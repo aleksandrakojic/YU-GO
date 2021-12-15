@@ -12,11 +12,11 @@ Please check the [official documentation of Moralis](https://docs.moralis.io/#us
 
 📄 Clone or fork `Yu-Go`:
 ```sh
-git clone https://github.com/ethereum-boilerplate/ethereum-boilerplate.git
+git clone https://github.com/aleksandraDev/YU-GO
 ```
 💿 Install all dependencies:
 ```sh
-cd ethereum-boilerplate
+cd YU-GO
 yarn install 
 ```
 ✏ Rename `.env.example` to `.env` in the main folder and provide your `appId` and `serverUrl` from Moralis ([How to start Moralis Server](https://docs.moralis.io/moralis-server/getting-started/create-a-moralis-server)) 
@@ -724,6 +724,4 @@ const SupportedTokens = () => {
   );
 }
 ```
-
-### Where to host your dApp?
 
