@@ -18,6 +18,9 @@ import Contract from "components/Contract/Contract";
 import Text from "antd/lib/typography/Text";
 import Ramper from "components/Ramper";
 import MenuItems from "./components/MenuItems";
+
+import CreateProfile from "./components/CreateProfile";
+
 const { Header, Footer } = Layout;
 
 const styles = {
@@ -79,6 +82,9 @@ const App = ({ isServerInfo }) => {
 
         <div style={styles.content}>
           <Switch>
+            <Route path="/createprofile">
+              <CreateProfile />
+            </Route>
             <Route exact path="/quickstart">
               <QuickStart isServerInfo={isServerInfo} />
             </Route>
