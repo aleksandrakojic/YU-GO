@@ -1,4 +1,5 @@
-import { Button, Input } from "antd";
+import { Button, Input, Dropdown, Menu } from "antd";
+import { DownOutlined } from '@ant-design/icons';
 import Text from "antd/lib/typography/Text";
 import React, { useState } from "react";
 import { useMoralis } from "react-moralis";
@@ -36,16 +37,28 @@ const styles = {
     gap: "10px",
     flexDirection: "row",
   },
+  dropdown: {
+    width: "50%",
+    marginTop: "20px",
+    display: "flex",
+    alignItems: "center",
+  }
 };
 
-function CreateProfile() {
+export default function CreateProfile() {
     const { Moralis } = useMoralis();
     const initialValues = {
         lastname: "",                                    
         firstname: "", 
         email: "",
         tel:"",
+        orga: "",
         };
+    const orgList = {
+        'org1': {'country': 'country1'}, 
+        'org2': {'country': 'country1'}, 
+        'org3': {'country': 'country2'}
+    }
 
     const [values, setValues] = useState(initialValues);
     const [emailIsValid, setEmailIsValid] = useState(true);
@@ -56,7 +69,30 @@ function CreateProfile() {
           ...values,
           [name]: value,
         });
+        console.log(values)
       };
+    
+    //|::::: handling the Dropdown with Antd :::::
+    const menus = Object.entries(orgList).map((key) => {
+        return (
+            <Menu.Item key={key[0]}>
+            {key[0]}
+            {/* {key[1].country} */}
+            </Menu.Item>
+        )
+    });
+    const menu = () => {
+            return (
+            <Menu onClick={handleMenuClick}>
+                {menus}
+            </Menu>
+            )
+    }
+
+    const handleMenuClick = () => {
+        console.log('in handleMenuClick')
+    }
+    //|::::::::::::::::::::::::::::::::::::::::::::
 
     const Submit = () => {
         var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
@@ -117,6 +153,16 @@ function CreateProfile() {
                 />
             </div>
 
+            <Dropdown overlay={menu} >
+                {/* <Button>
+                    Select your organisation <DownOutlined />
+                </Button> */}
+                <a className="ant-dropdown-link" style={styles.dropdown} name="orga" onClick={handleMenuClick}>
+                Select your organisation <DownOutlined />
+                </a>
+            </Dropdown>
+     
+
             <Button
                 type="primary"
                 size="large"
@@ -130,4 +176,4 @@ function CreateProfile() {
     );
     }
 
-export default CreateProfile;
+
