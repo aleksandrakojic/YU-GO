@@ -34,48 +34,57 @@ const styles = {
 
 export default function CreateProfile() {
 
-    // useEffect(() => {
-    //     const fetchData = async() => {
-    //         try {
-    //             const organisations = Moralis.Object.extend("Organisations");
-    //             const query = new Moralis.Query(organisations);
-    //             orgList= await query.find();
-    //         } catch (error) {
-    //             console.log("error", error);
-    //             }
-    //     }
-    //     fetchData();
-    // },[]);
-    // let orgList = {};
-
     const { contractName, networks, abi } = contractInfo;
     const contractAddress = networks[5777].address; //1337
-    console.log(contractAddress )
+    // console.log('address contract', contractAddress )
+    const [isWhitelisted, setIsWhitelisted] = useState(null)
+
+    const whitelistMember = async (accounts) => {
+        try {
+            contract.methods.whitelistMember(
+                '0x8AB4CBE82eFE7Eae2daDDD0436D333AFb3749f10', 
+                '0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2', 
+                true).send({from: accounts[0]})
+                .then(contract.events.IsWhitelisted()
+                .once('data', function(event) {
+                    console.log('event', event)
+                    setIsWhitelisted(event.returnValues.isWhitelisted)
+                })
+            )
+          } catch(e) {
+            console.log('e', e)
+          }
+    }
 
     const loadContract = async (name) => {
         const web3 = await Moralis.enableWeb3();
         const contract = new web3.eth.Contract(abi, contractAddress); 
         console.log('contract', contract)   
         const accounts = await web3.eth.getAccounts()
+        setAccount(accounts[0])
         console.log('account', accounts[0])
-        contract.methods.whitelistMember('0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2').send({from: accounts[0]}) //from: account 4
+        const testConnection = await contract.methods.testConnection().send({from: accounts[0]})
+        console.log('test connection', testConnection)
+        whitelistMember(accounts)
+
+        // contract.methods.whitelistMember('0x8AB4CBE82eFE7Eae2daDDD0436D333AFb3749f10', '0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2', true).send({from: accounts[0]}) //from: account 4
       return contract
     }
 
     const [contract, setContract] = useState(null)
+    console.log('contract', contract)
+    const [account, setAccount] = useState(null)
+    const [userRegistered, setUserRegistered] = useState(false)
 
     useEffect(() => {
-        console.log('in useEffect')
         const LoadContract = async () => {
-            const _contract= await loadContract("Main")
-            console.log('in effect',_contract)
+            const _contract= await loadContract()
             setContract(_contract)
         }
         LoadContract()
     }, [])
 
     const { Moralis } = useMoralis();
-    console.log('contract', contract)
 
     const initialValues = {
         lastname: "",                                    
@@ -141,12 +150,19 @@ export default function CreateProfile() {
     }
 
     const registerParticipant = async () => {
-        //get instance of Participants object, if Participants table does not exist it creates it
-        const Participants = await Moralis.Object.extend("Participants");
-        const participant = await new Participants();
-        //cgeck address in User DB
-        //if no, check if address is in whitelist
-        const isWhitelisted = await contract.method.participantIsWhiteListed('participantIsWhiteListed').send();
+        const currentUser = Moralis.User.current();
+        // if (currentUser) {
+        //         setUserRegistered(true);
+        // } else {
+        //     const isWhitelisted = await contract.method.participantIsWhiteListed(initialValues.orga, account).send({from: account});
+        //     console.log('whitelisted', isWhitelisted)
+        // }
+        // const isWhitelisted = await contract.methods.participantIsWhiteListed(
+        //     '0x8AB4CBE82eFE7Eae2daDDD0436D333AFb3749f10', 
+        //     '0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2')
+        //     .send({from: account});
+        console.log('whitelisted', isWhitelisted)
+        
 
         // if address in whitelist save data Moralis DB
         // await Moralis.authenticate().then(function (user) {
@@ -227,6 +243,12 @@ export default function CreateProfile() {
                 </a>
             </Dropdown>
      
+                <div className='userRegistered'>
+                    { !userRegistered ?
+                        <></> : 
+                        <Text type="danger">You are already registered</Text>
+                    }
+                </div>
 
             <Button
                 type="primary"
