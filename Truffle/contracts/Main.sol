@@ -17,7 +17,7 @@ contract Main {
 
     mapping (address => Orga) Organisations;
 
-    mapping (uint => string) external Thematics;
+    mapping (uint => string) Thematics;
 
     //::::::::::::::::::::::::::::::::::::::::::::::
     string test = "in Main.sol";
@@ -26,13 +26,18 @@ contract Main {
     }
      //::::::::::::::::::::::::::::::::::::::::::::::
 
-    function participantIsWhiteListed(address _addrParticipant) external view returns(bool) {
-        return Organisations[msg.sender].participantIsOkay[_addrParticipant];
+     event IsWhitelisted(address participant, bool isWhitelisted);
+
+    function participantIsWhiteListed(address _addrOrganisation, address _addrParticipant) external view returns(bool) {
+        bool value = Organisations[_addrOrganisation].participantIsOkay[_addrParticipant];
+        return value;
     }
 
-    function whitelistMember(address _addrParticipant) external  {
+    function whitelistMember(address _addrOrganisation, address _addrParticipant, bool _value) external  {
         // require(Organisations[msg.sender].isRegistered == true );
-        Organisations[msg.sender].participantIsOkay[_addrParticipant] = true;
+        // Organisations[msg.sender].participantIsOkay[_addrParticipant] = _value;
+        Organisations[_addrOrganisation].participantIsOkay[_addrParticipant] = _value;
+        emit IsWhitelisted(_addrParticipant, _value);
 
     }
 
