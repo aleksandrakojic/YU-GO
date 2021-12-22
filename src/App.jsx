@@ -20,6 +20,16 @@ import Ramper from "components/Ramper";
 import MenuItems from "./components/MenuItems";
 
 import CreateProfile from "./components/CreateProfile";
+import { loadContract } from "./utils/load-contract";
+
+const [contract, setContract] = useState(null)
+
+useEffect(() => {
+    const _loadProvider = async () => {
+        const contract= await loadContract("Main", Moralis)
+    }
+    _loadProvider()
+  }, [])
 
 const { Header, Footer } = Layout;
 
@@ -54,7 +64,12 @@ const styles = {
   },
 };
 const App = ({ isServerInfo }) => {
-  const { isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } = useMoralis();
+  const { 
+        Moralis,
+        isWeb3Enabled, 
+        enableWeb3, 
+        isAuthenticated, 
+        isWeb3EnableLoading } = useMoralis();
 
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled && !isWeb3EnableLoading) enableWeb3();

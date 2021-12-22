@@ -1,7 +1,7 @@
 import { Button, Input, Dropdown, Menu } from "antd";
 import { DownOutlined } from '@ant-design/icons';
 import Text from "antd/lib/typography/Text";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMoralis } from "react-moralis";
 
 const styles = {
@@ -9,22 +9,6 @@ const styles = {
     alignItems: "center",
     width: "50%",
   },
-//   header: {
-//     textAlign: "center",
-//   },
-//   input: {
-//     width: "100%",
-//     outline: "none",
-//     fontSize: "16px",
-//     whiteSpace: "nowrap",
-//     overflow: "hidden",
-//     textverflow: "ellipsis",
-//     appearance: "textfield",
-//     color: "#041836",
-//     fontWeight: "700",
-//     border: "none",
-//     backgroundColor: "transparent",
-//   },
   select: {
     marginTop: "20px",
     display: "flex",
@@ -46,7 +30,23 @@ const styles = {
 };
 
 export default function CreateProfile() {
+
+    // useEffect(() => {
+    //     const fetchData = async() => {
+    //         try {
+    //             const organisations = Moralis.Object.extend("Organisations");
+    //             const query = new Moralis.Query(organisations);
+    //             orgList= await query.find();
+    //         } catch (error) {
+    //             console.log("error", error);
+    //             }
+    //     }
+    //     fetchData();
+    // },[]);
+    // let orgList = {};
+
     const { Moralis } = useMoralis();
+
     const initialValues = {
         lastname: "",                                    
         firstname: "", 
@@ -54,10 +54,11 @@ export default function CreateProfile() {
         tel:"",
         orga: "",
         };
+
     const orgList = {
-        'org1': {'country': 'country1'}, 
-        'org2': {'country': 'country1'}, 
-        'org3': {'country': 'country2'}
+        0: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaOne', ethAddress: "0x61962Ca1467A0e7ba06787784336DaBE792Be29b"}, updatedAt: ''}, 
+        1: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaTwo', ethAddress: "0x51dE42454f3A50848e65bEDE6141Db788a9bCc5D"}, updatedAt: ''}, 
+        2: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaThree'}, updatedAt: ''}, 
     }
 
     const [values, setValues] = useState(initialValues);
@@ -73,34 +74,65 @@ export default function CreateProfile() {
       };
     
     //|::::: handling the Dropdown with Antd :::::
-    const menus = Object.entries(orgList).map((key) => {
+    const menus = Object.entries(orgList).map((item, i) => {
+        console.log('item[1]', item[1])
         return (
-            <Menu.Item key={key[0]}>
-            {key[0]}
+            <Menu.Item key={i}>
+            {item[1].attributes.name}
             {/* {key[1].country} */}
             </Menu.Item>
         )
     });
     const menu = () => {
             return (
-            <Menu onClick={handleMenuClick}>
+            <Menu onClick={handleMenuClick} mode="vertical">
                 {menus}
             </Menu>
             )
     }
 
-    const handleMenuClick = () => {
-        console.log('in handleMenuClick')
-    }
+    const handleMenuClick = (e) => {
+        console.log(orgList[e.key].attributes.ethAddress)
+        setValues({
+            ...values,
+            orga: orgList[e.key].attributes.ethAddress,
+          });
+        };
+
     //|::::::::::::::::::::::::::::::::::::::::::::
 
     const Submit = () => {
         var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
         if (!pattern.test(values.email)) {
             setEmailIsValid(false);
+        } else {
+            registerParticipant();
         }
-        console.log('values:',values)
     }
+
+    const registerParticipant = async () => {
+        //get instance of Participants object, if Participants table does not exist it creates it
+        const Participants = await Moralis.Object.extend("Participants");
+        const participant = await new Participants();
+        //check address is in whitelist
+        // if address in whitelist save data in SC and Moralis DB
+        // await Moralis.authenticate().then(function (user) {
+        //     console.log(user.get('ethAddress'))
+        //     participant.set("ethAddress", user.get('ethAddress'))
+        //     participant.save();
+        // })
+        const organisations = Moralis.Object.extend("Organisations");
+        const query = new Moralis.Query(organisations);
+        const results = await query.find();
+        console.log(results[0].attributes.name);
+        console.log('results',results)
+        Object.entries(results).map((item, i) => {
+            console.log('item',item)
+            // console.log('item[i]',item[i])
+        })
+        console.log('in registerParticipant',values)
+    }
+       
 
     return (
         <div style={styles.card}>
