@@ -3,6 +3,9 @@ import { DownOutlined } from '@ant-design/icons';
 import Text from "antd/lib/typography/Text";
 import React, { useState, useEffect } from "react";
 import { useMoralis } from "react-moralis";
+// import { loadContract } from "./LoadContract";
+import contract from "@truffle/contract"
+import contractInfo from "contracts/Main.json";
 
 const styles = {
   card: {
@@ -45,7 +48,34 @@ export default function CreateProfile() {
     // },[]);
     // let orgList = {};
 
+    const { contractName, networks, abi } = contractInfo;
+    const contractAddress = networks[5777].address; //1337
+    console.log(contractAddress )
+
+    const loadContract = async (name) => {
+        const web3 = await Moralis.enableWeb3();
+        const contract = new web3.eth.Contract(abi, contractAddress); 
+        console.log('contract', contract)   
+        const accounts = await web3.eth.getAccounts()
+        console.log('account', accounts[0])
+        contract.methods.whitelistMember('0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2').send({from: accounts[0]}) //from: account 4
+      return contract
+    }
+
+    const [contract, setContract] = useState(null)
+
+    useEffect(() => {
+        console.log('in useEffect')
+        const LoadContract = async () => {
+            const _contract= await loadContract("Main")
+            console.log('in effect',_contract)
+            setContract(_contract)
+        }
+        LoadContract()
+    }, [])
+
     const { Moralis } = useMoralis();
+    console.log('contract', contract)
 
     const initialValues = {
         lastname: "",                                    
@@ -75,7 +105,7 @@ export default function CreateProfile() {
     
     //|::::: handling the Dropdown with Antd :::::
     const menus = Object.entries(orgList).map((item, i) => {
-        console.log('item[1]', item[1])
+        // console.log('item[1]', item[1])
         return (
             <Menu.Item key={i}>
             {item[1].attributes.name}
@@ -114,8 +144,11 @@ export default function CreateProfile() {
         //get instance of Participants object, if Participants table does not exist it creates it
         const Participants = await Moralis.Object.extend("Participants");
         const participant = await new Participants();
-        //check address is in whitelist
-        // if address in whitelist save data in SC and Moralis DB
+        //cgeck address in User DB
+        //if no, check if address is in whitelist
+        const isWhitelisted = await contract.method.participantIsWhiteListed('participantIsWhiteListed').send();
+
+        // if address in whitelist save data Moralis DB
         // await Moralis.authenticate().then(function (user) {
         //     console.log(user.get('ethAddress'))
         //     participant.set("ethAddress", user.get('ethAddress'))
