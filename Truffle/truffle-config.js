@@ -6,12 +6,18 @@ module.exports = {
   // for more details on how to specify configuration options!
   //
   networks: {
-    develop: {
-      host: "127.0.0.1",
-      port: 7545,
-      chainId: 1337,
-      network_id: 1337,
-      deploymentPollingInterval: 10,
+    // develop: {
+    //   host: "127.0.0.1",
+    //   port: 7545,
+    //   chainId: 1337,
+    //   network_id: 1337,
+    //   deploymentPollingInterval: 10,
+    // },
+    development: {
+      // require: "./detecting_metamask.js",
+     host: "127.0.0.1",     // Localhost (default: none)
+     port: 8545,            // Standard Ethereum port (default: none)
+     network_id: "*",       // Any network (default: none)
     },
   },
   //
@@ -35,4 +41,5 @@ module.exports = {
   //     },
   //   },
   // },
+  
 };
