@@ -15,9 +15,12 @@ contract Main {
         mapping (address => Participant) participant;
     }
 
-    mapping (address => Orga) Organisations;
 
-    mapping (uint => string) external Thematics;
+    event AdressWhitelisted(address addressParticipant, address addressOrganization); 
+
+    mapping (address => Orga) organisations;
+
+    mapping (uint => string)  thematics;
 
     //::::::::::::::::::::::::::::::::::::::::::::::
     string test = "in Main.sol";
@@ -27,13 +30,20 @@ contract Main {
      //::::::::::::::::::::::::::::::::::::::::::::::
 
     function participantIsWhiteListed(address _addrParticipant) external view returns(bool) {
-        return Organisations[msg.sender].participantIsOkay[_addrParticipant];
+        return organisations[msg.sender].participantIsOkay[_addrParticipant];
     }
 
     function whitelistMember(address _addrParticipant) external  {
         // require(Organisations[msg.sender].isRegistered == true );
-        Organisations[msg.sender].participantIsOkay[_addrParticipant] = true;
+        organisations[msg.sender].participantIsOkay[_addrParticipant] = true;
 
+    }
+
+    function addParticipant(address _addrOrga,address _addr ) external {
+        //require(organisations[_addrOrga].ethAddress == msg.sender, 'You are not the owner of the organization');
+        //require( !organisations[_addrOrga].participantIsOkay[_addr], 'Address already whitelisted for this organization');
+        organisations[_addrOrga].participantIsOkay[_addr] = true;
+        emit AdressWhitelisted(_addr, _addrOrga);
     }
 
 }   
