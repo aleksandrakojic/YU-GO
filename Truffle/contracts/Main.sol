@@ -15,9 +15,12 @@ contract Main {
         mapping (address => Participant) participant;
     }
 
-    mapping (address => Orga) Organisations;
 
-    mapping (uint => string) Thematics;
+    event AdressWhitelisted(address addressParticipant, address addressOrganization); 
+
+    mapping (address => Orga) organisations;
+
+    mapping (uint => string)  thematics;
 
     //::::::::::::::::::::::::::::::::::::::::::::::
     string test = "in Main.sol";
@@ -26,19 +29,22 @@ contract Main {
     }
      //::::::::::::::::::::::::::::::::::::::::::::::
 
-     event IsWhitelisted(address participant, bool isWhitelisted);
-
-    function participantIsWhiteListed(address _addrOrganisation, address _addrParticipant) external view returns(bool) {
-        bool value = Organisations[_addrOrganisation].participantIsOkay[_addrParticipant];
-        return value;
+    function participantIsWhiteListed(address _addrParticipant) external view returns(bool) {
+        require(organisations[msg.sender].ethAddress, 'not an orga address')
+        return organisations[msg.sender].participantIsOkay[_addrParticipant];
     }
 
     function whitelistMember(address _addrOrganisation, address _addrParticipant, bool _value) external  {
         // require(Organisations[msg.sender].isRegistered == true );
-        // Organisations[msg.sender].participantIsOkay[_addrParticipant] = _value;
-        Organisations[_addrOrganisation].participantIsOkay[_addrParticipant] = _value;
-        emit IsWhitelisted(_addrParticipant, _value);
+        organisations[msg.sender].participantIsOkay[_addrParticipant] = true;
 
+    }
+
+    function addParticipant(address _addrOrga,address _addr ) external {
+        //require(organisations[_addrOrga].ethAddress == msg.sender, 'You are not the owner of the organization');
+        //require( !organisations[_addrOrga].participantIsOkay[_addr], 'Address already whitelisted for this organization');
+        organisations[_addrOrga].participantIsOkay[_addr] = true;
+        emit AdressWhitelisted(_addr, _addrOrga);
     }
 
 }   
