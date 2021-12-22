@@ -148,7 +148,7 @@
   "sourceMap": "366:1104:1:-;;;594:37;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;519:67;8:9:-1;5:2;;;30:1;27;20:12;5:2;519:67:1;573:5;551:8;:19;560:9;551:19;;;;;;;;;;;;;;;:27;;;;366:1104;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;",
   "deployedSourceMap": "366:1104:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;366:1104:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;594:37;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;99:1;94:3;90:11;84:18;80:1;75:3;71:11;64:39;52:2;49:1;45:10;40:15;;8:100;;;12:14;594:37:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;978:235;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;978:235:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;1221:134;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;1221:134:1;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;640:330;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;640:330:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;1363:104;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;1363:104:1;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;594:37;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;978:235::-;1066:15;1123:6;1099:8;:20;1108:10;1099:20;;;;;;;;;;;;;;;;:30;;;;;;;;;;;1166:8;1145:38;;1154:10;1145:38;;;1176:6;1145:38;;;;;;;;;;;;;;;;;;1201:4;1194:11;;978:235;;;;:::o;1221:134::-;1281:7;1308:10;:18;1327:16;1338:4;1327:10;:16::i;:::-;1345:1;1308:39;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1308:39:1;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;1308:39:1;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;1308:39:1;;;;;;;;;;;;;;;;1301:46;;1221:134;;;:::o;640:330::-;726:15;786:6;763:8;:20;772:10;763:20;;;;;;;;;;;;;;;;:29;759:47;;;801:5;794:12;;;;759:47;841:6;817:8;:20;826:10;817:20;;;;;;;;;;;;;;;;:30;;;;;;;;;;;880:6;858:8;:18;867:8;858:18;;;;;;;;;;;;;;;;:28;;;;;;;;;;;923:8;902:38;;911:10;902:38;;;933:6;902:38;;;;;;;;;;;;;;;;;;958:4;951:11;;640:330;;;;;:::o;1363:104::-;1418:7;1445:8;:14;1454:4;1445:14;;;;;;;;;;;;;;;;1438:21;;1363:104;;;:::o",
   "source": "// SPDX-License-Identifier: MIT\r\npragma solidity >=0.4.25 <0.7.0;\r\n\r\nimport \"./ConvertLib.sol\";\r\n\r\n// This is just a simple example of a coin-like contract.\r\n// It is not standards compatible and cannot be expected to talk to other\r\n// coin/token contracts. If you want to create a standards-compliant\r\n// token, see: https://github.com/ConsenSys/Tokens. Cheers!\r\n\r\ncontract MetaCoin {\r\n    mapping(address => uint256) balances;\r\n\r\n    event Transfer(address indexed _from, address indexed _to, uint256 _value);\r\n\r\n    constructor() public {\r\n        balances[tx.origin] = 10000;\r\n    }\r\n\r\n    string public name = \"Test Coin Nice\";\r\n\r\n    function sendCoin(address receiver, uint256 amount)\r\n        public\r\n        returns (bool sufficient)\r\n    {\r\n        if (balances[msg.sender] < amount) return false;\r\n        balances[msg.sender] -= amount;\r\n        balances[receiver] += amount;\r\n        emit Transfer(msg.sender, receiver, amount);\r\n        return true;\r\n    }\r\n\r\n    function faucetCoin(address receiver, uint256 amount)\r\n        public\r\n        returns (bool sufficient)\r\n    {\r\n        balances[msg.sender] += amount;\r\n        emit Transfer(msg.sender, receiver, amount);\r\n        return true;\r\n    }\r\n\r\n    function getBalanceInEth(address addr) public view returns (uint256) {\r\n        return ConvertLib.convert(getBalance(addr), 2);\r\n    }\r\n\r\n    function getBalance(address addr) public view returns (uint256) {\r\n        return balances[addr];\r\n    }\r\n}\r\n",
-  "sourcePath": "C:\\Work\\ethereum-boilerplate\\Truffle\\contracts\\MetaCoin.sol",
+  "sourcePath": "F:\\workspace\\alyra\\yugo\\YU-GO\\Truffle\\contracts\\MetaCoin.sol",
   "ast": {
     "absolutePath": "project:/contracts/MetaCoin.sol",
     "exportedSymbols": {
@@ -3447,14 +3447,14 @@
     "1337": {
       "events": {},
       "links": {
-        "ConvertLib": "0xba5b7E64bae1f953816B9f3a7de6B5b5378F9Fb8"
+        "ConvertLib": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
-      "address": "0x55Db01E043a48bc0d11037c51E3911A9Eb8dbe24",
-      "transactionHash": "0xd2f749e421a9fdfb2333352b5e3ad496b7e48810dca158f9b50ed1d7d3b8fafd"
+      "address": "0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B",
+      "transactionHash": "0xf584ed949a5c83d5db00b1418dcf72ea3f3b826b7c023e141121e8744346c3ce"
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-22T22:41:06.334Z",
+  "updatedAt": "2021-12-17T14:57:52.534Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
