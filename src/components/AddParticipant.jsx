@@ -33,19 +33,6 @@ const styles = {
 };
 
 export default function CreateProfile() {
-  // useEffect(() => {
-  //     const fetchData = async() => {
-  //         try {
-  //             const organisations = Moralis.Object.extend("Organisations");
-  //             const query = new Moralis.Query(organisations);
-  //             orgList= await query.find();
-  //         } catch (error) {
-  //             console.log("error", error);
-  //             }
-  //     }
-  //     fetchData();
-  // },[]);
-  // let orgList = {};
 
   const [accounts, setAccounts] = useState([]);
 
