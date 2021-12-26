@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 import routes from './router';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -6,7 +6,15 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import ThemeProvider from './theme/ThemeProvider';
 import { CircularProgress, Container, CssBaseline, Typography } from '@mui/material';
-import { useMoralis } from 'react-moralis';
+import { useMoralis, useWeb3ExecuteFunction } from 'react-moralis';
+import contractInfo from 'src/contracts/Main.json';
+import { AppContext } from './contexts/AppContext';
+import { IContractData } from './models';
+
+enum DataTypes {
+  Thematics = 'thematics',
+  Countries = 'countries'
+}
 
 const App = () => {
   const content = useRoutes(routes);
@@ -18,28 +26,75 @@ const App = () => {
     isAuthenticated,
     isWeb3EnableLoading,
     isInitialized,
+    authenticate,
     user,
     account,
     chainId
   } = useMoralis();
-  console.log('useMoralis', Moralis, isInitialized, user, account, chainId);
-  const organisations = Moralis.Object.extend('Organisations');
-  const query = new Moralis.Query(organisations);
-  console.log('organization', query);
+  console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
+  const { contractName, networks, abi } = contractInfo;
+  const contractAddress = networks[1337].address; //1337
+  const [contractData, setContractData] = useState<IContractData>({
+    thematics: [],
+    countries: []
+  });
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const organisations = Moralis.Object.extend('Organisations');
-  //     const query = new Moralis.Query(organisations);
-  //     const results = await query.find();
-  //     console.log(results[0].attributes.name);
-  //   })();
-  // }, []);
+  const {
+    fetch: fetchThemes,
+    data: themeData,
+    isFetching: isFetchingThemes,
+    isLoading: isLoadingThemes,
+    error: errorThemes
+  } = useWeb3ExecuteFunction({
+    abi,
+    contractAddress,
+    functionName: 'getThematics'
+  });
+
+  const {
+    fetch: fetchCountries,
+    data: countryData,
+    isFetching: isFetchingCountries,
+    isLoading: isLoadingCountries,
+    error: errorCountries
+  } = useWeb3ExecuteFunction({
+    abi,
+    contractAddress,
+    functionName: 'getCountries'
+  });
 
   useEffect(() => {
-    if (isAuthenticated && !isWeb3Enabled && !isWeb3EnableLoading) enableWeb3();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isWeb3Enabled]);
+    enableWeb3({
+      onSuccess: (s) => console.info('enableweb success', s),
+      onError: (e) => console.info('enableweb3 error', e),
+      onComplete: () => console.info('copmlete web3')
+    });
+  }, []);
+
+  useEffect(() => {
+    if (themeData && !contractData.thematics.length && !isFetchingThemes && !isLoadingThemes) {
+      const themes = (themeData as Array<any>)?.map((t, i) => ({ id: i, name: t }));
+      setContractData({ ...contractData, [DataTypes.Thematics]: themes });
+    }
+    if (countryData && !contractData.countries.length && !isFetchingCountries && !isLoadingCountries) {
+      const countries = (countryData as Array<any>)?.map((c, i) => ({ id: i, name: c }));
+      setContractData({ ...contractData, [DataTypes.Countries]: countries });
+    }
+  }, [themeData, countryData]);
+
+  useEffect(() => {
+    console.log('REINIT WEB3');
+    if (!isWeb3Enabled && !isWeb3EnableLoading) {
+      enableWeb3();
+    } else {
+      if (!themeData && !contractData.thematics.length) {
+        fetchThemes();
+      }
+      if (!countryData && !contractData.countries.length) {
+        fetchCountries();
+      }
+    }
+  }, [isWeb3Enabled, isWeb3EnableLoading]);
 
   if (isInitializing) {
     return (
@@ -71,8 +126,10 @@ const App = () => {
   return (
     <ThemeProvider>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <CssBaseline />
-        {content}
+        <AppContext.Provider value={{ ...contractData, abi, contractAddress }}>
+          <CssBaseline />
+          {content}
+        </AppContext.Provider>
       </LocalizationProvider>
     </ThemeProvider>
   );
