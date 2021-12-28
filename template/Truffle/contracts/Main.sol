@@ -8,7 +8,7 @@ contract Main {
         bool isRegistered;
     }
 
-    struct Orga {
+    struct Organization {
         string name;
         address ethAddress;
         bool isRegistered;
@@ -32,7 +32,7 @@ contract Main {
     event AddressWhitelisted(address addressParticipant, address addressOrganization); 
     event RemovedFromWhitelist(address addressParticipant);
 
-    mapping (address => Orga) organisations;
+    mapping (address => Organization) organisations;
     mapping (uint => Country)  private countries;
     mapping (uint => Theme)  private thematics;
     string[] private themeList = [
@@ -115,14 +115,7 @@ contract Main {
         organisations[msg.sender].name = name;
         emit OrganizationRegistered(msg.sender);
     }
-
-    //::::::::::::::::::::::::::::::::::::::::::::::
-    string test = "in Main.sol";
-    function testConnection() public view returns(string memory) {
-        return test;
-    }
-     //::::::::::::::::::::::::::::::::::::::::::::::
-
+    
     function participantIsWhiteListed(address _addrOrganisation) external view returns(bool) {
         require(organisations[_addrOrganisation].isRegistered == true, 'organisation not registered');
         return organisations[_addrOrganisation].participantIsWhitelisted[msg.sender];
