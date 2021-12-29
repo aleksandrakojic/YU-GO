@@ -1,4 +1,4 @@
-import { Button, Input, Dropdown, Menu } from "antd";
+import { Button, Input, Dropdown, Menu } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import Text from "antd/lib/typography/Text";
 import React, { useState, useEffect } from "react";
@@ -6,28 +6,28 @@ import { useMoralis } from "react-moralis";
 import contractInfo from "contracts/Main.json";
 
 const styles = {
-  card: {
-    alignItems: "center",
-    width: "50%",
-  },
-  select: {
-    marginTop: "20px",
-    display: "flex",
-    alignItems: "center",
-  },
-  textWrapper: { maxWidth: "80px", width: "100%" },
-  row: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    flexDirection: "row",
-  },
-  dropdown: {
-    width: "50%",
-    marginTop: "20px",
-    display: "flex",
-    alignItems: "center",
-  }
+	card: {
+		alignItems: 'center',
+		width: '50%',
+	},
+	select: {
+		marginTop: '20px',
+		display: 'flex',
+		alignItems: 'center',
+	},
+	textWrapper: { maxWidth: '80px', width: '100%' },
+	row: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: '10px',
+		flexDirection: 'row',
+	},
+	dropdown: {
+		width: '50%',
+		marginTop: '20px',
+		display: 'flex',
+		alignItems: 'center',
+	},
 };
 
 export default function CreateProfile() {
@@ -159,84 +159,67 @@ export default function CreateProfile() {
     }
        
 
-    return (
-        <div style={styles.card}>
-         
-            <div style={styles.select}>
-                <div style={styles.textWrapper}>
-                        <Text strong>Nom:</Text>
-                </div>
-                <Input
-                    size="medium"
-                    name = "lastname" //IMPORTANT
-                    onChange={onChange}
-                />
-            </div>
+	return (
+		<div style={styles.card}>
+			<div style={styles.select}>
+				<div style={styles.textWrapper}>
+					<Text strong>Nom:</Text>
+				</div>
+				<Input
+					size="medium"
+					name="lastname" //IMPORTANT
+					onChange={onChange}
+				/>
+			</div>
 
-            <div style={styles.select}>
-                <div style={styles.textWrapper}>
-                        <Text strong>Prénom:</Text>
-                </div>
-                <Input
-                    size="medium"
-                    name = "firstname"
-                    onChange={onChange}
-                />
-            </div>
+			<div style={styles.select}>
+				<div style={styles.textWrapper}>
+					<Text strong>Prénom:</Text>
+				</div>
+				<Input size="medium" name="firstname" onChange={onChange} />
+			</div>
 
-            <div style={styles.select}>
-                <div style={styles.textWrapper}>
-                        <Text strong>E-mail:</Text>
-                </div>
-                <Input
-                    size="medium"
-                    name = "email"
-                    onChange={onChange}
-                />
-            </div>
-            { !emailIsValid ?
-                    <Text type="danger">adresse email invalide</Text> :
-                    <></>
-                }
+			<div style={styles.select}>
+				<div style={styles.textWrapper}>
+					<Text strong>E-mail:</Text>
+				</div>
+				<Input size="medium" name="email" onChange={onChange} />
+			</div>
+			{!emailIsValid ? <Text type="danger">adresse email invalide</Text> : <></>}
 
-            <div style={styles.select}>
-                <div style={styles.textWrapper}>
-                        <Text strong>Tel. (Optional):</Text>
-                </div>
-                <Input
-                    size="medium"
-                    name = "tel"
-                    onChange={onChange}
-                />
-            </div>
+			<div style={styles.select}>
+				<div style={styles.textWrapper}>
+					<Text strong>Tel. (Optional):</Text>
+				</div>
+				<Input size="medium" name="tel" onChange={onChange} />
+			</div>
 
-            <Dropdown overlay={menu} >
-                {/* <Button>
+			<Dropdown overlay={menu}>
+				{/* <Button>
                     Select your organisation <DownOutlined />
                 </Button> */}
-                <a className="ant-dropdown-link" style={styles.dropdown} name="orga" onClick={handleMenuClick}>
-                Select your organisation <DownOutlined />
-                </a>
-            </Dropdown>
-     
-                <div className='userRegistered'>
-                    { !userRegistered ?
-                        <></> : 
-                        <Text type="danger">You are already registered</Text>
-                    }
-                </div>
+				<a
+					className="ant-dropdown-link"
+					style={styles.dropdown}
+					name="orga"
+					onClick={handleMenuClick}
+				>
+					Select your organisation <DownOutlined />
+				</a>
+			</Dropdown>
 
-            <Button
-                type="primary"
-                size="large"
-                style={{ width: "100%", marginTop: "25px" }}
-                onClick={() => Submit()}
-                >
-                Submit
-            </Button>
+			<div className="userRegistered">
+				{!userRegistered ? <></> : <Text type="danger">You are already registered</Text>}
+			</div>
 
-        </div>
-    );
-    }
-
-
+			<Button
+				type="primary"
+				size="large"
+				style={{ width: '100%', marginTop: '25px' }}
+				onClick={() => Submit()}
+			>
+				Submit
+			</Button>
+		</div>
+	);
+}
