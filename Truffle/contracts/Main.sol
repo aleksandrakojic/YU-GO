@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.25 <0.8.8;
+pragma solidity  0.8.11;
 
 contract Main {
     struct Participant {
@@ -11,32 +11,40 @@ contract Main {
     struct Orga {
         address ethAddress;
         bool isRegistered;
-        mapping (address => bool)  participantIsOkay;
+        mapping (address => bool) participantIsWhitelisted;
         mapping (address => Participant) participant;
     }
 
-
+    event orgaRegistered(address addressOrga);
     event AddressWhitelisted(address addressParticipant, address addressOrganization); 
     event removedFromWhitelist(address addressParticipant);
 
-    mapping (address => Orga) organisations;
+    mapping (address => Orga) private organisations;
+    mapping (uint => string) private thematics;
 
-    mapping (uint => string)  thematics;
+    function registerOrganisation() external {
+        require(organisations[msg.sender].isRegistered == false, 'Organisation already registered');
+        organisations[msg.sender].ethAddress = msg.sender;
+        organisations[msg.sender].isRegistered = true;
+        emit orgaRegistered(msg.sender);
+    }
 
     function participantIsWhiteListed(address _addrOrganisation) external view returns(bool) {
-        return organisations[_addrOrganisation].participantIsOkay[msg.sender];
+        require(organisations[_addrOrganisation].isRegistered == true, 'organisation not registered');
+        return organisations[_addrOrganisation].participantIsWhitelisted[msg.sender];
     }
 
     function removeFromWhitelist(address _addrOrga) external {
-        organisations[_addrOrga].participantIsOkay[msg.sender] = false;
+        organisations[_addrOrga].participantIsWhitelisted[msg.sender] = false;
         emit removedFromWhitelist(msg.sender);
     }
 
     function addParticipant(address _addrOrga, address _addrParticipant ) external {
-        // require(organisations[_addrOrga].ethAddress == msg.sender, 'You are not the owner of the organization');
-        // require( !organisations[_addrOrga].participantIsOkay[_addr], 'Address already whitelisted for this organization');
-        organisations[_addrOrga].participantIsOkay[_addrParticipant] = true;
+        require(organisations[_addrOrga].ethAddress == msg.sender, 'You are not the owner of the organization');
+        require(!organisations[_addrOrga].participantIsWhitelisted[_addrParticipant], 'Address already whitelisted for this organization');
+        organisations[_addrOrga].participantIsWhitelisted[_addrParticipant] = true;
         emit AddressWhitelisted(_addrParticipant, _addrOrga);
     }
+
 
 }   

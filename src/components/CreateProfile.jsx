@@ -3,8 +3,6 @@ import { DownOutlined } from '@ant-design/icons';
 import Text from "antd/lib/typography/Text";
 import React, { useState, useEffect } from "react";
 import { useMoralis } from "react-moralis";
-// import { loadContract } from "./LoadContract";
-import contract from "@truffle/contract"
 import contractInfo from "contracts/Main.json";
 
 const styles = {
@@ -33,49 +31,37 @@ const styles = {
 };
 
 export default function CreateProfile() {
-    
-    const { contractName, networks, abi } = contractInfo;
+    const { Moralis } = useMoralis();
+    const { networks, abi } = contractInfo;
     const contractAddress = networks[1337].address; //1337
-    // console.log('address contract', contractAddress )
     const [isWhitelisted, setIsWhitelisted] = useState(null)
-
-    // const whitelistMember = async (accounts) => {
-    //     try {
-    //         contract.methods.whitelistMember(
-    //             '0x8AB4CBE82eFE7Eae2daDDD0436D333AFb3749f10', 
-    //             '0xc9605cD51d1dAbCA9CA0f37ea4Fe78C182498cD2', 
-    //             true).send({from: accounts[0]})
-    //             .then(contract.events.IsWhitelisted()
-    //             .once('data', function(event) {
-    //                 console.log('event', event)
-    //                 setIsWhitelisted(event.returnValues.isWhitelisted)
-    //             })
-    //         )
-    //       } catch(e) {
-    //         console.log('e', e)
-    //       }
-    // }
-
-    const loadContract = async (name) => {
-        const web3 = await Moralis.enableWeb3();
-        const contract = new web3.eth.Contract(abi, contractAddress); 
-        console.log('contract', contract)   
-        const accounts = await web3.eth.getAccounts()
-        setAccount(accounts[0])
-        console.log('account', accounts[0])
-        // const testConnection = await contract.methods.testConnection().send({from: accounts[0]})
-        // console.log('test connection', testConnection)
-        // whitelistMember(accounts)
-
-        // const addP = await contract.methods.addParticipant("0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", accounts[0]).send({from: accounts[0]}) 
-        // console.log('addP', addP)
-        return contract
-    }
-
     const [contract, setContract] = useState(null)
-    console.log('contract', contract)
     const [account, setAccount] = useState(null)
     const [userRegistered, setUserRegistered] = useState(false)
+    const initialValues = {
+        lastname: "",                                    
+        firstname: "", 
+        email: "",
+        tel:"",
+        orga: "",
+        };
+    const [inputValues, setInputValues] = useState(initialValues);
+    const [emailIsValid, setEmailIsValid] = useState(true);
+
+    const orgList = {
+        0: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaOne', ethAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"}, updatedAt: ''}, 
+        1: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaTwo', ethAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"}, updatedAt: ''}, 
+        2: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaThree', ethAddress: "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"}, updatedAt: ''}, 
+    }
+
+    const loadContract = async () => {
+        const web3 = await Moralis.enableWeb3();
+        const contract = new web3.eth.Contract(abi, contractAddress); 
+        console.log('contract', contract);   
+        const accounts = await web3.eth.getAccounts();
+        setAccount(accounts[0]);
+        return contract
+    }
 
     useEffect(() => {
         const LoadContract = async () => {
@@ -85,32 +71,12 @@ export default function CreateProfile() {
         LoadContract()
     }, [])
 
-    const { Moralis } = useMoralis();
-
-    const initialValues = {
-        lastname: "",                                    
-        firstname: "", 
-        email: "",
-        tel:"",
-        orga: "",
-        };
-
-    const orgList = {
-        0: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaOne', ethAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"}, updatedAt: ''}, 
-        1: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaTwo', ethAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"}, updatedAt: ''}, 
-        2: {className: "Organisations",id: "ZDOcTqfhWadYVU7vhn68qPsl",_objCount: 2, attributes: {name: 'orgaThree', ethAddress: "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"}, updatedAt: ''}, 
-    }
-
-    const [values, setValues] = useState(initialValues);
-    const [emailIsValid, setEmailIsValid] = useState(true);
-
     const onChange = (e) => {
         const { name, value } = e.target;
-        setValues({
-          ...values,
+        setInputValues({
+          ...inputValues,
           [name]: value,
         });
-        console.log(values)
       };
     
     //|::::: handling the Dropdown with Antd :::::
@@ -133,17 +99,16 @@ export default function CreateProfile() {
 
     const handleMenuClick = (e) => {
         console.log('in handleMenuClick', orgList[e.key].attributes.ethAddress)
-        setValues({
-            ...values,
+        setInputValues({
+            ...inputValues,
             orga: orgList[e.key].attributes.ethAddress,
           });
         };
-
     //|::::::::::::::::::::::::::::::::::::::::::::
 
     const Submit = () => {
         var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-        if (!pattern.test(values.email)) {
+        if (!pattern.test(inputValues.email)) {
             setEmailIsValid(false);
         } else {
             registerParticipant();
@@ -151,49 +116,28 @@ export default function CreateProfile() {
     }
 
     const registerParticipant = async () => {
-        const currentUser = Moralis.User.current();
-        // console.log('currentUser', currentUser);
-        // if (currentUser) {
-        //         setUserRegistered(true);
+        // const currentUser = Moralis.User.current();
+        // if (!currentUser) {
+        //     // authenticate({ signingMessage: "new user!" })
+        //     Moralis.authenticate().then(function (user) {
+        //         console.log(user.get('ethAddress'))
+        //     })
         // } else {
-        //     const isWhitelisted = await contract.method.participantIsWhiteListed(initialValues.orga, account).send({from: account});
-        //     console.log('whitelisted', isWhitelisted)
+        //     console.log('currentUser', currentUser)
         // }
-        // console.log('in submit', values)
-
-        // await contract.methods.participantIsWhiteListed(
-        //     "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0" )
+        
+        //check if currentUser already in DB
+        const Users = Moralis.Object.extend("Participants");
+        const query = new Moralis.Query(Users);
+        const results = await query.find();
+        console.log('results', results)
+        // const results = await query.find();
+        // console.log(results[0].attributes.name);
+        // const _isWhitelisted = await contract.methods.participantIsWhiteListed(
+        //     inputValues.orga )
+        //     // .send({from: account})
         //     .send({from: account})
-        //     .on('receipt', function (data) {
-        //         console.log('data', data)
-        //         try {
-        //         // add participant type to Moralis DB
-        //         currentUser.set("type", 1);
-        //         currentUser.save();
-        //         // update whitelist in smart contract
-        //         contract.methods.removeFromWhitelist(
-        //             values.orga )
-        //             .send({from: account})
-        //             .then(contract.events.removedFromWhitelist()
-        //             .once('data', function(event) {
-        //                 console.log('event', event.returnValues)
-        //             })
-        //             )
-        //       }catch(e) {
-        //         console.log('e', e)
-        //         }
-        // })
-        const _isWhitelisted = await contract.methods.participantIsWhiteListed(
-            values.orga )
-            // .send({from: account})
-            .send({from: account})
-        // await (async() => {
-        //     console.log('whitelisted', _isWhitelisted)
-        //     if(_isWhitelisted) {
-        //         console.log('Yyyyoooooo')
-        //     }
-        // })()
-        console.log('whitelisted', _isWhitelisted)
+        // console.log('whitelisted', _isWhitelisted)
 
        
         
@@ -206,15 +150,12 @@ export default function CreateProfile() {
         //     participant.set("ethAddress", user.get('ethAddress'))
         //     participant.save();
         // })
-        const organisations = Moralis.Object.extend("Organisations");
-        const query = new Moralis.Query(organisations);
-        const results = await query.find();
-        console.log(results[0].attributes.name);
+        
         // console.log('results',results)
         // Object.entries(results).map((item, i) => {
         //     console.log('item',item)
         // })
-        console.log('in registerParticipant',values)
+        console.log('in registerParticipant',inputValues)
     }
        
 
