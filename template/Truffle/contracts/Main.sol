@@ -2,18 +2,17 @@
 pragma solidity 0.8.11;
 
 contract Main {
-    struct Participant {
-        address ethAddress;
-        address organisation;
-        bool isRegistered;
-    }
+    // struct Participant {
+    //     address ethAddress;
+    //     bool isRegistered;
+    // }
 
     struct Organization {
         string name;
         address ethAddress;
-        bool isRegistered;
-        mapping (address => bool) participantIsWhitelisted;
-        mapping (address => Participant) participant;
+        // bool isRegistered;
+        mapping (address => bool) participants;
+        // mapping (address => Participant) participant;
         uint[] themes;
         uint country;
     }

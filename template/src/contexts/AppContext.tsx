@@ -5,13 +5,15 @@ interface IAppContext {
   countries: Array<any>;
   abi: any;
   contractAddress: string;
+  // organisations: Array<any>;
 }
 
 const initAppContext: IAppContext = {
   thematics: [],
   countries: [],
   abi: {},
-  contractAddress: ''
+  contractAddress: '',
+  // organisations: [],
 };
 
 export const AppContext = createContext<IAppContext>(initAppContext);
