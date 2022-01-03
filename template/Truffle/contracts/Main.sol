@@ -39,6 +39,7 @@ contract Main {
         uint votingEndDate;
         uint availableFunds;
         bool isCreated;
+        address[] winningActionAddresses;
     }
 
     event OrganizationRegistered(address addressOrga);
@@ -46,6 +47,7 @@ contract Main {
     event ParticipantRemoved(address addressOrga, address addressParticipant);
     event ContestCreated(address addressOrga, string name, uint funds);
     event ActionCreated(address addressContestCreator, address addressActionCreator, string actionName, uint requiredFunds);
+    event VoteTallied(address addressContestCreator, address addressActionCreator, uint nbVotes);
     event hasVotedForAction(address addressContestCreator, address addressActionCreator, address voterAddress); // demande LIam ?
 
     mapping (address => Contest) contests;
@@ -187,10 +189,28 @@ contract Main {
         // TODO: verify if its time to vote
         require(msg.sender != _contestCreator && msg.sender != _actionCreator, 'You can not vote for this action');
         require(!contests[_contestCreator].actions[_actionCreator].hasVoted[msg.sender], 'You have already voted!');
+        
+        
         contests[_contestCreator].actions[_actionCreator].voteNumber += 1;
         contests[_contestCreator].actions[_actionCreator].hasVoted[msg.sender] = true;
+
+        if(contests[_contestCreator].winningActionAddress.length == 0){
+            contests[_contestCreator].winningActionAddress.push(_actionCreator);
+        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].voteNumber < contests[_contestCreator].actions[_actionCreator].voteNumber){
+            delete contests[_contestCreator].winningActionAddress;
+            contests[_contestCreator].winningActionAddress.push(_actionCreator);
+        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].voteNumber == contests[_contestCreator].actions[_actionCreator].voteNumber){
+            contests[_contestCreator].winningActionAddress.push(_actionCreator);
+        }
+
         emit hasVotedForAction(_contestCreator, _actionCreator, msg.sender);
     }
     
     // TODO: function for tallying votes with time counter / controller 
+
+    function tallyVote(address _contestCreator) external view {
+        require(now > contests[_contestCreator].votingEndDate, "Voting has not finished yet!");
+
+        emit voteTallied(_contestCreator, contests[_contestCreator].winningActionAddress, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].nbVotes);
+    }
 }   
