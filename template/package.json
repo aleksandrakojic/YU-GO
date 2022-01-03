@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.2.5",
     "@mui/lab": "^5.0.0-alpha.61",
     "@mui/material": "latest",
+    "@openzeppelin/contracts": "^4.4.1",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
@@ -27,6 +28,7 @@
     "react": "latest",
     "react-custom-scrollbars-2": "^4.4.0",
     "react-dom": "latest",
+    "react-error-overlay": "6.0.9",
     "react-final-form": "^6.5.7",
     "react-moralis": "latest",
     "react-router": "^6.2.1",
@@ -34,6 +36,9 @@
     "react-scripts": "4.0.3",
     "typescript": "^4.5.4",
     "web3": "^1.6.1"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -70,6 +75,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.5",
+    "@openzeppelin/test-helpers": "^0.5.15",
     "@types/numeral": "^2.0.2",
     "@types/react-router-dom": "^5.3.2",
     "@typescript-eslint/eslint-plugin": "^5.8.0",

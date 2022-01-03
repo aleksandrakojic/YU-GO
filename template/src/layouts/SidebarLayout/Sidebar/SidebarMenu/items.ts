@@ -6,6 +6,9 @@ import MmsTwoToneIcon from '@mui/icons-material/MmsTwoTone';
 import TableChartTwoToneIcon from '@mui/icons-material/TableChartTwoTone';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import VerifiedUserTwoToneIcon from '@mui/icons-material/VerifiedUserTwoTone';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 
 export interface MenuItem {
   link?: string;
@@ -35,9 +38,19 @@ const menuItems: MenuItems[] = [
     heading: 'Dashboards',
     items: [
       {
-        name: 'Crypto',
-        link: '/dashboards/crypto',
-        icon: BrightnessLowTwoToneIcon
+        name: 'Organization',
+        link: '/dashboards/organization',
+        icon: BrightnessLowTwoToneIcon,
+        items: [
+          {
+            name: 'Details',
+            link: '/dashboards/profile/details'
+          },
+          {
+            name: 'Settings',
+            link: '/dashboards/profile/settings'
+          }
+        ]
       }
     ]
   },
@@ -45,24 +58,19 @@ const menuItems: MenuItems[] = [
     heading: 'Management',
     items: [
       {
-        name: 'Transactions',
-        icon: TableChartTwoToneIcon,
-        link: '/management/transactions'
+        name: 'Members',
+        icon: GroupAddIcon,
+        link: '/management/members'
       },
       {
-        name: 'User Profile',
-        icon: AccountCircleTwoToneIcon,
-        link: '/management/profile',
-        items: [
-          {
-            name: 'Profile Details',
-            link: '/management/profile/details'
-          },
-          {
-            name: 'User Settings',
-            link: '/management/profile/settings'
-          }
-        ]
+        name: 'Contests',
+        icon: CampaignIcon,
+        link: '/management/contests'
+      },
+      {
+        name: 'Actions',
+        icon: PendingActionsOutlinedIcon,
+        link: '/management/actions'
       }
     ]
   },

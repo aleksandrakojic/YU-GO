@@ -7,6 +7,11 @@ export enum AuthenticationState {
   ERROR = 'error'
 }
 
+export enum ProfileType {
+  Organization,
+  Member
+}
+
 export interface IData {
   id: number;
   name: string;
@@ -15,4 +20,17 @@ export interface IData {
 export interface IContractData {
   thematics: IData[];
   countries: IData[];
+}
+
+export type IMemberStatus = 'registered' | 'pending' | 'canceled';
+
+export interface IMember {
+  id: string;
+  status: IMemberStatus;
+  firstname: string;
+  lastname: string;
+  email: string;
+  ethAddress: string;
+  orgEthAddress: string;
+  registrationDate: number;
 }

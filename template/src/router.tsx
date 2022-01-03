@@ -14,6 +14,7 @@ import Transactions from 'src/content/applications/Transactions';
 import UserProfile from 'src/content/applications/Users/profile';
 import UserSettings from 'src/content/applications/Users/settings';
 import LandingPage from './content/pages/Landing';
+import OrganizationMembers from './content/applications/Members';
 
 // import SuspenseLoader from './components/SuspenseLoader';
 
@@ -49,10 +50,6 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <LandingPage />
-  },
-  {
-    path: 'overview',
-    element: <Overview />
   },
   {
     path: 'status',
@@ -91,20 +88,6 @@ const routes: RouteObject[] = [
       {
         path: 'tasks',
         element: <Tasks />
-      }
-    ]
-  },
-  {
-    path: 'management',
-    element: <SidebarLayout />,
-    children: [
-      // {
-      //   path: '/',
-      //   element: <Navigate to="/management/transactions" replace />
-      // },
-      {
-        path: 'transactions',
-        element: <Transactions />
       },
       {
         path: 'profile',
@@ -122,6 +105,28 @@ const routes: RouteObject[] = [
             element: <UserSettings />
           }
         ]
+      }
+    ]
+  },
+  {
+    path: 'management',
+    element: <SidebarLayout />,
+    children: [
+      // {
+      //   path: '/',
+      //   element: <Navigate to="/management/transactions" replace />
+      // },
+      {
+        path: 'members',
+        element: <OrganizationMembers />
+      },
+      {
+        path: 'contests',
+        element: <Transactions />
+      },
+      {
+        path: 'actions',
+        element: <Transactions />
       }
     ]
   }
