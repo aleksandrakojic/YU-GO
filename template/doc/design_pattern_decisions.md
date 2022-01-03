@@ -6,7 +6,7 @@ This section explains why we chose the design patterns we are using in the code.
 - Behavioral Patterns
     - [x] **Guard Check**: Ensure that the behavior of a smart contract and its input parameters are as expected.
     - [ ] State Machine: Enable a contract to go through different stages with different corresponding functionality exposed.
-    - [x] **Oracle**: Gain access to data stored outside of the blockchain.
+    - [ ] **Oracle**: Gain access to data stored outside of the blockchain.
     - [x] **State Machine**: Enable a contract to go through different stages with different corresponding functionality exposed.
     - [ ] Randomness: Generate a random number of a predefined interval in the deterministic environment of a blockchain.
 - Security Patterns

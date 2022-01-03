@@ -7,9 +7,8 @@ This section contains the list of the deployed contract addresses on the Ethereu
 
 | Contract Name     | Address                                    |
 |---                |---                                         |
-| `YuGo`            | 0x........................................ |
-| `Contest`         | 0x........................................ |
-| `DAI`             | 0x........................................ |
-| `Migrations`      | 0x........................................ |
+| `YuGoToken`       | 0x........................................ |
+| `YuGoDao`         | 0x........................................ |
+| `YuGoManager`     | 0x........................................ |
 
 https://ropsten.etherscan.io/
