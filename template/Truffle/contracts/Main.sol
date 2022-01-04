@@ -47,8 +47,8 @@ contract Main {
     event ParticipantRemoved(address addressOrga, address addressParticipant);
     event ContestCreated(address addressOrga, string name, uint funds);
     event ActionCreated(address addressContestCreator, address addressActionCreator, string actionName, uint requiredFunds);
-    event VoteTallied(address addressContestCreator, address addressActionCreator, uint nbVotes);
-    event hasVotedForAction(address addressContestCreator, address addressActionCreator, address voterAddress); // demande LIam ?
+    event VoteTallied(address addressContestCreator, address[] addressActionCreator, uint nbVotes);
+    event HasVotedForAction(address addressContestCreator, address addressActionCreator, address voterAddress); 
 
     mapping (address => Contest) contests;
     mapping (address => Organisation) organisation;
@@ -194,16 +194,16 @@ contract Main {
         contests[_contestCreator].actions[_actionCreator].voteNumber += 1;
         contests[_contestCreator].actions[_actionCreator].hasVoted[msg.sender] = true;
 
-        if(contests[_contestCreator].winningActionAddress.length == 0){
-            contests[_contestCreator].winningActionAddress.push(_actionCreator);
-        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].voteNumber < contests[_contestCreator].actions[_actionCreator].voteNumber){
-            delete contests[_contestCreator].winningActionAddress;
-            contests[_contestCreator].winningActionAddress.push(_actionCreator);
-        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].voteNumber == contests[_contestCreator].actions[_actionCreator].voteNumber){
-            contests[_contestCreator].winningActionAddress.push(_actionCreator);
+        if(contests[_contestCreator].winningActionAddresses.length == 0){
+            contests[_contestCreator].winningActionAddresses.push(_actionCreator);
+        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber < contests[_contestCreator].actions[_actionCreator].voteNumber){
+            delete contests[_contestCreator].winningActionAddresses;
+            contests[_contestCreator].winningActionAddresses.push(_actionCreator);
+        }else if(contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber == contests[_contestCreator].actions[_actionCreator].voteNumber){
+            contests[_contestCreator].winningActionAddresses.push(_actionCreator);
         }
 
-        emit hasVotedForAction(_contestCreator, _actionCreator, msg.sender);
+        emit HasVotedForAction(_contestCreator, _actionCreator, msg.sender);
     }
     
     // TODO: function for tallying votes with time counter / controller 
@@ -211,6 +211,6 @@ contract Main {
     function tallyVote(address _contestCreator) external view {
         require(now > contests[_contestCreator].votingEndDate, "Voting has not finished yet!");
 
-        emit voteTallied(_contestCreator, contests[_contestCreator].winningActionAddress, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddress[0]].nbVotes);
+        emit VoteTallied(_contestCreator, contests[_contestCreator].winningActionAddresses, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber);
     }
 }   
