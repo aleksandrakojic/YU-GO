@@ -10,5 +10,6 @@ This section contains the list of the deployed contract addresses on the Ethereu
 | `YuGoToken`       | 0x........................................ |
 | `YuGoDao`         | 0x........................................ |
 | `YuGoManager`     | 0x........................................ |
+| `YuGoGovernor`    | 0x........................................ |
 
 https://ropsten.etherscan.io/

@@ -33,27 +33,11 @@ See Access Restriction
 
 ### Oracle
 
-For now, we **mock** an Oracle providing functions to:
-- declare an event
-- list all registered events
-- get the latest event
-- declare an event outcome
-- get the outcome of an event
-
-Next up, we will interconnect with an existing Oracle that makes available on-chain the results of sport events.
-
-[Reference](https://fravoll.github.io/solidity-patterns/oracle.html)
-
+Oracle functions:
+- verification / proof of existance of a organization before entering the DAO
 ## Crypto-Currency
 
-We use **DAI** as a crypto-currency.
-
-## DeFi
-
-In this POC, we do not use a real DeFi Service but stub one.  
-But next up, we plan to integrate with Compound, AAVE.
-This is one of the first topics on our roadmap.
-
+We use **ETH** as a crypto-currency.
 
 ## Security Patterns
 
@@ -82,7 +66,7 @@ We use *Pull over Push* so that players handle withdrawal (stake, gains) on thei
 
 We have decided to switch to the latest Solidity version (0.8.11) since OpenZeppelin supports it.  
 This version brings in native handling of arithmetic overflow and underflow and reverts the transaction in this case. 
-We don't use risky `SaFeMath` library.
+We don't use risky `SafeMath` library.
 
 ### Repository and Source Code
 

@@ -10,7 +10,11 @@ We use modifiers to prevent re-entrancy calls of payable functions in our contra
 
 [Reference](https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard)
 [Reference](https://solidity-by-example.org/hacks/re-entrancy/)
+## Pausable
 
+A common emergency response mechanism that can pause functionality while a remediation is pending..
+
+[Reference](https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable)
 
 ## Arithmetic Overflow and Underflow
 
@@ -27,7 +31,7 @@ An arbitrary contract could call `selfdestruct` to send all its remaining Ether 
 
 ## Accessing Private Data
 
-We do not store any sensitive data in storage to prevent anyone from reading private data of our smart-contract and be able to get a hold on key information.
+We do not store any sensitive and private data of our smart-contract and be able to get a hold on key information.
 
 [Reference](https://solidity-by-example.org/hacks/accessing-private-data/)
 
