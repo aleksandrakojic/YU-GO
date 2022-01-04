@@ -208,8 +208,8 @@ contract Main {
     
     // TODO: function for tallying votes with time counter / controller 
 
-    function tallyVote(address _contestCreator) external view {
-        require(now > contests[_contestCreator].votingEndDate, "Voting has not finished yet!");
+    function tallyVote(address _contestCreator) external {
+        require(block.timestamp > contests[_contestCreator].votingEndDate, "Voting has not finished yet!");
 
         emit VoteTallied(_contestCreator, contests[_contestCreator].winningActionAddresses, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber);
     }
