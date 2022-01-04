@@ -134,11 +134,6 @@ contract Main {
         organisation[msg.sender].isRegistered = true;
         emit OrganizationRegistered(msg.sender);
     }
-
-    function purchaseGovernanceToken() external {
-        require(organisation[msg.sender].isRegistered == true, 'you are not a registered organisation');
-
-    }
     
     /**
     * @notice this function returns true if the participant is whitelisted
