@@ -44,6 +44,13 @@ You project must:
 - [x] contain integration tests for each smart-contract
 - [x] contain a file named `tests_explication.md` explaining  **why you wrote these thests**
 
+## Deployment
+
+$ npm install -g moralis-admin-cli
+$ moralis-admin-cli deploy
+Enter:
+- Moralis CLI API Key
+- Moralis CLI API Secret
 
 ## ⭐️ Bonus
 
@@ -55,3 +62,4 @@ This [link](https://fravoll.github.io/solidity-patterns/) may help.
 
 You can find [here](https://github.com/Alyra-school/projet-final) an example of the expected directory tree including the expected items. 
 You can then clone it to bootstrap your project.
+
