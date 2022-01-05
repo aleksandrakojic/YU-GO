@@ -42,7 +42,7 @@ Your project must:
 You project must:
 
 - [x] contain integration tests for each smart-contract
-- [x] contain a file named `tests_explication.md` explaining  **why you wrote these thests**
+- [x] contain a file named `tests_explication.md` explaining  **why you wrote these tests**
 
 ## Deployment
 

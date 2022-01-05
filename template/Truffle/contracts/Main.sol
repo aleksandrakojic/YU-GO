@@ -105,6 +105,16 @@ contract Main {
         }
     }
 
+    function addThematics(string theme) external onlyBy {
+        uint numThemes = themeList.length;
+        for (uint i=0; i < numThemes-1; i++) {
+            Theme memory theme;
+            theme.id = i;
+            theme.name = themeList[i];
+            thematics[i] = theme;
+        }
+    }
+
     function setCountries() private {
         uint numCountries = countryList.length;
         for (uint i=0; i < numCountries-1; i++) {
