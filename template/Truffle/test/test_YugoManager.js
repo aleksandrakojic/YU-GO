@@ -1,4 +1,5 @@
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 const { expect, assert } = require('chai');
 const managerAbstraction = artifacts.require('YugoManager');
 const yugoAbstraction = artifacts.require('Yugo');
@@ -78,6 +79,21 @@ contract('test_manager', async function (accounts) {
         });
       });
     });
+    describe('orga1 buys Yugo token', function () {
+      context('registered orga1 purchased a token for the first time', function () {
+        it('should emit the Received event', async function () {
+          let _value = web3.utils.toWei('0.1', "ether")
+          // let tx = manager.purchaseToken({from: organisations.orga1.address, value: _value});
+          let tx = await web3.eth.sendTransaction({to:manager.address, from:organisations.orga1.address, value: web3.utils.toWei('0.1', "ether")});
+          // await expectEvent(tx, 'Received', {organisation: organisations.orga1.address, value: _value});
+          // await expectEvent(tx, 'TokenPurchasedBy', {organisation: organisations.orga1.address})
+        });
+        it('balance of manager contract should have 0.1 ETH', async function () {
+          let balance = await web3.eth.getBalance(manager.address)
+          assert(balance, web3.utils.toWei('0.1', "ether"))
+        })
+      });
+    })
     describe('#transferYugo()', function () {
       context('transfer a token to an orga', function () {
         it('should emit the YugoTransfer event', async function () {

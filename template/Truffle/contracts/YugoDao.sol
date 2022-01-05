@@ -25,13 +25,13 @@ contract YugoDao {
     struct Action {
         string name;
         uint voteNumber;
-        mapping(address => bool) hasVoted;
         uint requiredFunds;
         bool isCreated;
     }
 
     struct Contest {
         string name;
+        mapping(address => bool) hasVoted;
         mapping(address => Action) actions;
         uint[] themeIDs;
         uint[] countryIDs;

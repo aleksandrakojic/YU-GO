@@ -14,21 +14,25 @@ contract YugoManager is Ownable {
     IYugo public yugo;
     IYugoDao public yugoDao;
 
-    uint yugoTokenCost = 500000000000000000; //0.5 ETH
+    uint yugoTokenCost = 100000000000000000; //0.1 ETH
     mapping (address => uint) EthLedger;
 
     event AddressSet (address addrSetTo, address setter);
     event YugoTransfer (address recipient, uint256 amount);
-    event Received(address, uint);
+    event Received(address organisation, uint value);
+    event TokenPurchasedBy(address organisation);
 
-    function deposit(address _addrOrga, uint _eth) public payable {
-        require(_eth > 0);
-        address sender = _addrOrga;
-        uint deposited =_eth;
+    receive() external payable {
+        require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
+        require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
+        require(msg.value == yugoTokenCost, "you do not have enough ETH");
+        // require(msg.value > 0);
+        address sender = msg.sender;
+        uint deposited = msg.value;
         // receiver = owner;
         EthLedger[sender] = deposited;
         // receiver.transfer(deposited);
-        emit Received(_addrOrga, _eth);
+        emit Received(msg.sender, msg.value);
     }
 
     function sendEth(address payable _to) public payable onlyOwner {
@@ -50,23 +54,24 @@ contract YugoManager is Ownable {
         return yugo.balanceOf(account);
     }
 
-    function purchaseToken() external payable {
-        require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
-        require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
-        require(msg.value == yugoTokenCost, "you do not have enough ETH");
-        // require(!EthLedger)
-        deposit(msg.sender, msg.value);
-        _transferYugo(msg.sender);
-    }
+    // function purchaseToken() external payable {
+    //     require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
+    //     require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
+    //     require(msg.value == yugoTokenCost, "you do not have enough ETH");
+    //     // require(!EthLedger)
+    //     _deposit(msg.sender, msg.value);
+    //     // _transferYugo(msg.sender);
+    //     emit TokenPurchasedBy(msg.sender);
+    // }
 
-    function _transferYugo(address _orga) internal {
-        require(EthLedger[_orga] == yugoTokenCost, "no ETH was received");
+    function transferYugo() external {
+        require(EthLedger[msg.sender] == yugoTokenCost, "no ETH was received");
         uint256 amount = 1*10**yugo.decimals();
-        yugo.transfer(_orga, amount);
-        emit YugoTransfer(_orga, amount);
+        yugo.transfer(msg.sender, amount);
+        emit YugoTransfer(msg.sender, amount);
     }
 
-    // function transferWinninAction() {}
+    // function transferWinningAction() {}
 
     // function verifyByOracle
 
