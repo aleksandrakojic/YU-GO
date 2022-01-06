@@ -2,6 +2,10 @@
 pragma solidity 0.8.11;
 
 import "./IYugo.sol";
+<<<<<<< HEAD
+=======
+
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 /**  @title Smart Contract for the DAO
 *    @notice This Smart contract stores all vote history 
 */
@@ -89,15 +93,27 @@ contract YugoDao {
         "Macedonia"
     ];
 
+<<<<<<< HEAD
 
     //IYugo public yugo;
+=======
+    // IYugo public yugo;
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 
     constructor() {
         setThematics();
         setCountries();
+<<<<<<< HEAD
         //yugo = IYugo(_Yugo);
     }
 
+=======
+        // yugo = IYugo(_Yugo);
+    }
+
+    
+
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @dev Sender not authorized for this operation.
     */
@@ -142,7 +158,10 @@ contract YugoDao {
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Return the list of thematics
     * @return themeList List of thematics
@@ -170,8 +189,13 @@ contract YugoDao {
     * 
     */
      function registerOrganisation(uint[] memory thematicIds, uint countryId) external {
+<<<<<<< HEAD
         //require(yugo.balanceOf(msg.sender) == 1*10**yugo.decimals());
         require(!organisation[msg.sender].isRegistered, 'Organisation already registered');
+=======
+        // require(yugo.balanceOf(msg.sender) == 1*10**yugo.decimals());
+        require(!organisation[msg.sender].isRegistered, 'Organisation already registered.');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         require(thematicIds.length > 0, 'Organisation must have thematics');
         require(countryId >= 0, 'Organisation must have a country');
         organisation[msg.sender].ethAddress = msg.sender;
@@ -213,7 +237,10 @@ contract YugoDao {
         emit ParticipantRemoved(msg.sender, _addrToDelete);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Adds a particapants to a organisation
     * @dev Emit ParticipantWhitelisted event
@@ -221,13 +248,17 @@ contract YugoDao {
     * @param _addrParticipant address of particapant 
     */
     function addParticipant(address _addrOrga, address _addrParticipant ) external {
+        //TODO: verify with oracle _addrParticipant is not an organisation address
         require(organisation[_addrOrga].ethAddress == msg.sender, 'You are not the owner of the organization');
         require(!organisation[_addrOrga].participants[_addrParticipant], 'Address already whitelisted for this organization');
         organisation[_addrOrga].participants[_addrParticipant] = true;
         emit ParticipantWhitelisted(_addrParticipant, _addrOrga);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Add a contest
     * @dev Emit ContestCreated event
@@ -260,8 +291,12 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
+<<<<<<< HEAD
         // TODO : add country and theme verification
 
+=======
+        // TODO : theme verification
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         uint[] memory eligilibleCountries = contests[_creatorOfContest].countryIDs;
         uint orgaCountry = organisation[_creatorOfContest].country;
         bool countryFound=false;
@@ -272,15 +307,23 @@ contract YugoDao {
             }
         }
         require(countryFound == true, "You are not eligible to participate in this contest");
+<<<<<<< HEAD
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
+=======
+        require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest.');
+        require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action.');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         contests[_creatorOfContest].actions[msg.sender].name = _name;
         contests[_creatorOfContest].actions[msg.sender].requiredFunds = _requiredFunds;
         contests[_creatorOfContest].actions[msg.sender].isCreated = true;
         emit ActionCreated(_creatorOfContest, msg.sender, _name, _requiredFunds);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     function actionStatus(address _contestCreator, address _actionCreator) external view returns(bool){
         return contests[_contestCreator].actions[_actionCreator].isCreated;
     }
@@ -298,7 +341,11 @@ contract YugoDao {
     function voteForAction(address _contestCreator, address _actionCreator) external {
         // TODO: verify if its time to vote
         require(msg.sender != _contestCreator && msg.sender != _actionCreator, 'You can not vote for this action');
+<<<<<<< HEAD
         require(!contests[_contestCreator].hasVoted[msg.sender], 'You have already voted');
+=======
+        require(!contests[_contestCreator].hasVoted[msg.sender], 'You have already voted!');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         
         
         contests[_contestCreator].actions[_actionCreator].voteNumber += 1;
@@ -329,9 +376,13 @@ contract YugoDao {
         emit VoteTallied(_contestCreator, contests[_contestCreator].winningActionAddresses, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber);
     }
 
+<<<<<<< HEAD
 
     //TODO: pool of liquidity from contest's creator
 
 
 
+=======
+    //TODO: pool of liquidity from contest's creator
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 }   

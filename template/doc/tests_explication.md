@@ -23,4 +23,12 @@ We check the following for each key function of a smart-contract:
 - **successful cases**
 - **failure cases**
 
-## `test/main.test.js`
+## Test YugoDao
+
+## Test YugoManager
+Tests include:
+- setting up of Yugo and YuGoDao addresses in YugoManager
+- checking that Yugo was pre-minted to YugoManager right at deployment
+- the purchase of the Yugo token by the organisation
+- the deposit of ETH in YugoManager before Yugo token can be claimed
+- various events emittion
