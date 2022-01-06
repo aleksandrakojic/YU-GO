@@ -24,6 +24,15 @@ We check the following for each key function of a smart-contract:
 - **failure cases**
 
 ## Test YugoDao
+Tests include:
+- check all the steps of a voting session
+- registration of a Organisation
+- registration of a Particapant
+- creation of a contest
+- creation of actions for a contest
+- check the step for voting
+- various events emittion
+- check the vote tally
 
 ## Test YugoManager
 Tests include:
