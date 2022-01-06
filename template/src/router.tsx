@@ -15,6 +15,8 @@ import UserProfile from 'src/content/applications/Users/profile';
 import UserSettings from 'src/content/applications/Users/settings';
 import LandingPage from './content/pages/Landing';
 import OrganizationMembers from './content/applications/Members';
+import ContestsContainer from './content/applications/Contests';
+import ActionsContainer from './content/applications/Actions';
 
 // import SuspenseLoader from './components/SuspenseLoader';
 
@@ -90,12 +92,29 @@ const routes: RouteObject[] = [
         element: <Tasks />
       },
       {
-        path: 'profile',
+        path: 'organization',
         children: [
           // {
           //   path: '/',
           //   element: <Navigate to="details" replace />
           // },
+          {
+            path: 'details',
+            element: <UserProfile />
+          },
+          {
+            path: 'settings',
+            element: <UserSettings />
+          }
+        ]
+      },
+      {
+        path: 'profile',
+        children: [
+          {
+            path: '',
+            element: <Navigate to="/dashboards/organization/details" replace />
+          },
           {
             path: 'details',
             element: <UserProfile />
@@ -122,10 +141,14 @@ const routes: RouteObject[] = [
       },
       {
         path: 'contests',
-        element: <Transactions />
+        element: <ContestsContainer />
       },
       {
         path: 'actions',
+        element: <ActionsContainer />
+      },
+      {
+        path: 'transactions',
         element: <Transactions />
       }
     ]

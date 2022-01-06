@@ -56,11 +56,18 @@ const MetamaskBoxDescription = styled(Typography)(
 `
 );
 
-function MetamaskBox() {
+interface Props {
+  currentUser?: any;
+  logout: () => void;
+}
+
+function MetamaskBox({ currentUser, logout }: Props) {
+  console.log('currentUser', currentUser);
+  const addr = currentUser?.attributes?.ethAddress;
   const user = {
     name: 'Ethereum network',
     avatar: '/static/images/avatars/MetaMask.png',
-    jobtitle: '0x90230293029302930'
+    ethAddress: addr ? `${addr?.substring(0, 6)}...${addr.substring(addr.length - 4, addr.length)}` : ''
   };
 
   const ref = useRef<any>(null);
@@ -81,7 +88,7 @@ function MetamaskBox() {
         <Hidden mdDown>
           <MetamaskBoxText>
             <MetamaskBoxLabel variant="body1">{user.name}</MetamaskBoxLabel>
-            <MetamaskBoxDescription variant="body2">{user.jobtitle}</MetamaskBoxDescription>
+            <MetamaskBoxDescription variant="body2">{user.ethAddress}</MetamaskBoxDescription>
           </MetamaskBoxText>
         </Hidden>
         <Hidden smDown>
@@ -105,23 +112,23 @@ function MetamaskBox() {
           <Avatar variant="rounded" alt={user.name} src={user.avatar} />
           <MetamaskBoxText>
             <MetamaskBoxLabel variant="body1">{user.name}</MetamaskBoxLabel>
-            <MetamaskBoxDescription variant="body2">{user.jobtitle}</MetamaskBoxDescription>
+            <MetamaskBoxDescription variant="body2">{user.ethAddress}</MetamaskBoxDescription>
           </MetamaskBoxText>
         </MenuUserBox>
         <Divider sx={{ mb: 0 }} />
         <List sx={{ p: 1 }} component="nav">
-          <ListItem button to="/profile/details" component={NavLink}>
+          <ListItem button to="/organization/details" component={NavLink}>
             <AccountBoxTwoToneIcon fontSize="small" />
-            <ListItemText primary="My Profile" />
+            <ListItemText primary="My organization" />
           </ListItem>
-          <ListItem button to="/profile/settings" component={NavLink}>
+          <ListItem button to="/organization/settings" component={NavLink}>
             <AccountTreeTwoToneIcon fontSize="small" />
             <ListItemText primary="Account Settings" />
           </ListItem>
         </List>
         <Divider />
         <Box sx={{ m: 1 }}>
-          <Button color="primary" fullWidth>
+          <Button color="primary" fullWidth onClick={logout}>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />
             Sign out
           </Button>

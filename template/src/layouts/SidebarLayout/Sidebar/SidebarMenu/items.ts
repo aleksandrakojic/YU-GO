@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 
 import DesignServicesTwoToneIcon from '@mui/icons-material/DesignServicesTwoTone';
 import BrightnessLowTwoToneIcon from '@mui/icons-material/BrightnessLowTwoTone';
-import MmsTwoToneIcon from '@mui/icons-material/MmsTwoTone';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import TableChartTwoToneIcon from '@mui/icons-material/TableChartTwoTone';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import VerifiedUserTwoToneIcon from '@mui/icons-material/VerifiedUserTwoTone';
@@ -25,16 +25,6 @@ export interface MenuItems {
 
 const menuItems: MenuItems[] = [
   {
-    heading: '',
-    items: [
-      {
-        name: 'Overview',
-        link: '/overview',
-        icon: DesignServicesTwoToneIcon
-      }
-    ]
-  },
-  {
     heading: 'Dashboards',
     items: [
       {
@@ -44,11 +34,11 @@ const menuItems: MenuItems[] = [
         items: [
           {
             name: 'Details',
-            link: '/dashboards/profile/details'
+            link: '/dashboards/organization/details'
           },
           {
             name: 'Settings',
-            link: '/dashboards/profile/settings'
+            link: '/dashboards/organization/settings'
           }
         ]
       }
@@ -71,33 +61,38 @@ const menuItems: MenuItems[] = [
         name: 'Actions',
         icon: PendingActionsOutlinedIcon,
         link: '/management/actions'
+      },
+      {
+        name: 'Transactions',
+        icon: MonetizationOnIcon,
+        link: '/management/transactions'
       }
     ]
   },
   {
-    heading: 'Extra Pages',
+    heading: 'Yu-GO DAO',
     items: [
       {
-        name: 'Status',
+        name: 'DAO',
         icon: VerifiedUserTwoToneIcon,
-        link: '/status',
+        link: '/dao',
         items: [
           {
-            name: 'Error 404',
-            link: '/status/404'
+            name: 'Proposals',
+            link: '/dao/proposals'
           },
-          {
-            name: 'Error 500',
-            link: '/status/500'
-          },
+          // {
+          //   name: 'Error 500',
+          //   link: '/status/500'
+          // },
           {
             name: 'Maintenance',
             link: '/status/maintenance'
-          },
-          {
-            name: 'Coming Soon',
-            link: '/status/coming-soon'
           }
+          // {
+          //   name: 'Coming Soon',
+          //   link: '/status/coming-soon'
+          // }
         ]
       }
     ]

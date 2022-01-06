@@ -119,14 +119,14 @@ const MembersTable: FC<MembersTableProps> = ({ members }) => {
   };
 
   const handleSelectAllMembers = (event: ChangeEvent<HTMLInputElement>): void => {
-    setSelectedCryptoOrders(event.target.checked ? members.map((member) => member.id) : []);
+    // setSelectedCryptoOrders(event.target.checked ? members.map((member) => member.id) : []);
   };
 
-  const handleSelectOneMember = (event: ChangeEvent<HTMLInputElement>, cryptoOrderId: string): void => {
-    if (!selectedMembers.includes(cryptoOrderId)) {
-      setSelectedCryptoOrders((prevSelected) => [...prevSelected, cryptoOrderId]);
+  const handleSelectOneMember = (event: ChangeEvent<HTMLInputElement>, memberId: any): void => {
+    if (!selectedMembers.includes(memberId)) {
+      setSelectedCryptoOrders((prevSelected) => [...prevSelected, memberId]);
     } else {
-      setSelectedCryptoOrders((prevSelected) => prevSelected.filter((id) => id !== cryptoOrderId));
+      setSelectedCryptoOrders((prevSelected) => prevSelected.filter((id) => id !== memberId));
     }
   };
 
@@ -193,75 +193,76 @@ const MembersTable: FC<MembersTableProps> = ({ members }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedMembers.map((member) => {
-              const isMemberSelected = selectedMembers.includes(member.id);
-              return (
-                <TableRow hover key={member.id} selected={isMemberSelected}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isMemberSelected}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => handleSelectOneMember(event, member.id)}
-                      value={isMemberSelected}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
-                      {member.firstname}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
-                      {member.lastname}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
-                      {member.email}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
-                      {member.ethAddress}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body1" color="text.primary" gutterBottom noWrap>
-                      {format(member.registrationDate, 'MMMM dd yyyy')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">{getStatusLabel(member.status)}</TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Edit Order" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: theme.colors.primary.lighter
-                          },
-                          color: theme.palette.primary.main
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <EditTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Order" arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': { background: theme.colors.error.lighter },
-                          color: theme.palette.error.main
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <DeleteTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {paginatedMembers.length > 0 &&
+              paginatedMembers?.map((member) => {
+                const isMemberSelected = member?.id ? selectedMembers.includes(member?.id) : false;
+                return (
+                  <TableRow hover key={member?.id} selected={isMemberSelected}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        color="primary"
+                        checked={isMemberSelected}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => handleSelectOneMember(event, member?.id)}
+                        value={isMemberSelected}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
+                        {member?.firstname}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
+                        {member?.lastname}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
+                        {member?.email}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1" fontWeight="bold" color="text.primary" gutterBottom noWrap>
+                        {member?.ethAddress}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body1" color="text.primary" gutterBottom noWrap>
+                        {member?.registrationDate && format(member?.registrationDate, 'MMMM dd yyyy')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">{getStatusLabel(member?.status)}</TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Edit Order" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': {
+                              background: theme.colors.primary.lighter
+                            },
+                            color: theme.palette.primary.main
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <EditTwoToneIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Order" arrow>
+                        <IconButton
+                          sx={{
+                            '&:hover': { background: theme.colors.error.lighter },
+                            color: theme.palette.error.main
+                          }}
+                          color="inherit"
+                          size="small"
+                        >
+                          <DeleteTwoToneIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>

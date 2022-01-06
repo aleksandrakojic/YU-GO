@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Typography, Container, Button, Stack } from '@mui/material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 
@@ -8,6 +8,7 @@ import EnableWeb3 from 'src/components/EnableWeb3';
 import { MainContent, PaperItem } from './styles';
 import { AppContext } from 'src/contexts/AppContext';
 import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
+import { useNavigate } from 'react-router-dom';
 
 enum SignupType {
   None,
@@ -16,13 +17,38 @@ enum SignupType {
 }
 
 function LandingPage() {
-  const { enableWeb3 } = useMoralis();
+  const navigate = useNavigate();
+  const { enableWeb3, Moralis, authenticate } = useMoralis();
   const [signup, setSignup] = useState(SignupType.None);
   const { thematics, countries, abi, contractAddress } = useContext(AppContext);
   const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
+  const [newOrganistation, setNewOrganisation] = useState<any>(null);
+
+  useEffect(() => {
+    if (data && newOrganistation?.name && newOrganistation?.email && newOrganistation?.thematics && newOrganistation) {
+      const d: any = data;
+      if (d?.events?.OrganizationRegistered) {
+        console.log('inside create orga db', data);
+        const Organisations = Moralis.Object.extend('Organisations');
+        const orga = new Organisations();
+
+        orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
+          (res) => {
+            authenticate().then((user) => {
+              navigate('/dashboards/organization/settings');
+            });
+          },
+          (error) => {
+            console.warn('error saving orga', error);
+          }
+        );
+      }
+      setNewOrganisation(null);
+    }
+  }, [data]);
 
   const handleSubmitOrganization = (organization) => {
-    const data: any = {
+    const contractData: any = {
       abi,
       contractAddress,
       functionName: 'registerOrganisation',
@@ -32,9 +58,9 @@ function LandingPage() {
         countryId: organization?.country
       }
     };
-    fetch({ params: data });
+    fetch({ params: contractData });
+    setNewOrganisation(organization);
   };
-  console.warn('register organization', data, isLoading, isFetching, error);
 
   const renderForm = () => {
     if (signup === SignupType.Organization) {
@@ -55,15 +81,16 @@ function LandingPage() {
           sx={{
             p: 2,
             display: 'flex',
-            flexDirection: 'column',
-            gap: 4
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 2
           }}
         >
           <PaperItem elevation={16} onClick={() => setSignup(SignupType.Organization)}>
-            <Typography variant="h2">Jump in as Organization</Typography>
+            <Typography variant="h3">I am Organization</Typography>
           </PaperItem>
           <PaperItem elevation={16} onClick={() => setSignup(SignupType.Member)}>
-            <Typography variant="h2">Jump in as Member</Typography>
+            <Typography variant="h3">I am Member</Typography>
           </PaperItem>
         </Stack>
       );

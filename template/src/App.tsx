@@ -123,10 +123,12 @@ const App = () => {
     );
   }
 
+  const currentUser = Moralis.User.current();
+
   return (
     <ThemeProvider>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <AppContext.Provider value={{ ...contractData, abi, contractAddress }}>
+        <AppContext.Provider value={{ ...contractData, abi, contractAddress, currentUser }}>
           <CssBaseline />
           {content}
         </AppContext.Provider>

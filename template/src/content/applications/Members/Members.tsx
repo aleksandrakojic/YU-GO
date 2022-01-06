@@ -1,29 +1,22 @@
 import React from 'react';
 import { Card } from '@mui/material';
-import MembbersTable from './MembersTable';
 import { subDays } from 'date-fns';
 import { IMember } from 'src/models';
+import MembersTable from './MembersTable';
 
-/* 
-  id: string;
-  status: IMemberStatus;
-  firstname: string;
-  lastname: string;
-  status: MemberStatust,
-  email: string;
-  ethAddress: string;
-  orgEthAddress: string;
-*/
+interface Props {
+  members: IMember[];
+}
 
-function Members() {
-  const members: IMember[] = [
+function Members({ members }: Props) {
+  const mockMembers: IMember[] = [
     {
       id: '1',
       firstname: 'Aleks',
       lastname: 'Kojic',
       status: 'registered',
       email: 'test@test.com',
-      ethAddress: '0x98989898989',
+      ethAddress: '0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b',
       orgEthAddress: '0x90909000sdf0',
       registrationDate: new Date().getTime()
     },
@@ -33,7 +26,7 @@ function Members() {
       lastname: 'Kojic',
       status: 'registered',
       email: 'test@test.com',
-      ethAddress: '0x98989898989',
+      ethAddress: '0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b',
       orgEthAddress: '0x90909000sdf0',
       registrationDate: subDays(new Date(), 1).getTime()
     },
@@ -121,7 +114,7 @@ function Members() {
 
   return (
     <Card>
-      <MembbersTable members={members} />
+      <MembersTable members={mockMembers} />
     </Card>
   );
 }

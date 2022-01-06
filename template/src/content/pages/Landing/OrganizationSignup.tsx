@@ -1,7 +1,6 @@
 import { Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Autocomplete } from '@mui/material';
 import React, { useState } from 'react';
 import { Form, Field } from 'react-final-form';
-import { useNavigate } from 'react-router-dom';
 import { IData } from 'src/models';
 import { PaperContent } from './styles';
 
@@ -10,23 +9,21 @@ interface Props {
   countries: IData[];
   onSubmitOrganization: (org) => void;
 }
+
+const initOrganization = {
+  name: '',
+  email: '',
+  description: '',
+  address: '',
+  country: 0,
+  thematics: []
+};
+
 export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization }: Props) => {
-  const navigate = useNavigate();
-  const [organizationData, setOrganizationData] = useState({
-    name: '',
-    email: '',
-    description: '',
-    address: '',
-    country: 0,
-    thematics: []
-  });
+  const [organizationData, setOrganizationData] = useState(initOrganization);
 
   const handleSubmit = () => {
     onSubmitOrganization(organizationData);
-  };
-
-  const handleSubmitForm = () => {
-    navigate('/dashboards');
   };
 
   const handleThemeSelection = (e, newvalue) => {
@@ -38,11 +35,25 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
     setOrganizationData({ ...organizationData, [name]: value });
   };
 
+  const handleResetForm = () => {
+    console.log('reset form', initOrganization, organizationData);
+    setOrganizationData(initOrganization);
+  };
+  const isSubmitDisabled = () =>
+    !(
+      organizationData?.address &&
+      organizationData?.email &&
+      organizationData?.name &&
+      organizationData?.thematics.length
+    );
+
   return (
     <div style={{ padding: 10, margin: 'auto', maxWidth: 600 }}>
       <Form
         onSubmit={handleSubmit}
-        render={({ submitting, pristine }) => (
+        subscription={{ submitting: true, pristine: true }}
+        initialValues={initOrganization}
+        render={({ submitting, values, form }) => (
           <PaperContent>
             <Grid container alignItems="flex-start" spacing={2}>
               <Grid item xs={12}>
@@ -73,7 +84,6 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                 <Field
                   name="address"
                   fullWidth
-                  required
                   type="address"
                   label="Address"
                   value={organizationData.address}
@@ -99,6 +109,7 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                     name="country"
                     labelId="country-label"
                     label="Country"
+                    required
                     onChange={({ target: { name, value } }) => handleInputChange(name, value)}
                     value={organizationData.country}
                   >
@@ -123,6 +134,7 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                 <Autocomplete
                   fullWidth
                   multiple
+                  aria-required
                   id="tags-outlined"
                   options={thematics}
                   getOptionLabel={(option) => option.name}
@@ -132,17 +144,18 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                 />
               </Grid>
               <Grid item style={{ marginTop: 16 }}>
-                <Button
-                  type="button"
-                  variant="contained"
-                  onClick={() => console.log('reset')}
-                  disabled={submitting || pristine}
-                >
+                <Button type="button" variant="outlined" onClick={form.reset} disabled={submitting}>
                   Reset
                 </Button>
               </Grid>
               <Grid item style={{ marginTop: 16 }}>
-                <Button variant="contained" color="primary" type="submit" disabled={submitting} onClick={handleSubmit}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={isSubmitDisabled()}
+                  onClick={handleSubmit}
+                >
                   Submit
                 </Button>
               </Grid>

@@ -11,6 +11,9 @@ import HeaderButtons from './Buttons';
 import HeaderUserbox from './Userbox';
 import Logo from 'src/components/Logo';
 import MetamaskBox from './MetamaskBox';
+import { AppContext } from 'src/contexts/AppContext';
+import { useMoralis } from 'react-moralis';
+import { useNavigate } from 'react-router-dom';
 
 const HeaderWrapper = styled(Box)(
   ({ theme }) => `
@@ -33,6 +36,16 @@ const HeaderWrapper = styled(Box)(
 
 function Header() {
   const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
+  const { currentUser } = useContext(AppContext);
+  const { Moralis } = useMoralis();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await Moralis.User.logOut().then((r) => {
+      console.log('logout', r);
+      navigate('/');
+    });
+  };
 
   return (
     <HeaderWrapper display="flex" alignItems="center">
@@ -43,7 +56,7 @@ function Header() {
       </Box>
       <Box display="flex" alignItems="center">
         <HeaderButtons />
-        <MetamaskBox />
+        <MetamaskBox currentUser={currentUser} logout={handleLogout} />
         <Hidden lgUp>
           <Tooltip arrow title="Toggle Menu">
             <IconButton color="primary" onClick={toggleSidebar}>

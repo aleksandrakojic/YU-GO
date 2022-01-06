@@ -24,6 +24,7 @@
     "inlineSources": true,
     "declaration": true
   },
+  "plugins": ["@babel/plugin-proposal-optional-chaining", "@babel/plugin-syntax-optional-chaining"],
   "include": ["src", "custom.d.ts"],
   "exclude": ["node_modules", "public", ".cache"]
 }

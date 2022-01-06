@@ -6,34 +6,57 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { Divider } from '@mui/material';
 
-export default function FormDialog() {
-  const [open, setOpen] = React.useState(false);
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (addr: string) => void;
+}
 
-  const handleClickOpen = () => {
-    setOpen(true);
+export default function AddMemberModal({ isOpen, onClose, onSubmit }: Props) {
+  const [addr, setAddr] = React.useState('');
+
+  const handleSubmit = () => {
+    if (addr) {
+      onSubmit(addr);
+      setAddr('');
+    }
   };
-
+  const handleChange = ({ target: { value } }) => setAddr(value);
   const handleClose = () => {
-    setOpen(false);
+    setAddr('');
+    onClose();
   };
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Open form dialog
-      </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Whiteliste new Member</DialogTitle>
+      <Dialog open={isOpen} onClose={handleClose} sx={{ '& > div > div': { padding: 2, backgroundColor: '#393264' } }}>
+        <DialogTitle>WHITELIST MEMBER OF YOUR ORGANIZATION</DialogTitle>
+        <Divider />
         <DialogContent>
           <DialogContentText>
-            Adding ETH address, you are allowing a member of your organization to access the platform
+            Adding ETH address of your member, you are allowing her to access the platform.
           </DialogContentText>
-          <TextField autoFocus margin="dense" id="name" label="ETH Address" type="email" fullWidth variant="standard" />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="ETH Address"
+            type="text"
+            fullWidth
+            variant="filled"
+            onChange={handleChange}
+            value={addr}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Subscribe</Button>
+        <DialogActions sx={{ marginRight: '20px' }}>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="outlined" onClick={handleSubmit}>
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

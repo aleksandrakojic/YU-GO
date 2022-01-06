@@ -7,3 +7,4 @@ yarn-error.log
 tsconfig.tsbuildinfo
 node_modules
 build
+data

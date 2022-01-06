@@ -5,6 +5,7 @@ interface IAppContext {
   countries: Array<any>;
   abi: any;
   contractAddress: string;
+  currentUser?: any;
   // organisations: Array<any>;
 }
 
@@ -13,6 +14,7 @@ const initAppContext: IAppContext = {
   countries: [],
   abi: {},
   contractAddress: '',
+  currentUser: {}
   // organisations: [],
 };
 
