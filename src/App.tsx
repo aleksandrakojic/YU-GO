@@ -33,7 +33,8 @@ const App = () => {
   } = useMoralis();
   console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
   const { contractName, networks, abi } = contractInfo;
-  const contractAddress = networks[1337].address; //1337
+  const contractAddress = networks[3].address; //1337
+  console.log('CONTRACT', contractAddress);
   const [contractData, setContractData] = useState<IContractData>({
     thematics: [],
     countries: []
