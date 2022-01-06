@@ -23493,11 +23493,30 @@
           ],
           "name": "Unpaused",
           "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
         }
       },
       "links": {},
-      "address": "0x0A1257A8fad8EfeD3d80f75BB56E888Aa8c4120C",
-      "transactionHash": "0x4720a460c79ad0b1257edf8b33cc8bb447f177a94fef61c32398e6d4cb3647ef"
+      "address": "0x333Adcc5fC798923888416b751f9A09e0F514F91",
+      "transactionHash": "0xba03271a657f73d58db77a69f9774369a74191984bab0cd7dfd77a69766df455"
     },
     "1337": {
       "events": {
@@ -23728,7 +23747,7 @@
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-01-06T01:48:47.458Z",
+  "updatedAt": "2022-01-06T02:11:18.414Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
