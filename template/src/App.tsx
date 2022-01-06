@@ -7,7 +7,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import ThemeProvider from './theme/ThemeProvider';
 import { CircularProgress, Container, CssBaseline, Typography } from '@mui/material';
 import { useMoralis, useWeb3ExecuteFunction } from 'react-moralis';
-import contractInfo from 'src/contracts/Main.json';
+import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
 import { IContractData } from './models';
 

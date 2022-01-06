@@ -1,3 +1,4 @@
+// "cd Truffle && truffle migrate --reset --compile-all --network ropsten && node scripts/contractInfo.js",
 const { spawn } = require('child_process');
 
 const run = async () => {
