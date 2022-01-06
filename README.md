@@ -37,6 +37,19 @@ REACT_APP_MORALIS_APPLICATION_ID = xxxxxxxxxxxx
 REACT_APP_MORALIS_SERVER_URL = https://xxxxxx.grandmoralis.com:2053/server
 ```
 
+✏ Ou utiliser notre serveur de test
+
+```jsx
+REACT_APP_MORALIS_APP_ID = 7xj9eFvOciZLstw0sL4zvJXG2Qc9uwLMkXwG3S32
+REACT_APP_MORALIS_SERVER_URL = https://pinc0xztf3n2.usemoralis.com:2053/server
+
+# Optional info for connecting your localChain and Moralis Database
+moralisApiKey = xwyGYHiqB7hqy7a
+moralisApiSecret = lWHYr0tsVbXdWsL
+chain = ganache
+moralisSubdomain = xxxxxxx.usemoralis.com
+```
+
 🚴‍♂️ Lancement de l'App:
 
 ```sh
