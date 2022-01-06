@@ -2,7 +2,10 @@
 pragma solidity 0.8.11;
 
 import "./IYugo.sol";
+<<<<<<< HEAD
+=======
 
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 /**  @title Smart Contract for the DAO
 *    @notice This Smart contract stores all vote history 
 */
@@ -90,16 +93,27 @@ contract YugoDao {
         "Macedonia"
     ];
 
+<<<<<<< HEAD
+
+    //IYugo public yugo;
+=======
     // IYugo public yugo;
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 
     constructor() {
         setThematics();
         setCountries();
+<<<<<<< HEAD
+        //yugo = IYugo(_Yugo);
+    }
+
+=======
         // yugo = IYugo(_Yugo);
     }
 
     
 
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @dev Sender not authorized for this operation.
     */
@@ -144,6 +158,10 @@ contract YugoDao {
         }
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Return the list of thematics
     * @return themeList List of thematics
@@ -160,6 +178,7 @@ contract YugoDao {
     function getCountries() public view returns(string[] memory) {        
         return countryList;
     }
+    
 
     /**
     * @notice Registers an Organisation
@@ -170,8 +189,13 @@ contract YugoDao {
     * 
     */
      function registerOrganisation(uint[] memory thematicIds, uint countryId) external {
+<<<<<<< HEAD
+        //require(yugo.balanceOf(msg.sender) == 1*10**yugo.decimals());
+        require(!organisation[msg.sender].isRegistered, 'Organisation already registered');
+=======
         // require(yugo.balanceOf(msg.sender) == 1*10**yugo.decimals());
         require(!organisation[msg.sender].isRegistered, 'Organisation already registered.');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         require(thematicIds.length > 0, 'Organisation must have thematics');
         require(countryId >= 0, 'Organisation must have a country');
         organisation[msg.sender].ethAddress = msg.sender;
@@ -198,6 +222,7 @@ contract YugoDao {
     * @return True if the address exists, false if not
      */
     function participantIsWhiteListed(address _addrOrganisation, address _addrParticipant) external view returns(bool) {
+        
         return organisation[_addrOrganisation].participants[_addrParticipant];
     }
 
@@ -212,6 +237,10 @@ contract YugoDao {
         emit ParticipantRemoved(msg.sender, _addrToDelete);
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Adds a particapants to a organisation
     * @dev Emit ParticipantWhitelisted event
@@ -226,6 +255,10 @@ contract YugoDao {
         emit ParticipantWhitelisted(_addrParticipant, _addrOrga);
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     /**
     * @notice Add a contest
     * @dev Emit ContestCreated event
@@ -238,7 +271,7 @@ contract YugoDao {
     */
     function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external {
         // TODO: verify if balance of gouv token is > 0 in metamask
-        require(!contests[msg.sender].isCreated, 'Organisation already created a contest.');
+        require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         contests[msg.sender].name = _name;
         contests[msg.sender].themeIDs = _themeIds;
         contests[msg.sender].countryIDs = _eligibleCountryIds;
@@ -258,7 +291,12 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
+<<<<<<< HEAD
+        // TODO : add country and theme verification
+
+=======
         // TODO : theme verification
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         uint[] memory eligilibleCountries = contests[_creatorOfContest].countryIDs;
         uint orgaCountry = organisation[_creatorOfContest].country;
         bool countryFound=false;
@@ -269,13 +307,23 @@ contract YugoDao {
             }
         }
         require(countryFound == true, "You are not eligible to participate in this contest");
+<<<<<<< HEAD
+        require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
+        require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
+=======
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest.');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action.');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         contests[_creatorOfContest].actions[msg.sender].name = _name;
         contests[_creatorOfContest].actions[msg.sender].requiredFunds = _requiredFunds;
+        contests[_creatorOfContest].actions[msg.sender].isCreated = true;
         emit ActionCreated(_creatorOfContest, msg.sender, _name, _requiredFunds);
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
     function actionStatus(address _contestCreator, address _actionCreator) external view returns(bool){
         return contests[_contestCreator].actions[_actionCreator].isCreated;
     }
@@ -293,7 +341,11 @@ contract YugoDao {
     function voteForAction(address _contestCreator, address _actionCreator) external {
         // TODO: verify if its time to vote
         require(msg.sender != _contestCreator && msg.sender != _actionCreator, 'You can not vote for this action');
+<<<<<<< HEAD
+        require(!contests[_contestCreator].hasVoted[msg.sender], 'You have already voted');
+=======
         require(!contests[_contestCreator].hasVoted[msg.sender], 'You have already voted!');
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
         
         
         contests[_contestCreator].actions[_actionCreator].voteNumber += 1;
@@ -318,11 +370,19 @@ contract YugoDao {
     * @param _contestCreator Address of Contest creator 
     */
     function tallyVote(address _contestCreator) external {
-        // TODO: tallying votes with time counter / controller 
-        require(block.timestamp > contests[_contestCreator].votingEndDate, "Voting has not finished yet!");
+        // TODO: tallying votes with time counter / controller / check only callable from manager
+        require(block.timestamp > contests[_contestCreator].votingEndDate, "Voting has not finished yet");
 
         emit VoteTallied(_contestCreator, contests[_contestCreator].winningActionAddresses, contests[_contestCreator].actions[contests[_contestCreator].winningActionAddresses[0]].voteNumber);
     }
 
+<<<<<<< HEAD
+
     //TODO: pool of liquidity from contest's creator
+
+
+
+=======
+    //TODO: pool of liquidity from contest's creator
+>>>>>>> dbcc41825d428b75319f9e6f7871d26b934ce608
 }   
