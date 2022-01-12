@@ -1,11 +1,26 @@
-import React from 'react';
-import { Heading, Stack } from '@chakra-ui/layout';
-import { Box, Button, HStack } from '@chakra-ui/react';
-import { useMoralis } from 'react-moralis';
-import { CodeBlock } from '../components/CodeBlock';
+import React, { useContext } from "react";
+import { Heading, Stack } from "@chakra-ui/layout";
+import { Box, Button, HStack } from "@chakra-ui/react";
+import { useMoralis } from "react-moralis";
+import { CodeBlock } from "../components/CodeBlock";
+import { AppContext } from "src/contexts/AppContext";
 
 export const Authentication = () => {
-  const { authenticate, user, authError, isAuthenticated, isAuthenticating, logout } = useMoralis();
+  const {
+    authenticate,
+    user,
+    authError,
+    isAuthenticated,
+    isAuthenticating,
+    logout,
+  } = useMoralis();
+
+  const context = useContext(AppContext);
+
+  const redirect = () => {
+    if (isAuthenticated && context.currentUser.type == 1) {
+    }
+  };
 
   return (
     <div>
@@ -17,7 +32,11 @@ export const Authentication = () => {
           ) : (
             <HStack>
               <Button onClick={() => authenticate()}>Authenticate</Button>
-              <Button onClick={() => authenticate({ provider: 'walletconnect' })}>Authenticate Walletconnect</Button>
+              <Button
+                onClick={() => authenticate({ provider: "walletconnect" })}
+              >
+                Authenticate Walletconnect
+              </Button>
             </HStack>
           )}
         </Box>
@@ -27,7 +46,7 @@ export const Authentication = () => {
               user,
               isAuthenticated,
               isAuthenticating,
-              authError
+              authError,
             },
             null,
             2

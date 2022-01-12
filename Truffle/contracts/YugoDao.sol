@@ -11,9 +11,9 @@ contract YugoDao {
         string name;
         address ethAddress;
         bool isRegistered;
-        mapping (address => bool) participants;
         uint[] themes;
         uint country;
+        mapping (address => bool) participants;
     }
 
     struct Theme {
@@ -38,9 +38,7 @@ contract YugoDao {
     * @dev A participant can only create one action
     */
     struct Contest {
-        string name;
-        mapping(address => bool) hasVoted;
-        mapping(address => Action) actions;
+        string name;    
         uint[] themeIDs;
         uint[] countryIDs;
         uint applicationEndDate;
@@ -48,6 +46,8 @@ contract YugoDao {
         uint availableFunds;
         bool isCreated;
         address[] winningActionAddresses;
+        mapping(address => bool) hasVoted;
+        mapping(address => Action) actions;
     }
 
     event OrganizationRegistered(address addressOrga);

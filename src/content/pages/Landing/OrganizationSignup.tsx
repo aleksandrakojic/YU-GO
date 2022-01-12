@@ -1,8 +1,17 @@
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Autocomplete } from '@mui/material';
-import React, { useState } from 'react';
-import { Form, Field } from 'react-final-form';
-import { IData } from 'src/models';
-import { PaperContent } from './styles';
+import {
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Autocomplete,
+} from "@mui/material";
+import React, { useState } from "react";
+import { Form, Field } from "react-final-form";
+import { IData } from "src/models";
+import { PaperContent } from "./styles";
 
 interface Props {
   thematics: IData[];
@@ -11,18 +20,23 @@ interface Props {
 }
 
 const initOrganization = {
-  name: '',
-  email: '',
-  description: '',
-  address: '',
+  name: "",
+  email: "",
+  description: "",
+  address: "",
   country: 0,
-  thematics: []
+  thematics: [],
 };
 
-export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization }: Props) => {
+export const OrganizationSignup = ({
+  thematics,
+  countries,
+  onSubmitOrganization,
+}: Props) => {
   const [organizationData, setOrganizationData] = useState(initOrganization);
 
   const handleSubmit = () => {
+    console.log("submit");
     onSubmitOrganization(organizationData);
   };
 
@@ -36,7 +50,7 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
   };
 
   const handleResetForm = () => {
-    console.log('reset form', initOrganization, organizationData);
+    console.log("reset form", initOrganization, organizationData);
     setOrganizationData(initOrganization);
   };
   const isSubmitDisabled = () =>
@@ -48,7 +62,7 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
     );
 
   return (
-    <div style={{ padding: 10, margin: 'auto', maxWidth: 600 }}>
+    <div style={{ padding: 10, margin: "auto", maxWidth: 600 }}>
       <Form
         onSubmit={handleSubmit}
         subscription={{ submitting: true, pristine: true }}
@@ -65,7 +79,9 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                   label="Organization name"
                   value={organizationData.name}
                   component={TextField}
-                  onChange={({ target: { value } }) => handleInputChange('name', value)}
+                  onChange={({ target: { value } }) =>
+                    handleInputChange("name", value)
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -77,7 +93,9 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                   label="Email"
                   value={organizationData.email}
                   component={TextField}
-                  onChange={({ target: { value } }) => handleInputChange('email', value)}
+                  onChange={({ target: { value } }) =>
+                    handleInputChange("email", value)
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -88,7 +106,9 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                   label="Address"
                   value={organizationData.address}
                   component={TextField}
-                  onChange={({ target: { value } }) => handleInputChange('address', value)}
+                  onChange={({ target: { value } }) =>
+                    handleInputChange("address", value)
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -99,7 +119,9 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                   label="Description"
                   value={organizationData.description}
                   component={TextField}
-                  onChange={({ target: { value } }) => handleInputChange('description', value)}
+                  onChange={({ target: { value } }) =>
+                    handleInputChange("description", value)
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
@@ -110,7 +132,9 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                     labelId="country-label"
                     label="Country"
                     required
-                    onChange={({ target: { name, value } }) => handleInputChange(name, value)}
+                    onChange={({ target: { name, value } }) =>
+                      handleInputChange(name, value)
+                    }
                     value={organizationData.country}
                   >
                     {countries.map((c) => (
@@ -125,10 +149,10 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                 item
                 xs={12}
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  maxWidth: '100%'
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  maxWidth: "100%",
                 }}
               >
                 <Autocomplete
@@ -140,11 +164,18 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
                   getOptionLabel={(option) => option.name}
                   onChange={handleThemeSelection}
                   filterSelectedOptions
-                  renderInput={(params) => <TextField {...params} label="Thematics" />}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Thematics" />
+                  )}
                 />
               </Grid>
               <Grid item style={{ marginTop: 16 }}>
-                <Button type="button" variant="outlined" onClick={form.reset} disabled={submitting}>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={form.reset}
+                  disabled={submitting}
+                >
                   Reset
                 </Button>
               </Grid>
