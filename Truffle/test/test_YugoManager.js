@@ -1,5 +1,6 @@
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
-const { web3 } = require('@openzeppelin/test-helpers/src/setup');
+// const { web3 } = require('@openzeppelin/test-helpers/src/setup');
+const web3 = require('web3')
 const { expect, assert } = require('chai');
 const managerAbstraction = artifacts.require('YugoManager');
 const yugoAbstraction = artifacts.require('Yugo');
@@ -31,8 +32,8 @@ contract('test_manager', async function (accounts) {
     before('create an instance of the contract', async function createInstance() {
       //instantiate main contract from abstraction
       manager = await managerAbstraction.new({ from: admin });
-      yugo = await yugoAbstraction.new(manager.address,{ from: admin });
-      yugoDao = await yugoDaoAbstraction.new({ from: admin });
+      yugo = await yugoAbstraction.new(manager.address, { from: admin });
+      yugoDao = await yugoDaoAbstraction.new(yugo.address, { from: admin });
       await logAddresses();
     });
 
@@ -41,17 +42,25 @@ contract('test_manager', async function (accounts) {
    * It tests that:
    * the event AddressSet is emitted for each call
    */
+    // describe('#set Addresses dans YugoManager', function () {
+    //   context('set Yugo token address', function () {
+    //     it('should emit the AddressSet event', async function () {
+    //       const setYugo = await manager.setYugoAddress(yugo.address, {from: admin})
+    //       expectEvent(setYugo, 'AddressSet', {addrSetTo: yugo.address, setter: admin})
+    //     });
+    //   });
+    //   context('set YugoDao address', function () {
+    //     it('should emit the AddressSet event', async function () {
+    //       const setYugoDao = await manager.setYugoDaoAddress(yugoDao.address, {from: admin})
+    //       expectEvent(setYugoDao, 'AddressSet', {addrSetTo: yugoDao.address, setter: admin})
+    //     });
+    //   });
+    // });
     describe('#set Addresses dans YugoManager', function () {
-      context('set Yugo token address', function () {
-        it('should emit the AddressSet event', async function () {
-          const setYugo = await manager.setYugoAddress(yugo.address, {from: admin})
-          expectEvent(setYugo, 'AddressSet', {addrSetTo: yugo.address, setter: admin})
-        });
-      });
-      context('set YugoDao address', function () {
-        it('should emit the AddressSet event', async function () {
-          const setYugoDao = await manager.setYugoDaoAddress(yugoDao.address, {from: admin})
-          expectEvent(setYugoDao, 'AddressSet', {addrSetTo: yugoDao.address, setter: admin})
+      context('set Yugo token et YugoDao addresses', function () {
+        it('should emit the ContractsAddrSet event', async function () {
+          const setAddresses = await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
+          expectEvent(setAddresses, 'ContractsAddrSet', {yugo: yugo.address, yugodao: yugoDao.address})
         });
       });
     });
@@ -105,7 +114,7 @@ contract('test_manager', async function (accounts) {
       context('registered orga1 purchased a token for the first time', function () {
         it('should emit the Received event', async function () {
           let _value = web3.utils.toWei('0.1', "ether")
-          let tx = await manager.sendTransaction({to:manager.address, from:organisations.orga1.address, value: web3.utils.toWei('0.1', "ether")});
+          let tx = await manager.sendTransaction({to:manager.address, from:organisations.orga1.address, value: _value});
           await expectEvent(tx, 'Received', {organisation: organisations.orga1.address, value: _value});
         });
         it('balance of manager contract should have 0.1 ETH', async function () {

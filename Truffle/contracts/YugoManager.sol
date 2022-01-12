@@ -17,11 +17,12 @@ contract YugoManager is Ownable {
     uint yugoTokenCost = 100000000000000000; //0.1 ETH
     mapping (address => uint) EthLedger;
 
-    event AddressSet (address addrSetTo, address setter);
+    // event AddressSet (address addrSetTo, address setter);
     event YugoTransfer (address recipient, uint256 amount);
     event Received(address organisation, uint value);
     event TokenPurchasedBy(address organisation);
     event FundsTransferedToWinner(address organisation);
+    event ContractsAddrSet(address yugo, address yugodao);
 
     /**
     * @notice receives ETH
@@ -52,23 +53,23 @@ contract YugoManager is Ownable {
         require(sent, "Failed to send Ether");
     }
 
-    /**
-    * @notice set the address of the Yugo contract for use with its interface 
-    * @param _addy - the address of the Yugo contract
-    */
-    function setYugoAddress(address _addy) external onlyOwner {
-        yugo = IYugo(_addy);
-        emit AddressSet(_addy, msg.sender);
-    }
+    // /**
+    // * @notice set the address of the Yugo contract for use with its interface 
+    // * @param _addy - the address of the Yugo contract
+    // */
+    // function setYugoAddress(address _addy) external onlyOwner {
+    //     yugo = IYugo(_addy);
+    //     emit AddressSet(_addy, msg.sender);
+    // }
 
-    /**
-    * @notice set the address of the YugoDao contract for use with its interface 
-    * @param _addydao - the address of the YugoDao contract
-    */
-    function setYugoDaoAddress(address _addydao) external onlyOwner {
-        yugoDao = IYugoDao(_addydao);
-        emit AddressSet(_addydao, msg.sender);
-    }
+    // /**
+    // * @notice set the address of the YugoDao contract for use with its interface 
+    // * @param _addydao - the address of the YugoDao contract
+    // */
+    // function setYugoDaoAddress(address _addydao) external onlyOwner {
+    //     yugoDao = IYugoDao(_addydao);
+    //     emit AddressSet(_addydao, msg.sender);
+    // }
 
     /**
     * @notice checks the Yugo balance of an account
@@ -76,6 +77,12 @@ contract YugoManager is Ownable {
     */
     function yugoBalanceOf(address account) public view returns (uint256) {
         return yugo.balanceOf(account);
+    }
+
+    function setContractsAddresses(address _yugo, address _dao) external onlyOwner {
+        yugo = IYugo(_yugo);
+        yugoDao = IYugoDao(_dao);
+        emit ContractsAddrSet(_yugo, _dao);
     }
 
     /**

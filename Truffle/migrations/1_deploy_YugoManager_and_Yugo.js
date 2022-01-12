@@ -1,7 +1,8 @@
 const Manager = artifacts.require("YugoManager");
 const Token = artifacts.require("Yugo");
+const YugoDao = artifacts.require('YugoDao');
 
-let manager, token;
+let manager, token, dao;
 
 module.exports = async function(deployer) {
   //::::: Deploy Manager :::::|
@@ -9,8 +10,14 @@ module.exports = async function(deployer) {
   manager = await Manager.deployed();
 
   //::::: Deploy Token :::::|
-  await deployer.deploy(Token,manager.address);
+  await deployer.deploy(Token, manager.address);
   token = await Token.deployed()
-  // await token.transferOwnership(manager.address)
 
+  //::::: Deploy YugoDao :::::|
+  await deployer.deploy(YugoDao, token.address);
+  dao = await YugoDao.deployed()
+
+  //::::: Set Token and YugoDao addresses in Manager :::::|
+  await manager.setContractsAddresses(token.address, dao.address)
+  
 };
