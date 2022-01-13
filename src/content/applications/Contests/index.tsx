@@ -10,88 +10,91 @@ import { AppContext } from 'src/contexts/AppContext';
 import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
 
 function ContestsContainer() {
-  const { Moralis, isAuthenticated, authenticate } = useMoralis();
-  const { abi, contractAddress, currentUser, thematics, countries } = useContext(AppContext);
-  const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const toggleModalState = () => setIsModalOpen(!isModalOpen);
-  const [newContest, setNewContest] = useState<any>(null);
+	const { Moralis, isAuthenticated, authenticate } = useMoralis();
+	const { abi, contractAddress, currentUser, thematics, countries } = useContext(AppContext);
+	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const toggleModalState = () => setIsModalOpen(!isModalOpen);
+	const [newContest, setNewContest] = useState<any>(null);
+	const [contests, setContests] = useState([]);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      authenticate();
-    }
-    // const subscribeFunc = async () => {
-    //   const query = new Moralis.Query('Contests');
-    //   const subscription = await query.subscribe();
-    //   subscription.on('update', (object) => {
-    //     console.log('object updated', object);
-    //   });
-    // };
-    // subscribeFunc();
-  }, []);
+	useEffect(() => {
+		const subscribeFunc = async () => {
+			const query = new Moralis.Query('Contests');
+			const subscription = await query.subscribe();
+			subscription?.on('create', (object) => {
+				console.log('CONTEST', object);
+			});
+			return subscription;
+		};
+		const subscription = subscribeFunc();
 
-  useEffect(() => {
-    const addrOrga = (data as any)?.events?.ContestCreated?.returnValues?.addressOrga;
-    if (!(isLoading && isFetching && error) && newContest?.name && addrOrga) {
-      const queryFunc = async () => {
-        if (addrOrga) {
-          const Contests = Moralis.Object.extend('Contests');
-          const contestInstance = new Contests();
-          contestInstance?.save({
-            ...newContest,
-            availableFunds: Number(newContest.availableFunds),
-            addrGrantOrga: currentUser?.attributes?.ethAddress?.toLowerCase()
-          });
-        }
-      };
-      queryFunc();
-      setNewContest(null);
-    }
-  }, [data, newContest]);
+		return () => {
+			subscription.then((r) => r?.unsubscribe());
+		};
+	}, []);
 
-  const handleSubmit = (contest: any) => {
-    const contractData: any = {
-      abi,
-      contractAddress,
-      functionName: 'addContest',
-      params: {
-        _name: contest.name,
-        _themeIds: contest.thematics,
-        _eligibleCountryIds: contest.countries,
-        _applicationEndDate: new Date(contest.applicationEndDate).getTime(),
-        _votingEndDate: new Date(contest.votingEndDate).getTime(),
-        _funds: contest.availableFunds
-      }
-    };
-    fetch({ params: contractData }).then((res) => console.log('then after fetch', res, data));
-    setNewContest(contest);
-  };
+	useEffect(() => {
+		const addrOrga = (data as any)?.events?.ContestCreated?.returnValues?.addressOrga;
+		if (!(isLoading && isFetching && error) && newContest?.name && addrOrga) {
+			const queryFunc = async () => {
+				if (addrOrga) {
+					const Contests = Moralis.Object.extend('Contests');
+					const contestInstance = new Contests();
+					contestInstance?.save({
+						...newContest,
+						availableFunds: Number(newContest.availableFunds),
+						addrGrantOrga: currentUser?.attributes?.ethAddress?.toLowerCase(),
+					});
+				}
+			};
+			queryFunc();
+			setNewContest(null);
+		}
+	}, [data, newContest]);
 
-  console.log('create contest', data, isLoading, isFetching, error);
+	const handleSubmit = (contest: any) => {
+		const contractData: any = {
+			abi,
+			contractAddress,
+			functionName: 'addContest',
+			params: {
+				_name: contest.name,
+				_themeIds: contest.thematics,
+				_eligibleCountryIds: contest.countries,
+				_applicationEndDate: new Date(contest.applicationEndDate).getTime(),
+				_votingEndDate: new Date(contest.votingEndDate).getTime(),
+				_funds: contest.availableFunds,
+			},
+		};
+		fetch({ params: contractData });
+		setNewContest(contest);
+	};
 
-  return (
-    <>
-      <PageTitleWrapper>
-        <PageHeader onAddNewMember={toggleModalState} />
-      </PageTitleWrapper>
-      <Container maxWidth="lg">
-        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
-          <Grid item xs={12}>
-            <Contests currentUser={currentUser} />
-          </Grid>
-        </Grid>
-      </Container>
-      <Footer />
-      <AddContestModal
-        isOpen={isModalOpen}
-        onClose={toggleModalState}
-        onSubmit={handleSubmit}
-        thematics={thematics}
-        countries={countries}
-      />
-    </>
-  );
+	console.log('create contest', data, isLoading, isFetching, error);
+
+	return (
+		<>
+			<PageTitleWrapper>
+				<PageHeader onAddNewMember={toggleModalState} />
+			</PageTitleWrapper>
+			<Container maxWidth="lg">
+				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
+					<Grid item xs={12}>
+						<Contests currentUser={currentUser} />
+					</Grid>
+				</Grid>
+			</Container>
+			<Footer />
+			<AddContestModal
+				isOpen={isModalOpen}
+				onClose={toggleModalState}
+				onSubmit={handleSubmit}
+				thematics={thematics}
+				countries={countries}
+			/>
+		</>
+	);
 }
 
 export default ContestsContainer;
