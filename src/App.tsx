@@ -30,10 +30,10 @@ const App = () => {
 		user,
 	} = useMoralis();
 	const { switchNetwork, chainId, chain, account } = useChain();
-	console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
+	//console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
 	const { contractName, networks, abi } = contractInfo;
 	// const contractAddress = networks[3].address; //1337
-	const [contractAddress, setContractAddress] = useState(networks[1337].address);
+	const [contractAddress, setContractAddress] = useState(networks[5777].address);
 	const [contractData, setContractData] = useState<IContractData>({
 		thematics: [],
 		countries: [],
@@ -67,18 +67,19 @@ const App = () => {
 		enableWeb3({
 			onSuccess: (s) => console.info('enableweb success', s),
 			onError: (e) => console.info('enableweb3 error', e),
-			onComplete: () => console.info('copmlete web3'),
+			onComplete: () => console.info('complete web3'),
 		});
 		if (chain && chainId) {
 			setContractAddress(networks[chain?.networkId]?.address);
 		}
 	}, []);
 
+
 	useEffect(() => {
 		if (chain && chainId) {
 			setContractAddress(networks[chain?.networkId]?.address);
 		} else {
-			setContractAddress(networks[1337]?.address);
+			setContractAddress(networks[5777]?.address);
 		}
 	}, [chain, chainId]);
 

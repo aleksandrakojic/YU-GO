@@ -77,7 +77,7 @@ function Logo() {
       <LogoWrapper to="/overview">
         <LogoSignWrapper>
           <LogoSign>
-            <LogoSignInner />
+            <LogoSignInner/>
           </LogoSign>
         </LogoSignWrapper>
       </LogoWrapper>

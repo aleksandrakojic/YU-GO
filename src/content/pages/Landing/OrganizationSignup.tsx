@@ -12,6 +12,8 @@ import React, { useState } from "react";
 import { Form, Field } from "react-final-form";
 import { IData } from "src/models";
 import { PaperContent } from "./styles";
+import { useMoralisQuery, useMoralis } from "react-moralis";
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   thematics: IData[];
@@ -33,11 +35,13 @@ export const OrganizationSignup = ({
   countries,
   onSubmitOrganization,
 }: Props) => {
+  const navigate = useNavigate();
+  const { authenticate, isAuthenticated,isAuthenticating, user, logout } = useMoralis();
   const [organizationData, setOrganizationData] = useState(initOrganization);
 
   const handleSubmit = () => {
-    console.log("submit");
     onSubmitOrganization(organizationData);
+    console.log("submit");
   };
 
   const handleThemeSelection = (e, newvalue) => {

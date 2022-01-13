@@ -14,7 +14,8 @@ const initAppContext: IAppContext = {
   countries: [],
   abi: {},
   contractAddress: '',
-  currentUser: {}
+  currentUser: {},
+  
   // organisations: [],
 };
 

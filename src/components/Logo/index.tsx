@@ -75,7 +75,7 @@ const LogoSignInner = styled(Box)(
 function Logo() {
   return (
     <LogoWrapper to="/overview">
-      <LogoSignWrapper>
+      <LogoSignWrapper >
         <LogoSign>
           <LogoSignInner />
         </LogoSign>

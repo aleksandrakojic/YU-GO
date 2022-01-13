@@ -12,30 +12,40 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Form, Field } from "react-final-form";
-import { useMoralisQuery } from "react-moralis";
+import { useMoralisQuery, useMoralis } from "react-moralis";
 import { Moralis } from "moralis";
+import { useNavigate } from 'react-router-dom';
+
 
 const PaperContent = styled(Paper)({
   padding: "16px",
 });
 
-export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
-  const onSubmit = async (values) => {
-    console.log("on Submit");
-    // const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    // await sleep(300);
+interface Props {
+  onSubmitMember: (member) => void;
+}
 
-    const User = Moralis.Object.extend({
-      className: "User",
-    });
+const initMember = {
+  name: "",
+  email: "",
+  organisation : "",
+};
 
-    const user = new User();
-    user.set("type", 1);
 
-    user.save().then((data) => {
-      console.log("saved", data);
-    });
-    window.alert(JSON.stringify(values));
+
+
+export const MemberSignup = ({onSubmitMember}: Props) => {
+
+  const navigate = useNavigate();
+  const { authenticate, isAuthenticated,isAuthenticating, user, logout } = useMoralis();
+  const [memberData, setMemberData] = useState(initMember);
+
+  const handleSubmit = (e) => {
+    onSubmitMember(memberData);
+  };
+
+  const handleInputChange = (name, value) => {
+    setMemberData({ ...memberData, [name]: value });
   };
 
   const validate = (values) => {
@@ -54,47 +64,18 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
   };
 
   const { data, error, isLoading } = useMoralisQuery("Organisations");
-  const [member, setMember] = useState({
-    name: "",
-    email: "",
-    organisationId: "",
-  });
+ 
 
-  const handleInputChange = (name, value) => {
-    console.log("value", value);
-    member[name] = value;
-    setMember(member);
-    //setMember({ ...member, [name]: value });
-    console.log("01", member);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("member", member);
-    const User = Moralis.Object.extend({
-      className: "User",
-    });
-
-    const user = new User();
-    user.set("type", 1);
-
-    user.save().then((data) => {
-      console.log(data);
-    });
-  };
-
-  useEffect(() => {
-    // const { data, error, isLoading } = useMoralisQuery("Organisation");
-    console.log("data", data);
-  });
 
   return (
     <div style={{ padding: 16, margin: "auto", maxWidth: 600 }}>
       <Form
-        onSubmit={onSubmit}
-        validate={validate}
-        render={({ handleSubmit, form, submitting, pristine, values }) => (
-          <form onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+        subscription={{ submitting: true, pristine: true }}
+        initialValues={initMember}
+        //validate={validate}
+        render={({ submitting, values, form, pristine }) => (
+          
             <PaperContent>
               <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={12}>
@@ -105,7 +86,7 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
                     type="text"
                     label="Member name"
                     component={TextField}
-                    value={member.name}
+                    value={memberData.name}
                     onChange={({ target: { value } }) =>
                       handleInputChange("name", value)
                     }
@@ -119,7 +100,7 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
                     type="email"
                     label="Email"
                     component={TextField}
-                    value={member.email}
+                    value={memberData.email}
                     onChange={({ target: { value } }) =>
                       handleInputChange("email", value)
                     }
@@ -128,15 +109,15 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
                 <Grid item xs={12}>
                   <FormControl fullWidth>
                     <InputLabel id="organization-label">
-                      Organization
+                      Organisation
                     </InputLabel>
                     <Select
-                      name="organization"
+                      name="organisation"
                       labelId="organization-label"
                       label="Organization"
-                      value={member.organisationId}
+                      value={memberData.organisation}
                       onChange={({ target: { value } }) =>
-                        handleInputChange("organization", value)
+                        handleInputChange("organisation", value)
                       }
                     >
                       <MenuItem value=""></MenuItem>
@@ -164,7 +145,6 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
                     variant="contained"
                     color="primary"
                     type="submit"
-                    disabled={submitting}
                     onClick={handleSubmit}
                   >
                     {/* > */}
@@ -173,7 +153,7 @@ export const MemberSignup = ({ organisations }: Record<string, unknown>) => {
                 </Grid>
               </Grid>
             </PaperContent>
-          </form>
+          
         )}
       />
     </div>
