@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.11;
 
-import "./IYugo.sol";
+import "./interfaces/IYugo.sol";
 
 /**  @title Smart Contract for the DAO
 *    @notice This Smart contract stores all vote history 
@@ -9,7 +9,6 @@ import "./IYugo.sol";
 contract YugoDao {
 
     struct Organisation {
-        string name;
         address ethAddress;
         bool isRegistered;
         mapping (address => bool) participants;
@@ -302,6 +301,7 @@ contract YugoDao {
         string memory actionName = contests[_creatorOfContest].actions[msg.sender].name;
         delete contests[_creatorOfContest].actions[msg.sender];
         emit ActionDeleted(_creatorOfContest, msg.sender, actionName);
+        delete actionName;
     }
 
     /**
@@ -330,8 +330,8 @@ contract YugoDao {
         }else if(contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber == contests[_creatorOfContest].actions[_actionCreator].voteNumber){
             contests[_creatorOfContest].winningActionAddresses.push(_actionCreator);
         }
-
         emit HasVotedForAction(_creatorOfContest, _actionCreator, msg.sender);
+        delete currentTime;
     }
     
 
@@ -342,7 +342,7 @@ contract YugoDao {
     */
     function tallyVote(address _creatorOfContest) external {
         // TODO: tallying votes with time counter / controller / check only callable from manager
-        //TODO needs more testing
+        //TODO needs more testing for multiple winners
         require(block.timestamp > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
 
         emit VoteTallied(_creatorOfContest, contests[_creatorOfContest].winningActionAddresses, contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber);

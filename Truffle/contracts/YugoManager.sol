@@ -2,8 +2,8 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IYugo.sol";
-import "./IYugoDao.sol";
+import "./interfaces/IYugo.sol";
+import "./interfaces/IYugoDao.sol";
 
 // interface IYugo {
 //     function balanceOf(address account) external view returns (uint256);
@@ -11,11 +11,20 @@ import "./IYugoDao.sol";
 
 contract YugoManager is Ownable {
 
-    IYugo public yugo;
-    IYugoDao public yugoDao;
+    IYugo private yugo;
+    IYugoDao private yugoDao;
 
     uint yugoTokenCost = 100000000000000000; //0.1 ETH
     mapping (address => uint) EthLedger;
+    mapping (address => bool) EligibleToClaimYugo;
+    bool internal locked;
+
+    modifier noReentrant() {
+        require(!locked, "No re-entrancy");
+        locked = true;
+        _;
+        locked = false;
+    }
 
     // event AddressSet (address addrSetTo, address setter);
     event YugoTransfer (address recipient, uint256 amount);
@@ -38,8 +47,9 @@ contract YugoManager is Ownable {
         address sender = msg.sender;
         uint deposited = msg.value;
         // receiver = owner;
-        EthLedger[sender] = deposited;
+        EthLedger[sender] = deposited; // specifies that ETH was deposited
         // receiver.transfer(deposited);
+        EligibleToClaimYugo[msg.sender] == true; //specifies that Yugo can now be claimed by the caller
         emit Received(msg.sender, msg.value);
     }
 
@@ -86,14 +96,25 @@ contract YugoManager is Ownable {
     }
 
     /**
-    * @notice Pull over Push: claim Yugo token 
-    * @dev the ledger's balance of the caller must show that the token was purchased
+    * @notice claim Yugo token 
+    * @dev the ETH ledger of the caller must show that the token was purchased
+    * @dev The Yugo Ledger of the caller must be at 0. Either because it is a 
+    * first time purchase or because the period of validity of the token has passed
+    * and must renewed
+    * @dev Re-entrancy - the noReentrant modifier ensures that the function can not
+    * be run multiple times in parallel. The function is locked until it finishes.  
+    * @dev Pull-Over-Push - the token was not sent after purchase but the buyer was marked as 
+    * eligible to claim the token. Afterwards, the condition of eligibility is updated before 
+    * the transfer. 
     */
-    function transferYugo() external {
+    function transferYugo() external noReentrant {
         require(EthLedger[msg.sender] == yugoTokenCost, "no ETH was received");
+        require(EligibleToClaimYugo[msg.sender] == true, "You already received your Yugo");
+        EligibleToClaimYugo[msg.sender] = false;
         uint256 amount = 1*10**yugo.decimals();
         yugo.transfer(msg.sender, amount);
         emit YugoTransfer(msg.sender, amount);
+        locked = true;
     }
 
     /**

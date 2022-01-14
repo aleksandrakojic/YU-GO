@@ -83,7 +83,7 @@ contract('test_YugoDao', async function (accounts) {
     return new Promise((resolve, reject) => {
       web3.currentProvider.send({
         jsonrpc: '2.0',
-        method: 'evm_mine',
+        method: 'evm_mine', // also see "evm_increaseTime"
         id: Date.now(),
         params: [timestamp],
       }, (err, res) => {
