@@ -9,6 +9,7 @@ import { CircularProgress, Container, CssBaseline, Typography } from '@mui/mater
 import { useMoralis, useWeb3ExecuteFunction, useChain } from 'react-moralis';
 import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
+import { useNavigate } from "react-router-dom";
 import { IContractData } from './models';
 
 enum DataTypes {
@@ -18,6 +19,7 @@ enum DataTypes {
 
 const App = () => {
 	const content = useRoutes(routes);
+	const navigate = useNavigate();
 	const {
 		Moralis,
 		isWeb3Enabled,
@@ -28,6 +30,7 @@ const App = () => {
 		isInitialized,
 		authenticate,
 		user,
+		logout,
 	} = useMoralis();
 	const { switchNetwork, chainId, chain, account } = useChain();
 	//console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
@@ -138,6 +141,12 @@ const App = () => {
 			</Container>
 		);
 	}
+
+	Moralis.Web3.onAccountsChanged(function(accounts) {
+		console.log("account change",accounts);
+		logout();
+		navigate("/");
+	});
 
 	const currentUser = Moralis?.User?.current();
 	console.log("app", currentUser, user)
