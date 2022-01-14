@@ -5,10 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugo.sol";
 import "./interfaces/IYugoDao.sol";
 
-// interface IYugo {
-//     function balanceOf(address account) external view returns (uint256);
-// }
-
 contract YugoManager is Ownable {
 
     IYugo private yugo;
@@ -43,13 +39,10 @@ contract YugoManager is Ownable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
         require(msg.value == yugoTokenCost, "you do not have enough ETH");
-        // require(msg.value > 0);
         address sender = msg.sender;
         uint deposited = msg.value;
-        // receiver = owner;
         EthLedger[sender] = deposited; // specifies that ETH was deposited
-        // receiver.transfer(deposited);
-        EligibleToClaimYugo[msg.sender] == true; //specifies that Yugo can now be claimed by the caller
+        EligibleToClaimYugo[msg.sender] = true; //specifies that Yugo can now be claimed by the caller
         emit Received(msg.sender, msg.value);
     }
 
@@ -62,24 +55,6 @@ contract YugoManager is Ownable {
         bool sent = _to.send(msg.value);
         require(sent, "Failed to send Ether");
     }
-
-    // /**
-    // * @notice set the address of the Yugo contract for use with its interface 
-    // * @param _addy - the address of the Yugo contract
-    // */
-    // function setYugoAddress(address _addy) external onlyOwner {
-    //     yugo = IYugo(_addy);
-    //     emit AddressSet(_addy, msg.sender);
-    // }
-
-    // /**
-    // * @notice set the address of the YugoDao contract for use with its interface 
-    // * @param _addydao - the address of the YugoDao contract
-    // */
-    // function setYugoDaoAddress(address _addydao) external onlyOwner {
-    //     yugoDao = IYugoDao(_addydao);
-    //     emit AddressSet(_addydao, msg.sender);
-    // }
 
     /**
     * @notice checks the Yugo balance of an account
@@ -121,7 +96,7 @@ contract YugoManager is Ownable {
     * @notice transfers funds to winning organisation
     */
     function transferWinningOrganisation() external {
-        //TODO
+        //TODO: communicate with GrantEscrow.sol
     }
 
     // TODO:function verifyByOracle orga

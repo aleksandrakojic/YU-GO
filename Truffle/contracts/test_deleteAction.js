@@ -5,7 +5,8 @@ const { networkInterfaces } = require('os');
 const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
-// let catchRevert = require("./exceptions.js").catchRevert;
+//|::::: For debugging :::::|
+let catchRevert = require("./exceptions.js").catchRevert;
 
 contract('test_deleteAction', async function (accounts) {
   const admin = accounts[0];

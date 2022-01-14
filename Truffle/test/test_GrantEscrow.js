@@ -38,14 +38,9 @@ contract('test_GrantEscrow', async function (accounts) {
         let orga2 = organisations.orga2;
         await yugoDao.registerOrganisation(orga1.themes, orga1.country, { from: orga1.address });
         await yugoDao.registerOrganisation(orga2.themes, orga2.country, { from: orga2.address });
-        // purchase a claim tokens
-
-        //orga1 creates a contest
-
-        //orga2 create an action
       });
 
-      describe('#depositGrant, Orga deposits the grant', function () {
+    describe('#depositGrant, Orga deposits the grant', function () {
         context('orga is not registered', function () {
             it('should revert', async function () {
                 let orga3 = organisations.orga3;
@@ -55,7 +50,7 @@ contract('test_GrantEscrow', async function (accounts) {
                     'You are not registered'
                 );
             });
-          });
+        });
         context('orga is registered', function () {
           it('should emit the GrantDeposited event', async function () {
             let orga1 = organisations.orga1;
@@ -65,7 +60,7 @@ contract('test_GrantEscrow', async function (accounts) {
           });
         });
       });
-      describe('#withdrawGrant, claim funds from the contest', function () {
+    describe('#withdrawGrant, claim funds from the contest', function () {
         context('signature is verified', function () {
             it('should emit the GrantWithdrawn event', async function () {
                 let orga1 = organisations.orga1;
@@ -73,8 +68,8 @@ contract('test_GrantEscrow', async function (accounts) {
                 let amount = web3.utils.toWei('10', "ether")
                 let tx = await escrow.withdrawGrant(orga1.address, {to: escrow.address, from: orga2.address});
                 await expectEvent(tx, 'GrantWithdrawn', {grant: amount, recipient: orga2.address});
-              });
             });
-          });
+        });
+    });
 
 });

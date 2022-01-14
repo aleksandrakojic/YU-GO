@@ -64,7 +64,7 @@ contract YugoDao {
     mapping (uint => Country)  private countries;
     mapping (uint => Theme)  private thematics;
 
-    string[] private themeList = [
+    string[11] private themeList = [
         "education",
         "trafficking",
         "domestic violence",
@@ -78,7 +78,7 @@ contract YugoDao {
         "women's rights"
     ];
 
-     string[] private countryList = [
+     string[6] private countryList = [
         "Serbia",
         "Croatia",
         "Montenegro",
@@ -145,7 +145,7 @@ contract YugoDao {
     * @notice Return the list of thematics
     * @return themeList List of thematics
     */
-    function getThematics() public view returns(string[] memory) {        
+    function getThematics() public view returns(string[11] memory) {        
         return themeList;
     }
 
@@ -153,7 +153,7 @@ contract YugoDao {
     * @notice Return the list of countries
     * @return countryList List of countries
     */
-    function getCountries() public view returns(string[] memory) {        
+    function getCountries() public view returns(string[6] memory) {        
         return countryList;
     }
     
@@ -294,7 +294,7 @@ contract YugoDao {
     * @param _creatorOfContest Address of creator 
     */
     function deleteActions(address _creatorOfContest) external {
-        //TODO: needs more testing
+        //TODO: needs testing
         require(contests[_creatorOfContest].actions[msg.sender].isCreated, 'you did not create any action for this contest');
         uint currentTime = block.timestamp;
         require(currentTime < contests[_creatorOfContest].applicationEndDate, 'Votes have started.You cannot delete this action');
