@@ -140,7 +140,7 @@ const App = () => {
 	}
 
 	const currentUser = Moralis?.User?.current();
-
+	console.log("app", currentUser, user)
 	return (
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>
