@@ -232,7 +232,7 @@ contract YugoDao {
     * @param _funds Value of funds 
     */
     function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external {
-        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
+        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
         require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         contests[msg.sender].name = _name;
         contests[msg.sender].themeIDs = _themeIds;
@@ -253,7 +253,7 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
-        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
+        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');

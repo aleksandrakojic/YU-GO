@@ -11,13 +11,14 @@ import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
 import { IMemberStatus } from 'src/models';
 
 function OrganizationMembers() {
-	const { Moralis } = useMoralis();
+	const { Moralis, account } = useMoralis();
 	const { abi, contractAddress, currentUser } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 	const [newAddr, setNewAddr] = useState<any>(null);
 	const [allMembers, setAllMembers] = useState([]);
+
+	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
 	useEffect(() => {
 		getWhitelistedAddresses();
@@ -60,9 +61,7 @@ function OrganizationMembers() {
 
 	const getWhitelistedAddresses = async () => {
 		const query = new Moralis.Query('Organisations');
-		const organization = await query
-			.equalTo('ethAddress', currentUser.attributes.ethAddress)
-			.first();
+		const organization = await query.equalTo('ethAddress', account).first();
 		setWhitelistedAddresses(organization?.attributes?.whitelisted);
 	};
 
@@ -74,7 +73,7 @@ function OrganizationMembers() {
 			status: IMemberStatus.Pending,
 			email: '',
 			ethAddress: memberAddr,
-			orgEthAddress: currentUser.attributes.ethAddress,
+			orgEthAddress: currentUser?.attributes?.ethAddress,
 			registrationDate: new Date(currentUser?.attributes?.updatedAt).getTime(),
 		}));
 		if (whitelistedAddrs) {
@@ -85,7 +84,7 @@ function OrganizationMembers() {
 	const getAllParticipants = async () => {
 		const query = new Moralis.Query('Participants');
 		const participants = await query
-			.equalTo('orgEthAddress', currentUser.attributes.ethAddress)
+			.equalTo('orgEthAddress', currentUser?.attributes?.ethAddress)
 			.find();
 	};
 
@@ -97,14 +96,14 @@ function OrganizationMembers() {
 			contractAddress,
 			functionName: 'addParticipant',
 			params: {
-				_addrOrga: currentUser?.attributes?.ethAddress,
+				_addrOrga: account,
 				_addrParticipant: addr,
 			},
 		};
 		fetch({ params: contractData });
 	};
 
-	console.log('add participant', data, isLoading, isFetching, error, newAddr);
+	console.log('add participant', data, isLoading, isFetching, error, newAddr, currentUser, account);
 
 	return (
 		<>

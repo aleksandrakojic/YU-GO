@@ -7,6 +7,15 @@ export enum AuthenticationState {
 	ERROR = 'error',
 }
 
+export const ICountryCode = {
+	0: 'rs',
+	1: 'hr',
+	2: 'me',
+	3: 'ba',
+	4: 'si',
+	5: 'mk',
+};
+
 export enum ProfileType {
 	Organization,
 	Member,
@@ -43,14 +52,14 @@ export interface IContest {
 	id: string;
 	name: string;
 	description: string;
-	themes: number[];
+	thematics: number[];
 	countries: number[];
 	actionsIds: number[];
 	votingEndDate: number;
 	applicationEndDate: number;
 	availableFunds: number;
 	addrGrantOrga: string;
-	createdAt?: string;
+	createdAt?: Date;
 	imageUrl?: string;
 }
 
@@ -58,11 +67,10 @@ export interface IAction {
 	id: string;
 	name: string;
 	description: string;
-	hasVoted: string[];
-	contestId: string;
 	requiredFunds: number;
 	addrOrgaCreator: string;
-	votes: number;
-	createdAt?: string;
+	addrGrantOrga: string;
+	nbOfVotes: number;
+	createdAt: Date;
 	imageUrl?: string;
 }

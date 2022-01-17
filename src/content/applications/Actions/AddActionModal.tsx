@@ -26,9 +26,9 @@ const initAction = {
 
 export default function AddActionModal({ isOpen, onClose, onSubmit, eligibleContests }: Props) {
 	const [action, setAction] = React.useState(initAction);
+	console.log('eligibleContests', eligibleContests);
 
 	const handleSubmit = () => {
-		console.log('action', action);
 		onSubmit({ ...action, requiredFunds: Number(action.requiredFunds) });
 		handleClose();
 	};
@@ -102,9 +102,9 @@ export default function AddActionModal({ isOpen, onClose, onSubmit, eligibleCont
 							onChange={handleChange}
 							value={action.addrGrantOrga}
 						>
-							{eligibleContests.map((c) => (
-								<MenuItem value={c.attributes.addrGrantOrga} key={c.id}>
-									{c.attributes.name}
+							{eligibleContests?.map((c) => (
+								<MenuItem value={c?.addrGrantOrga} key={c?.id}>
+									{c?.name}
 								</MenuItem>
 							))}
 						</Select>

@@ -1,38 +1,46 @@
 import PageHeader from './PageHeader';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
-import { Grid, Container } from '@mui/material';
+import { Grid, Container, LinearProgress } from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, { useContext, useEffect, useState } from 'react';
 
 import Contests from './Contests';
 import AddContestModal from './AddContestModal';
 import { AppContext } from 'src/contexts/AppContext';
-import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
+import { useWeb3ExecuteFunction, useMoralis, useMoralisQuery } from 'react-moralis';
+import { findCommentArrayElements, getEligibleFormattedContests } from 'src/helpers/utils';
 
 function ContestsContainer() {
-	const { Moralis, isAuthenticated, authenticate } = useMoralis();
-	const { abi, contractAddress, currentUser, thematics, countries } = useContext(AppContext);
+	const { Moralis, user, account } = useMoralis();
+	const { abi, contractAddress, thematics, countries } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 	const [newContest, setNewContest] = useState<any>(null);
-	const [contests, setContests] = useState([]);
+	const [contests, setContests] = useState<any[]>([]);
+	const [balance, setBalance] = useState<any>(null);
+	const [organization, setOrganization] = useState<any>(null);
+
+	const {
+		data: contestData,
+		error: contestError,
+		isLoading: isLoadingContest,
+	} = useMoralisQuery('Contests', (query) => query.includeAll(), [], {
+		live: true,
+	});
+
+	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
 	useEffect(() => {
-		const subscribeFunc = async () => {
-			const query = new Moralis.Query('Contests');
-			const subscription = await query.subscribe();
-			subscription?.on('create', (object) => {
-				console.log('CONTEST', object);
-			});
-			return subscription;
-		};
-		const subscription = subscribeFunc();
-
-		return () => {
-			subscription.then((r) => r?.unsubscribe());
-		};
+		getOrganization();
+		getBalance();
 	}, []);
+
+	useEffect(() => {
+		if (contestData && organization) {
+			const eligibleContest = getEligibleFormattedContests(contestData, organization, account);
+			setContests(eligibleContest);
+		}
+	}, [contestData, organization]);
 
 	useEffect(() => {
 		const addrOrga = (data as any)?.events?.ContestCreated?.returnValues?.addressOrga;
@@ -44,7 +52,7 @@ function ContestsContainer() {
 					contestInstance?.save({
 						...newContest,
 						availableFunds: Number(newContest.availableFunds),
-						addrGrantOrga: currentUser?.attributes?.ethAddress?.toLowerCase(),
+						addrGrantOrga: user?.attributes?.ethAddress?.toLowerCase(),
 					});
 				}
 			};
@@ -52,6 +60,18 @@ function ContestsContainer() {
 			setNewContest(null);
 		}
 	}, [data, newContest]);
+
+	useEffect(() => {
+		if (organization) {
+			fetchContests();
+		}
+	}, [organization]);
+
+	const getOrganization = async () => {
+		const query = new Moralis.Query('Organisations');
+		const orga = await query.equalTo('ethAddress', account).first();
+		setOrganization(orga);
+	};
 
 	const handleSubmit = (contest: any) => {
 		const contractData: any = {
@@ -71,7 +91,21 @@ function ContestsContainer() {
 		setNewContest(contest);
 	};
 
-	console.log('create contest', data, isLoading, isFetching, error);
+	const fetchContests = async () => {
+		const query = new Moralis.Query('Contests');
+		const allContests = await query.find();
+
+		const formattedContest = getEligibleFormattedContests(allContests, organization, account);
+
+		setContests(formattedContest);
+	};
+
+	const getBalance = async () => {
+		const query = new Moralis.Query('EthBalance');
+		const userEthBalanceData = await query.equalTo('address', account).first();
+		const ethBalance = Number(userEthBalanceData?.attributes?.balance) / 10 ** 18;
+		setBalance(ethBalance);
+	};
 
 	return (
 		<>
@@ -81,7 +115,8 @@ function ContestsContainer() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
-						<Contests currentUser={currentUser} />
+						{(isLoading || isFetching) && <LinearProgress color="primary" />}
+						<Contests account={account} contests={contests} />
 					</Grid>
 				</Grid>
 			</Container>
@@ -92,6 +127,7 @@ function ContestsContainer() {
 				onSubmit={handleSubmit}
 				thematics={thematics}
 				countries={countries}
+				balance={balance}
 			/>
 		</>
 	);
