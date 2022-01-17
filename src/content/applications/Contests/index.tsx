@@ -27,6 +27,7 @@ function ContestsContainer() {
 	} = useMoralisQuery('Contests', (query) => query.includeAll(), [], {
 		live: true,
 	});
+	console.log('contestData', contestData, organization, account);
 
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
@@ -52,7 +53,7 @@ function ContestsContainer() {
 					contestInstance?.save({
 						...newContest,
 						availableFunds: Number(newContest.availableFunds),
-						addrGrantOrga: user?.attributes?.ethAddress?.toLowerCase(),
+						addrGrantOrga: account?.toLowerCase(),
 					});
 				}
 			};

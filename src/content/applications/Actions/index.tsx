@@ -1,6 +1,6 @@
 import PageHeader from './PageHeader';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
-import { Grid, Container } from '@mui/material';
+import { Grid, Container, LinearProgress } from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, { useContext, useEffect, useState } from 'react';
 
@@ -38,6 +38,7 @@ function ActionsContainer() {
 
 	useEffect(() => {
 		getOrganization();
+		queryActions();
 	}, []);
 
 	useEffect(() => {
@@ -48,26 +49,18 @@ function ActionsContainer() {
 	}, [contestData, organization]);
 
 	useEffect(() => {
-		const queryActions = async (addrTable) => {
-			const queryActions = new Moralis.Query('Actions');
-			const query = await queryActions.containedIn('addrOrgaCreator', addrTable);
-			const filteredActions = await query.find();
-			setActions(filteredActions);
-		};
-
-		if (actionsData && eligibleContests.length) {
-			const actionCreatorAddrs = eligibleContests.map((c) => c.addrActionCreators).flat();
-			const setAddr = new Set(actionCreatorAddrs);
-			const arrayAddr = Array.from(setAddr);
-			queryActions(arrayAddr);
-		}
+		queryActions();
 	}, [actionsData]);
 
 	useEffect(() => {
-		const addrGrantOrga = (data as any)?.events?.ActionCreated?.returnValues?.addressContestCreator;
+		const addrGrantOrga = (
+			data as any
+		)?.events?.ActionCreated?.returnValues?.addressContestCreator?.toLowerCase();
 		if (!(isLoading && isFetching && error) && newAction?.name && addrGrantOrga) {
 			const queryFunc = async () => {
-				const contestId = eligibleContests.find((c) => c.addrGrantOrga === addrGrantOrga)?.id;
+				const contestId = eligibleContests.find(
+					(c) => c.addrGrantOrga?.toLowerCase() === addrGrantOrga
+				)?.id;
 
 				const Actions = Moralis.Object.extend('Actions');
 				const actionInstance = new Actions();
@@ -83,6 +76,19 @@ function ActionsContainer() {
 			setNewAction(null);
 		}
 	}, [data, newAction]);
+
+	const queryActions = async () => {
+		if (actionsData && eligibleContests?.length > 0) {
+			const actionCreatorAddrs = eligibleContests?.map((c) => c?.addrActionCreators)?.flat();
+			const setAddr = new Set(actionCreatorAddrs);
+			const arrayAddr = Array.from(setAddr);
+			const queryActions = new Moralis.Query('Actions');
+			const query = await queryActions.containedIn('addrOrgaCreator', arrayAddr);
+			const filteredActions = await query.find();
+			console.log('addresses', arrayAddr, filteredActions);
+			setActions(filteredActions);
+		}
+	};
 
 	const getOrganization = async () => {
 		const query = new Moralis.Query('Organisations');
@@ -108,7 +114,7 @@ function ActionsContainer() {
 		setNewAction(action);
 	};
 
-	console.log('create contest', data, isLoading, isFetching, eligibleContests);
+	console.log('create action', data, isLoading, isFetching, eligibleContests, actionsData);
 
 	return (
 		<>
@@ -118,6 +124,7 @@ function ActionsContainer() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
+						{(isLoading || isFetching) && <LinearProgress color="primary" />}
 						<Actions currentUser={currentUser} actions={actions} />
 					</Grid>
 				</Grid>
