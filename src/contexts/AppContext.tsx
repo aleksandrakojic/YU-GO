@@ -10,12 +10,14 @@ interface IAppContext {
 }
 
 const initAppContext: IAppContext = {
+
 	thematics: [],
 	countries: [],
 	abi: {},
 	contractAddress: '',
 	currentUser: {},
 	// organisations: [],
+
 };
 
 export const AppContext = createContext<IAppContext>(initAppContext);

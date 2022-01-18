@@ -17,10 +17,12 @@ function OrganizationMembers() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [newAddr, setNewAddr] = useState<any>(null);
 	const [allMembers, setAllMembers] = useState([]);
+	const [orgaParticipant, setOrgaParticipant] = useState<any[]>([]);
 
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
-	useEffect(() => {
+	useEffect( () => {
+		getAllParticipants();
 		getWhitelistedAddresses();
 		const subscribeFunc = async () => {
 			const query = new Moralis.Query('Organisations');
@@ -36,6 +38,7 @@ function OrganizationMembers() {
 			subscription.then((r) => r?.unsubscribe());
 		};
 	}, []);
+
 
 	useEffect(() => {
 		if (!(isLoading && isFetching && error) && newAddr) {
@@ -66,16 +69,22 @@ function OrganizationMembers() {
 	};
 
 	const setWhitelistedAddresses = (whitelisted) => {
-		const whitelistedAddrs = whitelisted?.map((memberAddr) => ({
-			id: Math.random().toString(36).substring(2, 7),
-			firstname: '',
-			lastname: '',
-			status: IMemberStatus.Pending,
-			email: '',
-			ethAddress: memberAddr,
-			orgEthAddress: currentUser?.attributes?.ethAddress,
-			registrationDate: new Date(currentUser?.attributes?.updatedAt).getTime(),
-		}));
+		const whitelistedAddrs = whitelisted?.map((memberAddr) => {
+			const participant = orgaParticipant.find(e=>{
+				return e.ethAddress == memberAddr;
+			})
+			console.log(orgaParticipant, participant)
+			return {
+				id: Math.random().toString(36).substring(2, 7),
+				firstname: participant?.firstname,
+				lastname: participant?.lastname,
+				status: IMemberStatus.Pending,
+				email: participant?.email,
+				ethAddress: memberAddr,
+				orgEthAddress: currentUser?.attributes?.ethAddress,
+				registrationDate: new Date(currentUser?.attributes?.updatedAt).getTime(),
+			}
+		});
 		if (whitelistedAddrs) {
 			setAllMembers(whitelistedAddrs);
 		}
@@ -84,8 +93,10 @@ function OrganizationMembers() {
 	const getAllParticipants = async () => {
 		const query = new Moralis.Query('Participants');
 		const participants = await query
-			.equalTo('orgEthAddress', currentUser?.attributes?.ethAddress)
+			.equalTo('organisation', currentUser?.attributes?.ethAddress)
 			.find();
+		console.log("getAllParticipants", participants);
+		setOrgaParticipant(participants);
 	};
 
 	const handleSubmit = (addr: string) => {

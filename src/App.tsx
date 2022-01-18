@@ -9,7 +9,11 @@ import { CircularProgress, Container, CssBaseline, Typography } from '@mui/mater
 import { useMoralis, useWeb3ExecuteFunction, useChain } from 'react-moralis';
 import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
+
+import { useNavigate } from "react-router-dom";
 import { IContractData, ICountryCode } from './models';
+const Moralis = require("moralis");
+
 
 enum DataTypes {
 	Thematics = 'thematics',
@@ -18,8 +22,9 @@ enum DataTypes {
 
 const App = () => {
 	const content = useRoutes(routes);
+	const navigate = useNavigate();
 	const {
-		Moralis,
+		
 		isWeb3Enabled,
 		enableWeb3,
 		isInitializing,
@@ -28,9 +33,11 @@ const App = () => {
 		isInitialized,
 		authenticate,
 		user,
+		logout,
+		isAuthenticating,
+		isLoggingOut
 	} = useMoralis();
 	const { switchNetwork, chainId, chain, account } = useChain();
-	console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
 	const { contractName, networks, abi } = contractInfo;
 	// const contractAddress = networks[3].address; //1337
 	const [contractAddress, setContractAddress] = useState(networks[5777].address);
@@ -67,12 +74,21 @@ const App = () => {
 		enableWeb3({
 			onSuccess: (s) => console.info('enableweb success', s),
 			onError: (e) => console.info('enableweb3 error', e),
-			onComplete: () => console.info('copmlete web3'),
+			onComplete: () => console.info('complete web3'),
 		});
 		if (chain && chainId) {
 			setContractAddress(networks[chain?.networkId]?.address);
 		}
-	}, []);
+	}, []);/**/
+
+	
+	Moralis.Web3.onAccountsChanged(function(accounts) {
+		
+		logout();
+		navigate("/");
+	});
+	
+
 
 	useEffect(() => {
 		if (chain && chainId) {
@@ -142,8 +158,10 @@ const App = () => {
 		);
 	}
 
-	const currentUser = Moralis?.User?.current();
+	
 
+	const currentUser = Moralis?.User?.current();
+	//console.log("app", currentUser, user)
 	return (
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>

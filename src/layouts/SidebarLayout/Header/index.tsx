@@ -35,17 +35,19 @@ const HeaderWrapper = styled(Box)(
 );
 
 function Header() {
-	const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
-	const { currentUser } = useContext(AppContext);
-	const { Moralis } = useMoralis();
-	const navigate = useNavigate();
 
-	const handleLogout = async () => {
-		await Moralis.User.logOut().then((r) => {
-			console.log('logout', r);
-			navigate('/');
-		});
-	};
+  const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
+  const { currentUser } = useContext(AppContext);
+  const { Moralis, logout } = useMoralis();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout().then((r) => {
+      console.log('logout', r);
+      navigate('/');
+    });
+  };
+
 
 	return (
 		<HeaderWrapper display="flex" alignItems="center">
