@@ -73,7 +73,7 @@ const LogoSignInner = styled(Box)(
 );
 
 function Logo() {
-<<<<<<< HEAD
+
   return (
     <LogoWrapper to="/overview">
       <LogoSignWrapper >
@@ -83,17 +83,7 @@ function Logo() {
       </LogoSignWrapper>
     </LogoWrapper>
   );
-=======
-	return (
-		<LogoWrapper to="/overview">
-			<LogoSignWrapper>
-				<LogoSign>
-					<LogoSignInner />
-				</LogoSign>
-			</LogoSignWrapper>
-		</LogoWrapper>
-	);
->>>>>>> 261a7901b72fbaa1c5b59e57e16dbdf6300fcdea
+
 }
 
 export default Logo;

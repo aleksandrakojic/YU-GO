@@ -12,6 +12,7 @@ import { AppContext } from './contexts/AppContext';
 
 import { useNavigate } from "react-router-dom";
 import { IContractData, ICountryCode } from './models';
+const Moralis = require("moralis");
 
 
 enum DataTypes {
@@ -23,7 +24,7 @@ const App = () => {
 	const content = useRoutes(routes);
 	const navigate = useNavigate();
 	const {
-		Moralis,
+		
 		isWeb3Enabled,
 		enableWeb3,
 		isInitializing,
@@ -80,13 +81,13 @@ const App = () => {
 		}
 	}, []);/**/
 
-	/*useEffect(() => {
-		Moralis.Web3.onAccountsChanged(function(accounts) {
-			console.log("account change",accounts);
-			logout();
-			navigate("/");
-		});
-	}, [isLoggingOut ]);*/
+	
+	Moralis.Web3.onAccountsChanged(function(accounts) {
+		
+		logout();
+		navigate("/");
+	});
+	
 
 
 	useEffect(() => {

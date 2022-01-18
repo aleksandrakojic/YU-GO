@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
@@ -22,14 +21,13 @@ import Logo from "src/components/Logo";
 const Moralis = require("moralis");
 
 
-
 enum SignupType {
   None,
   Organization,
   Member,
 }
 function LandingPage() {
-<<<<<<< HEAD
+
   const navigate = useNavigate();
   const {
     enableWeb3,
@@ -109,7 +107,7 @@ function LandingPage() {
     if (!isAuthenticated) {
       await authenticate();
     }
-    setNewParticipant({...member,  ethAddress : Moralis.User.current().attributes.ethAddress });
+    
     console.log(
       "onComplete authenticate",
       user,
@@ -141,12 +139,26 @@ function LandingPage() {
         queryParticipant[0].set('lastname', member.lastname);
         queryParticipant[0].set('organisation', member.organisation);
         queryParticipant[0].save();
+        
+        /**/
       }else{
         const Participant = Moralis.Object.extend("Participants");
         const participant = new Participant();
-        participant.save({ ...member, ethAddress: Moralis.User.current().attributes.ethAddress})
+        participant.save({ ...member, ethAddress: Moralis.User.current().attributes.ethAddress});
+       
       }
+      
+      setUserData({
+        type : 1
+      });
+      setNewParticipant({...member,  ethAddress : Moralis.User.current().attributes.ethAddress });
       navigate("/dashboards/profile/settings");
+      /*user?.set("type", 1);
+        await user?.save().then(res=>{
+          console.log(res);
+           navigate("/dashboards/profile/settings");
+        })*/
+      
     }
       
   };
@@ -233,7 +245,7 @@ function LandingPage() {
       try{
  
         await authenticate();
-        console.log("address", user?.get('ethAddress'), Moralis.User.current().attributes.ethAddress);
+        console.log("address", Moralis.User.current().attributes, Moralis.User.current().attributes.ethAddress);
         let participant =  await participantQuery(Moralis.User.current().attributes.ethAddress);
         let organisation =  await organisationQuery(Moralis.User.current().attributes.ethAddress);
         console.log("query", participant, organisation);
