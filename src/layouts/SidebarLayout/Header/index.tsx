@@ -16,7 +16,7 @@ import { useMoralis } from 'react-moralis';
 import { useNavigate } from 'react-router-dom';
 
 const HeaderWrapper = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         height: ${theme.header.height};
         color: ${theme.header.textColor};
         padding: ${theme.spacing(0, 2)};
@@ -35,6 +35,7 @@ const HeaderWrapper = styled(Box)(
 );
 
 function Header() {
+
   const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
   const { currentUser } = useContext(AppContext);
   const { Moralis, logout } = useMoralis();
@@ -47,26 +48,27 @@ function Header() {
     });
   };
 
-  return (
-    <HeaderWrapper display="flex" alignItems="center">
-      <Box display="flex" alignItems="center">
-        <Hidden lgUp>
-          <Logo />
-        </Hidden>
-      </Box>
-      <Box display="flex" alignItems="center">
-        <HeaderButtons />
-        <MetamaskBox currentUser={currentUser} logout={handleLogout} />
-        <Hidden lgUp>
-          <Tooltip arrow title="Toggle Menu">
-            <IconButton color="primary" onClick={toggleSidebar}>
-              {!sidebarToggle ? <MenuTwoToneIcon /> : <CloseTwoToneIcon />}
-            </IconButton>
-          </Tooltip>
-        </Hidden>
-      </Box>
-    </HeaderWrapper>
-  );
+
+	return (
+		<HeaderWrapper display="flex" alignItems="center">
+			<Box display="flex" alignItems="center">
+				<Hidden lgUp>
+					<Logo /> <h1>Yu-Go DAO</h1>
+				</Hidden>
+			</Box>
+			<Box display="flex" alignItems="center">
+				<HeaderButtons />
+				<MetamaskBox currentUser={currentUser} logout={handleLogout} />
+				<Hidden lgUp>
+					<Tooltip arrow title="Toggle Menu">
+						<IconButton color="primary" onClick={toggleSidebar}>
+							{!sidebarToggle ? <MenuTwoToneIcon /> : <CloseTwoToneIcon />}
+						</IconButton>
+					</Tooltip>
+				</Hidden>
+			</Box>
+		</HeaderWrapper>
+	);
 }
 
 export default Header;

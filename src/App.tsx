@@ -9,8 +9,10 @@ import { CircularProgress, Container, CssBaseline, Typography } from '@mui/mater
 import { useMoralis, useWeb3ExecuteFunction, useChain } from 'react-moralis';
 import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
+
 import { useNavigate } from "react-router-dom";
-import { IContractData } from './models';
+import { IContractData, ICountryCode } from './models';
+
 
 enum DataTypes {
 	Thematics = 'thematics',
@@ -106,10 +108,14 @@ const App = () => {
 			!isFetchingCountries &&
 			!isLoadingCountries
 		) {
-			const countries = (countryData as Array<any>)?.map((c, i) => ({ id: i, name: c }));
+			const countries = (countryData as Array<any>)?.map((c, i) => ({
+				id: i,
+				name: c,
+				code: ICountryCode[i],
+			}));
 			setContractData({ ...contractData, [DataTypes.Countries]: countries });
 		}
-	}, [themeData, countryData]);
+	}, [themeData, countryData, isLoadingThemes, isLoadingCountries]);
 
 	useEffect(() => {
 		if (!isWeb3Enabled && !isWeb3EnableLoading) {

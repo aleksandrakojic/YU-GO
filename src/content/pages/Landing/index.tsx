@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
@@ -20,12 +21,15 @@ import Logo from "src/components/Logo";
 
 const Moralis = require("moralis");
 
+
+
 enum SignupType {
   None,
   Organization,
   Member,
 }
 function LandingPage() {
+<<<<<<< HEAD
   const navigate = useNavigate();
   const {
     enableWeb3,
@@ -382,6 +386,7 @@ function LandingPage() {
       </MainContent>
     </Wrapper>
   );
+
 }
 
 export default LandingPage;

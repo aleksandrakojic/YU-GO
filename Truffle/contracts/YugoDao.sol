@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.11;
 
-import "./IYugo.sol";
+import "./interfaces/IYugo.sol";
 
 /**  @title Smart Contract for the DAO
 *    @notice This Smart contract stores all vote history 
@@ -9,7 +9,6 @@ import "./IYugo.sol";
 contract YugoDao {
 
     struct Organisation {
-        string name;
         address ethAddress;
         bool isRegistered;
         uint[] themes;
@@ -65,7 +64,7 @@ contract YugoDao {
     mapping (uint => Country)  private countries;
     mapping (uint => Theme)  private thematics;
 
-    string[] private themeList = [
+    string[11] private themeList = [
         "education",
         "trafficking",
         "domestic violence",
@@ -79,7 +78,7 @@ contract YugoDao {
         "women's rights"
     ];
 
-     string[] private countryList = [
+     string[6] private countryList = [
         "Serbia",
         "Croatia",
         "Montenegro",
@@ -146,7 +145,7 @@ contract YugoDao {
     * @notice Return the list of thematics
     * @return themeList List of thematics
     */
-    function getThematics() public view returns(string[] memory) {        
+    function getThematics() public view returns(string[11] memory) {        
         return themeList;
     }
 
@@ -154,7 +153,7 @@ contract YugoDao {
     * @notice Return the list of countries
     * @return countryList List of countries
     */
-    function getCountries() public view returns(string[] memory) {        
+    function getCountries() public view returns(string[6] memory) {        
         return countryList;
     }
     
@@ -232,7 +231,7 @@ contract YugoDao {
     * @param _funds Value of funds 
     */
     function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external {
-        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
+        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
         require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         contests[msg.sender].name = _name;
         contests[msg.sender].themeIDs = _themeIds;
@@ -253,7 +252,7 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
-        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
+        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
@@ -295,13 +294,14 @@ contract YugoDao {
     * @param _creatorOfContest Address of creator 
     */
     function deleteActions(address _creatorOfContest) external {
-        //TODO: needs more testing
+        //TODO: needs testing
         require(contests[_creatorOfContest].actions[msg.sender].isCreated, 'you did not create any action for this contest');
         uint currentTime = block.timestamp;
         require(currentTime < contests[_creatorOfContest].applicationEndDate, 'Votes have started.You cannot delete this action');
         string memory actionName = contests[_creatorOfContest].actions[msg.sender].name;
         delete contests[_creatorOfContest].actions[msg.sender];
         emit ActionDeleted(_creatorOfContest, msg.sender, actionName);
+        delete actionName;
     }
 
     /**
@@ -330,8 +330,8 @@ contract YugoDao {
         }else if(contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber == contests[_creatorOfContest].actions[_actionCreator].voteNumber){
             contests[_creatorOfContest].winningActionAddresses.push(_actionCreator);
         }
-
         emit HasVotedForAction(_creatorOfContest, _actionCreator, msg.sender);
+        delete currentTime;
     }
     
 
@@ -342,7 +342,7 @@ contract YugoDao {
     */
     function tallyVote(address _creatorOfContest) external {
         // TODO: tallying votes with time counter / controller / check only callable from manager
-        //TODO needs more testing
+        //TODO needs more testing for multiple winners
         require(block.timestamp > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
 
         emit VoteTallied(_creatorOfContest, contests[_creatorOfContest].winningActionAddresses, contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber);

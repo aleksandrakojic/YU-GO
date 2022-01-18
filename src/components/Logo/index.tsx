@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 
 const LogoWrapper = styled(Link)(
-  ({ theme }) => `
+	({ theme }) => `
         color: ${theme.palette.text.primary};
         padding: ${theme.spacing(0, 1, 0, 0)};
         display: flex;
@@ -14,7 +14,7 @@ const LogoWrapper = styled(Link)(
 );
 
 const LogoSignWrapper = styled(Box)(
-  () => `
+	() => `
         width: 52px;
         height: 38px;
         margin-top: 4px;
@@ -23,7 +23,7 @@ const LogoSignWrapper = styled(Box)(
 );
 
 const LogoSign = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         background: ${theme.general.reactFrameworkColor};
         width: 18px;
         height: 18px;
@@ -60,7 +60,7 @@ const LogoSign = styled(Box)(
 );
 
 const LogoSignInner = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         width: 16px;
         height: 16px;
         position: absolute;
@@ -73,6 +73,7 @@ const LogoSignInner = styled(Box)(
 );
 
 function Logo() {
+<<<<<<< HEAD
   return (
     <LogoWrapper to="/overview">
       <LogoSignWrapper >
@@ -82,6 +83,17 @@ function Logo() {
       </LogoSignWrapper>
     </LogoWrapper>
   );
+=======
+	return (
+		<LogoWrapper to="/overview">
+			<LogoSignWrapper>
+				<LogoSign>
+					<LogoSignInner />
+				</LogoSign>
+			</LogoSignWrapper>
+		</LogoWrapper>
+	);
+>>>>>>> 261a7901b72fbaa1c5b59e57e16dbdf6300fcdea
 }
 
 export default Logo;
