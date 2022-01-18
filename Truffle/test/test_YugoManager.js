@@ -1,6 +1,7 @@
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
-// const { web3 } = require('@openzeppelin/test-helpers/src/setup');
-const web3 = require('web3')
+// const web3 = require('web3')
+// or:
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 const { expect, assert } = require('chai');
 const managerAbstraction = artifacts.require('YugoManager');
 const yugoAbstraction = artifacts.require('Yugo');
@@ -40,22 +41,8 @@ contract('test_manager', async function (accounts) {
     /**
    * The following function sets the address of Yugo and YuGoDao in YugoManager
    * It tests that:
-   * the event AddressSet is emitted for each call
+   * the event ContractsAddrSet is emitted 
    */
-    // describe('#set Addresses dans YugoManager', function () {
-    //   context('set Yugo token address', function () {
-    //     it('should emit the AddressSet event', async function () {
-    //       const setYugo = await manager.setYugoAddress(yugo.address, {from: admin})
-    //       expectEvent(setYugo, 'AddressSet', {addrSetTo: yugo.address, setter: admin})
-    //     });
-    //   });
-    //   context('set YugoDao address', function () {
-    //     it('should emit the AddressSet event', async function () {
-    //       const setYugoDao = await manager.setYugoDaoAddress(yugoDao.address, {from: admin})
-    //       expectEvent(setYugoDao, 'AddressSet', {addrSetTo: yugoDao.address, setter: admin})
-    //     });
-    //   });
-    // });
     describe('#set Addresses dans YugoManager', function () {
       context('set Yugo token et YugoDao addresses', function () {
         it('should emit the ContractsAddrSet event', async function () {

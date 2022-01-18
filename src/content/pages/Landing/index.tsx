@@ -5,7 +5,7 @@ import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { OrganizationSignup } from './OrganizationSignup';
 import MemberSignup from './MemberSignup';
 import EnableWeb3 from 'src/components/EnableWeb3';
-import { MainContent, PaperItem, Wrapper, AppBar } from './styles';
+import { MainContent, PaperItem, Wrapper, AppBar, Image } from './styles';
 import { AppContext } from 'src/contexts/AppContext';
 import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
 import { useNavigate } from 'react-router-dom';
@@ -108,23 +108,15 @@ function LandingPage() {
 		<Wrapper>
 			<AppBar>
 				<Box sx={{ display: 'flex', alignItems: 'center' }}>
-					<Logo /> <h1>Yu-go DAO</h1>
+					<Logo /> <h1>Yu-Go DAO</h1>
 				</Box>
 				<Button variant="contained">Connect Wallet</Button>
 			</AppBar>
 			<MainContent>
 				<Container maxWidth="sm">
-					<Box
-						sx={{
-							textAlign: 'center',
-							height: '400px',
-							display: 'flex',
-							justifyContent: 'space-between',
-							flexDirection: 'column',
-						}}
-					>
+					<Image>
 						<img alt="Coming Soon" height={400} src="/static/images/logo/woman.svg" />
-					</Box>
+					</Image>
 				</Container>
 
 				<Container maxWidth="sm">

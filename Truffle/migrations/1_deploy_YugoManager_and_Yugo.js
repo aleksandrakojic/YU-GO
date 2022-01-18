@@ -1,6 +1,7 @@
 const Manager = artifacts.require("YugoManager");
 const Token = artifacts.require("Yugo");
 const YugoDao = artifacts.require('YugoDao');
+const GrantEscrow = artifacts.require('GrantEscrow');
 
 let manager, token, dao;
 
@@ -16,6 +17,9 @@ module.exports = async function(deployer) {
   //::::: Deploy YugoDao :::::|
   await deployer.deploy(YugoDao, token.address);
   dao = await YugoDao.deployed()
+
+  //::::: Deploy GrantEscrow :::::|
+  await deployer.deploy(GrantEscrow, dao.address);
 
   //::::: Set Token and YugoDao addresses in Manager :::::|
   await manager.setContractsAddresses(token.address, dao.address)

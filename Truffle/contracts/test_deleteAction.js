@@ -5,6 +5,7 @@ const { networkInterfaces } = require('os');
 const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
+//|::::: For debugging :::::|
 let catchRevert = require("./exceptions.js").catchRevert;
 
 contract('test_deleteAction', async function (accounts) {
@@ -65,7 +66,8 @@ contract('test_deleteAction', async function (accounts) {
     let _value = web3.utils.toWei('0.1', "ether")
     await manager.sendTransaction({to:manager.address, from:contestCreator, value: _value});
     await manager.transferYugo({from: contestCreator})
-    ...
+    //...
+    
   });
   describe('#deleteActions()', function () {
     context('the msg.sender did not create the action', function () {

@@ -49,3 +49,11 @@ export const PaperItem = styled(Paper)(({ theme }) => ({
 export const PaperContent = styled(Paper)({
 	padding: '20px',
 });
+
+export const Image = styled(Box)({
+	textAlign: 'center',
+	height: '400px',
+	display: 'flex',
+	justifyContent: 'space-between',
+	flexDirection: 'column'
+});
