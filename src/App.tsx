@@ -31,9 +31,10 @@ const App = () => {
 		authenticate,
 		user,
 		logout,
+		isAuthenticating,
+		isLoggingOut
 	} = useMoralis();
 	const { switchNetwork, chainId, chain, account } = useChain();
-	//console.log('useMoralis', isAuthenticated, isWeb3Enabled, isInitialized, user, account, chainId);
 	const { contractName, networks, abi } = contractInfo;
 	// const contractAddress = networks[3].address; //1337
 	const [contractAddress, setContractAddress] = useState(networks[5777].address);
@@ -75,7 +76,15 @@ const App = () => {
 		if (chain && chainId) {
 			setContractAddress(networks[chain?.networkId]?.address);
 		}
-	}, []);
+	}, []);/**/
+
+	/*useEffect(() => {
+		Moralis.Web3.onAccountsChanged(function(accounts) {
+			console.log("account change",accounts);
+			logout();
+			navigate("/");
+		});
+	}, [isLoggingOut ]);*/
 
 
 	useEffect(() => {
@@ -142,14 +151,10 @@ const App = () => {
 		);
 	}
 
-	Moralis.Web3.onAccountsChanged(function(accounts) {
-		console.log("account change",accounts);
-		logout();
-		navigate("/");
-	});
+	
 
 	const currentUser = Moralis?.User?.current();
-	console.log("app", currentUser, user)
+	//console.log("app", currentUser, user)
 	return (
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>

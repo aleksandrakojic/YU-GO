@@ -27,6 +27,8 @@ interface Props {
 
 const initMember = {
   name: "",
+  firstname: "",
+  lastname: "",
   email: "",
   organisation : "",
 };
@@ -65,7 +67,7 @@ export const MemberSignup = ({onSubmitMember}: Props) => {
 
   const { data, error, isLoading } = useMoralisQuery("Organisations");
  
-
+  //console.log({data});
 
   return (
     <div style={{ padding: 16, margin: "auto", maxWidth: 600 }}>
@@ -94,6 +96,34 @@ export const MemberSignup = ({onSubmitMember}: Props) => {
                 </Grid>
                 <Grid item xs={12}>
                   <Field
+                    fullWidth
+                    required
+                    name="firstname"
+                    type="text"
+                    label="Member firstname"
+                    component={TextField}
+                    value={memberData.name}
+                    onChange={({ target: { value } }) =>
+                      handleInputChange("firstname", value)
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    fullWidth
+                    required
+                    name="lastname"
+                    type="text"
+                    label="Member lastname"
+                    component={TextField}
+                    value={memberData.lastname}
+                    onChange={({ target: { value } }) =>
+                      handleInputChange("lastname", value)
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
                     name="email"
                     fullWidth
                     required
@@ -111,6 +141,7 @@ export const MemberSignup = ({onSubmitMember}: Props) => {
                     <InputLabel id="organization-label">
                       Organisation
                     </InputLabel>
+                    
                     <Select
                       name="organisation"
                       labelId="organization-label"
@@ -122,7 +153,8 @@ export const MemberSignup = ({onSubmitMember}: Props) => {
                     >
                       <MenuItem value=""></MenuItem>
                       {data.map((c) => (
-                        <MenuItem value={c.id} key={c.id}>
+                        
+                        <MenuItem value={c.attributes.ethAddress} key={c.id}>
                           {c.attributes.name}
                         </MenuItem>
                       ))}

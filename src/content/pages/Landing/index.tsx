@@ -18,18 +18,19 @@ import { useWeb3ExecuteFunction, useMoralis } from "react-moralis";
 import { useNavigate } from "react-router-dom";
 import Logo from "src/components/Logo";
 
+const Moralis = require("moralis");
+
 enum SignupType {
   None,
   Organization,
   Member,
 }
-
 function LandingPage() {
   const navigate = useNavigate();
   const {
     enableWeb3,
-    Moralis,
     authenticate,
+    isWeb3Enabled,
     isAuthenticated,
     isAuthenticating,
     user,
@@ -37,6 +38,7 @@ function LandingPage() {
     refetchUserData,
     isUserUpdating,
     setUserData,
+    web3
   } = useMoralis();
   const [signup, setSignup] = useState(SignupType.None);
   const { thematics, countries, abi, contractAddress, currentUser } =
@@ -44,28 +46,22 @@ function LandingPage() {
   const { data, isLoading, isFetching, fetch, error } =
     useWeb3ExecuteFunction();
   const [newOrganistation, setNewOrganisation] = useState<any>(null);
-  const [newMember, setNewMember] = useState<any>(null);
+  const [newParticipant, setNewParticipant] = useState<any>(null);
+
+
+ 
 
   useEffect(() => {
-    console.log("contextCurrentUser", currentUser, user);
-    if (isAuthenticated && user?.get("type") == 2) {
-      navigate("/dashboards/organization/settings");
-    }
-    if (isAuthenticated && user?.get("type") == 1) {
-      navigate("/dashboards/profile/settings");
-    }
-  }, [isAuthenticated, user]);
+    // console.log("user newParticipant", user, newParticipant);
+    // if (isAuthenticated && user && newParticipant) {
+    //   setUserData(newParticipant);
+    //   if (newParticipant.type === 1) {
+    //     navigate("/dashboards/profile/settings");
+    //   }
+    //   setNewParticipant(null);
+    // }
+  }, [isAuthenticated, user, newParticipant]);
 
-  useEffect(() => {
-    console.log("newmember", user, newMember);
-    if (isAuthenticated && user && newMember) {
-      setUserData(newMember);
-      if (newMember.type === 1) {
-        navigate("/dashboards/profile/settings");
-      }
-      setNewMember(null);
-    }
-  }, [isAuthenticated, user, newMember]);
 
   useEffect(() => {
     if (
@@ -103,100 +99,70 @@ function LandingPage() {
     }
   }, [data]);
 
-  const handleSubmitMember = async (member) => {
-    console.log("handleSubmitMember", member, isAuthenticated);
-    if (isAuthenticated) {
-      if (user?.get("type") == 2) {
-        navigate("/dashboards/organization/settings");
-      } else if (user?.get("type") == 1) {
-        navigate("/dashboards/profile/settings");
-      } else {
-        setUserData({
-          username: member.name,
-          email: member.email,
-          type: 1,
-        }).then(
-          (res) => {
-            navigate("/dashboards/profile/settings");
-            console.log(res);
-          },
-          (err) => {
-            console.warn("error saving user", err);
-          }
-        );
-      }
-    } else {
-      authenticate().then(async (res) => {
-        console.log(
-          "onComplete authenticate",
-          user,
-          currentUser,
-          Moralis.User.current()
-        );
-        setNewMember({
-          username: member.name,
-          email: member.email,
-          type: 1,
-        });
-        // setUserData({
-        //   username: member.name,
-        //   email: member.email,
-        //   type: 1,
-        // }).then(
-        //   (res) => {
-        //     console.log(res);
-        //     navigate("/dashboards/profile/settings");
-        //   },
-        //   (err) => {
-        //     console.warn("error saving user", err);
-        //   }
-        // );
-      }); /**/
+  
 
-      /*authenticate({ onComplete: async () => {
-				console.log("onComplete authenticate", user, currentUser, Moralis.User.current())
-				await refetchUserData();
-				setUserData({
-						username: member.name,
-						email: member.email,
-						type: 1,
-				}).then(res=>{
-					console.log(res);
-					navigate('/dashboards/profile/settings');
-				}, err=>{
-					console.warn('error saving user', err);
-				})
-				
-				}, onError : () =>{
-					console.warn("authenticate error");
-				}, onSuccess : () =>{
-					console.log("onSuccess");
-				} 
-			})*/
+  const handleSubmitMember = async (member) => {
+    if (!isAuthenticated) {
+      await authenticate();
     }
+    setNewParticipant({...member,  ethAddress : Moralis.User.current().attributes.ethAddress });
+    console.log(
+      "onComplete authenticate",
+      user,
+      currentUser,
+      Moralis.User.current(), 
+      newParticipant, 
+      isAuthenticated
+    );
+    const contractData: any = {
+      abi,
+      contractAddress,
+      functionName: "participantIsWhiteListed",
+      params: {
+        _addrOrganisation: member.organisation,
+        _addrParticipant: Moralis.User.current().attributes.ethAddress,
+      },
+    };
+    const resFunc= await Moralis.executeFunction(contractData);
+    console.log({resFunc});
+    
+    if(resFunc){
+      const queryParticipant = await participantQuery(Moralis.User.current().attributes.ethAddress);
+      
+      console.log("queryParticipant authenticate", queryParticipant[0]);
+      if(queryParticipant[0]){
+        queryParticipant[0].set('email', member.email);
+        queryParticipant[0].set('name', member.name);
+        queryParticipant[0].set('firstname', member.firstname);
+        queryParticipant[0].set('lastname', member.lastname);
+        queryParticipant[0].set('organisation', member.organisation);
+        queryParticipant[0].save();
+      }else{
+        const Participant = Moralis.Object.extend("Participants");
+        const participant = new Participant();
+        participant.save({ ...member, ethAddress: Moralis.User.current().attributes.ethAddress})
+      }
+      navigate("/dashboards/profile/settings");
+    }
+      
   };
 
   const handleSubmitOrganization = (organization) => {
     console.log("handleSubmitOrganization", organization);
     if (isAuthenticated) {
-      if (user?.get("type") == 2) {
-        navigate("/dashboards/organization/settings");
-      } else if (user?.get("type") == 1) {
-        navigate("/dashboards/profile/settings");
-      } else {
         const contractData: any = {
           abi,
           contractAddress,
           functionName: "registerOrganisation",
           params: {
-            name: organization?.name,
             thematicIds: organization?.thematics,
             countryId: organization?.country,
           },
         };
+        //const resFunc= await Moralis.executeFunction(contractData);
         fetch({ params: contractData });
         setNewOrganisation(organization);
-      }
+      
     } else {
       authenticate().then((res) => {
         const contractData: any = {
@@ -256,24 +222,82 @@ function LandingPage() {
     }
   };
 
-  const userConnect = () => {
-    console.log("userConnect");
-    authenticate();
-    // authenticate({ onComplete: async () => {
-    // 	console.log("onComplete", isUserUpdating, user)
-    // 	if(isAuthenticated){
-    // 		if(user?.get("type") == 2){
-    // 			navigate('/dashboards/organization/settings');
-    // 		}else if(user?.get("type") == 1){
-    // 			navigate('/dashboards/profile/settings');
-    // 		}
-    // 	}
-    // }, onError : () =>{
-    // 	console.warn("authenticate error");
-    // }, onSuccess : () =>{
-    // 	console.log("onSuccess");
-    // } })
+  const userConnect = async () => {
+    console.log("userConnect", Moralis.User.current(), isAuthenticated, isWeb3Enabled);
+
+    if(!isAuthenticated){
+      try{
+ 
+        await authenticate();
+        console.log("address", user?.get('ethAddress'), Moralis.User.current().attributes.ethAddress);
+        let participant =  await participantQuery(Moralis.User.current().attributes.ethAddress);
+        let organisation =  await organisationQuery(Moralis.User.current().attributes.ethAddress);
+        console.log("query", participant, organisation);
+
+        if(participant[0]){
+          const contractData: any = {
+            abi,
+            contractAddress,
+            functionName: "participantIsWhiteListed",
+            params: {
+              _addrOrganisation: participant[0].attributes.organisation,
+              _addrParticipant: Moralis.User.current().attributes.ethAddress,
+            },
+          };
+          const resFunc= await Moralis.executeFunction(contractData);
+          console.log({resFunc});
+          if(resFunc){
+            setNewParticipant(participant);
+            navigate('/dashboards/profile/settings');
+          }
+        }
+
+        if(organisation[0]){
+          const contractData: any = {
+            abi,
+            contractAddress,
+            functionName: "organisationRegistrationStatus",
+            params: {
+              _orga: Moralis.User.current().attributes.ethAddress,
+            },
+          };
+          const resFunc= await Moralis.executeFunction(contractData);
+          console.log({resFunc});
+          if(resFunc){
+            setNewOrganisation(organisation);
+            navigate('/dashboards/organization/settings');
+          }
+        }
+
+        /*if(!organisation && !participant){
+          logout();
+          navigate('/');
+        }*/
+
+
+      }catch(error){
+        console.warn(error)
+      }
+    }
   };
+
+  const participantQuery = async (address) : Promise<any>  => {
+    const Participant = Moralis.Object.extend("Participants");
+    const query = new Moralis.Query(Participant);
+    query.equalTo("ethAddress", address);
+    const object = await query.find();
+    
+    return object;
+  }
+
+  const organisationQuery = async (address)  : Promise<any> => {
+    const Organisation = Moralis.Object.extend("Organisations");
+    const query = new Moralis.Query(Organisation);
+    query.equalTo("ethAddress", address);
+    const object = await query.find();
+    
+    return object;
+  }
 
   const renderAppBar = () => {
     if (isAuthenticated && user) {
@@ -282,11 +306,10 @@ function LandingPage() {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Logo /> <h1>Yu-go DAO</h1>
           </Box>
-          <h4>{user.get("ethAddress")}</h4>
+          <h4>{user.get('ethAddress')}</h4>
           <Button
             onClick={() => logout()}
             variant="contained"
-            disabled={isAuthenticating}
           >
             Logout
           </Button>

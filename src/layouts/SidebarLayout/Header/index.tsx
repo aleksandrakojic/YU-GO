@@ -37,11 +37,11 @@ const HeaderWrapper = styled(Box)(
 function Header() {
   const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
   const { currentUser } = useContext(AppContext);
-  const { Moralis } = useMoralis();
+  const { Moralis, logout } = useMoralis();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await Moralis.User.logOut().then((r) => {
+    await logout().then((r) => {
       console.log('logout', r);
       navigate('/');
     });
