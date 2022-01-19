@@ -41,6 +41,7 @@ contract YugoManager is Ownable {
         
     function purchaseYugo() public payable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
+        require(EthLedger[msg.sender] == 0, 'you have made a deposit');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
         require(msg.value == yugoTokenCost, "you do not have enough ETH");
         address sender = msg.sender;
@@ -72,6 +73,15 @@ contract YugoManager is Ownable {
         yugo = IYugo(_yugo);
         yugoDao = IYugoDao(_dao);
         emit ContractsAddrSet(_yugo, _dao);
+    }
+
+    /**
+    * @notice Returns deposit state of organization
+    * @return _ledgerState boolean true if organisation has deposit for yugo token
+    */
+    function hasEthDeposit() external view returns(bool _ledgerState) {        
+        _ledgerState = EthLedger[msg.sender] == yugoTokenCost;
+        return _ledgerState;
     }
 
     /**

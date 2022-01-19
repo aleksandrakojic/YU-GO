@@ -243,13 +243,8 @@ contract YugoDao {
     * @param _votingEndDate End Date of voting period 
     * @param _funds Value of funds 
     */
-<<<<<<< HEAD
-    function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external {
-        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
-=======
     function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external payable {
         require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
->>>>>>> stephPhase5_070122
         require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         require(_funds == msg.value, "Amount of funds in escrow is different from the data you provided");
         // require(bytes(confidentials[msg.sender].seed).length == 0, "a seed phrase already exists");
