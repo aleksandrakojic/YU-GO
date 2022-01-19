@@ -1,91 +1,84 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.11;
+pragma solidity ^0.8.9;
 
-/* Signature Verification
+import "@openzeppelin/contracts/access/Ownable.sol";
+import {convert} from "./libraries/Convert.sol";
+import "./interfaces/IYugoDao.sol";
 
-How to Sign and Verify
-# Signing
-1. Create message to sign
-2. Hash the message
-3. Sign the hash (off chain, keep your private key secret)
+contract VerifySignature is Ownable {
+    
+    struct Confidential {
+            string agreement;
+            uint nonce;
+            bytes32 msgHash;
+            bytes32 signature;
+        }
 
-# Verify
-1. Recreate hash from the original message
-2. Recover signer from signature and hash
-3. Compare recovered signer to claimed signer
-*/
+    IYugoDao private yugodao;
 
-contract VerifySignature {
-    /* 1. Unlock MetaMask account
-    ethereum.enable()
+    bool private yugoAddrSet;
+
+    event YugoDaoAddrSet(address yugodao);
+
+    mapping(address => mapping (address => Confidential)) private confidentials;
+    mapping( address => mapping (address => bool)) private unlockFunds;
+    
+    /**
+    * @notice Set the address of teh YugoDao contract
+    * @dev Only the account deploying can call this function
+    * @dev require boolean yugoAddrSet to be false
+    * @dev yugoAddrSet is updated to true to avoid any further attempt to change the address
+    * @param _dao YugoDao contract address
     */
+    function setYugoDaoAddress(address _dao) external onlyOwner {
+        require(!yugoAddrSet, "yugo address has already been set");
+        yugoAddrSet = true;
+        yugodao = IYugoDao(_dao);
+        emit YugoDaoAddrSet(_dao);
+    }
 
-    /* 2. Get message hash to sign
-    getMessageHash(
-        0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C,
-        123,
-        "coffee and donuts",
-        1
-    )
-
-    hash = "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd"
-    */
     function getMessageHash(
         address _to,
         uint _amount,
-        string memory _message,
+        string memory _agreement,
         uint _nonce
-    ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_to, _amount, _message, _nonce));
+    ) public returns (bytes32) {
+        confidentials[msg.sender][_to].agreement = _agreement;
+        confidentials[msg.sender][_to].nonce = _nonce;
+        bytes32 _msgHash = keccak256(abi.encodePacked(_to, _amount, _agreement, _nonce));
+        confidentials[msg.sender][_to].msgHash = _msgHash;
+        return _msgHash;
     }
 
-    /* 3. Sign message hash
-    # using browser
-    account = "copy paste account of signer here"
-    ethereum.request({ method: "personal_sign", params: [account, hash]}).then(console.log)
-
-    # using web3
-    web3.personal.sign(hash, web3.eth.defaultAccount, console.log)
-
-    Signature will be different for different accounts
-    0x993dab3dd91f5c6dc28e17439be475478f5635c92a56e17e82349d3fb2f166196f466c0b4e0c146f285204f0dcb13e5ae67bc33f4b888ec32dfe0a063e8f3f781b
-    */
     function getEthSignedMessageHash(bytes32 _messageHash)
         public
         pure
         returns (bytes32)
     {
-        /*
-        Signature is produced by signing a keccak256 hash with the following format:
-        "\x19Ethereum Signed Message\n" + len(msg) + msg
-        */
+ 
         return
             keccak256(
                 abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash)
             );
     }
 
-    /* 4. Verify signature
-    signer = 0xB273216C05A8c0D4F0a4Dd0d7Bae1D2EfFE636dd
-    to = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C
-    amount = 123
-    message = "coffee and donuts"
-    nonce = 1
-    signature =
-        0x993dab3dd91f5c6dc28e17439be475478f5635c92a56e17e82349d3fb2f166196f466c0b4e0c146f285204f0dcb13e5ae67bc33f4b888ec32dfe0a063e8f3f781b
-    */
+
     function verify(
-        address _signer,
         address _to,
         uint _amount,
-        string memory _message,
+        string memory _agreement,
         uint _nonce,
         bytes memory signature
-    ) public pure returns (bool) {
-        bytes32 messageHash = getMessageHash(_to, _amount, _message, _nonce);
+    ) public returns (bool) {
+        bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
-        return recoverSigner(ethSignedMessageHash, signature) == _signer;
+        if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
+            unlockFunds[msg.sender][_to] = true;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
@@ -128,5 +121,9 @@ contract VerifySignature {
         }
 
         // implicitly return (r, s, v)
+    }
+
+    function canWithdraw(address _from, address _to) external view returns(bool) {
+        return unlockFunds[_from][_to];
     }
 }
