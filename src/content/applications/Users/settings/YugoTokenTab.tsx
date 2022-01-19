@@ -32,8 +32,8 @@ const YugoToken = styled(Box)(
 		animation: pulse 2s infinite;
 		background: linear-gradient(
 			to right, 
-			hsl(90 100% 63%), 
-			hsl(205 100% 59%)
+			hsl(280 100% 65%), 
+			hsl(200 100% 80%)
   	);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
@@ -183,7 +183,11 @@ function YugoTokenTab() {
 									lineHeight: 1,
 								}}
 								primary="Yugo Token"
-								secondary="Get Yugo token to be able to create your community, contests and actions"
+								secondary={
+									balanceData !== '0' || hasYugo
+										? 'You have full access on the platform'
+										: 'Get Yugo token to be able to create your community, contests and actions'
+								}
 							/>
 							{isLoading && <CircularProgress />}
 							{!isLoading && balanceData === '0' && !ledgerData && (
