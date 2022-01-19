@@ -114,16 +114,11 @@ const App = () => {
 	}, [themeData, countryData, isLoadingThemes, isLoadingCountries]);
 
 	useEffect(() => {
-		console.log('isWebenabled');
-		if (!isWeb3Enabled && !isWeb3EnableLoading) {
-			enableWeb3();
-		} else {
-			if (!themeData && !contractData.thematics.length) {
-				fetchThemes();
-			}
-			if (!countryData && !contractData.countries.length) {
-				fetchCountries();
-			}
+		if (!themeData && !contractData.thematics.length) {
+			fetchThemes();
+		}
+		if (!countryData && !contractData.countries.length) {
+			fetchCountries();
 		}
 	}, [isWeb3Enabled, isWeb3EnableLoading]);
 
