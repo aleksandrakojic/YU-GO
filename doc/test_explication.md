@@ -41,3 +41,8 @@ Tests include:
 - the purchase of the Yugo token by the organisation
 - the deposit of ETH in YugoManager before Yugo token can be claimed
 - various events emittion
+
+## Test GrantEscrow
+Tests include:
+- the deposit of grants in ETH
+- The withdrawal of funds by winning organisation

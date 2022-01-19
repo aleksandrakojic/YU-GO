@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.11;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugo.sol";
@@ -36,6 +36,10 @@ contract YugoManager is Ownable {
     * @dev verifies that the ETH sent equals the token price
     */
     receive() external payable {
+        purchaseYugo();
+    }
+        
+    function purchaseYugo() public payable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
         require(msg.value == yugoTokenCost, "you do not have enough ETH");
@@ -89,15 +93,8 @@ contract YugoManager is Ownable {
         uint256 amount = 1*10**yugo.decimals();
         yugo.transfer(msg.sender, amount);
         emit YugoTransfer(msg.sender, amount);
-        locked = true;
     }
 
-    /**
-    * @notice transfers funds to winning organisation
-    */
-    function transferWinningOrganisation() external {
-        //TODO: communicate with GrantEscrow.sol
-    }
 
     // TODO:function verifyByOracle orga
 

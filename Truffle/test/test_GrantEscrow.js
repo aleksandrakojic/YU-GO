@@ -6,38 +6,47 @@ const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
 const grantEscrowAbstraction = artifacts.require('GrantEscrow');
+const {setup} = require("./setup.js")
+
 
 contract('test_GrantEscrow', async function (accounts) {
-    const admin = accounts[0];
-    const organisations = {
-        orga1: {
-            address: accounts[1],
-            members: { 0: accounts[2], 1: accounts[3] },
-            country: 0,
-            themes: [0,1]
-          },
-          orga2: {
-            address: accounts[4],
-            members: { 0: accounts[5] },
-            country: 0,
-            themes: [0,1]
-          },
-        orga3: { address: accounts[6] }
-      };
-    const foundation = accounts[9];
-    let yugo, yugoDao, manager, escrow;
-
+    // const admin = accounts[0];
+    // const organisations = {
+    //     orga1: {
+    //         address: accounts[1],
+    //         members: { 0: accounts[2], 1: accounts[3] },
+    //         country: 0,
+    //         themes: [0,1]
+    //       },
+    //       orga2: {
+    //         address: accounts[4],
+    //         members: { 0: accounts[5] },
+    //         country: 0,
+    //         themes: [0,1]
+    //       },
+    //     orga3: { address: accounts[6] }
+    //   };
+    // const foundation = accounts[9];
+    // let yugo, yugoDao, manager, escrow;
+    
+    let organisations, escrow;
     before('create an instance of the contract', async function createInstance() {
-        //instantiate main contract from abstraction
-        manager = await managerAbstraction.new({ from: admin });
-        yugo = await yugoAbstraction.new(manager.address, { from: admin });
-        yugoDao = await yugoDaoAbstraction.new(yugo.address, { from: admin });
-        escrow = await grantEscrowAbstraction.new(yugoDao.address, {from: admin})
-        //register orga 1 et 2
-        let orga1 = organisations.orga1;
-        let orga2 = organisations.orga2;
-        await yugoDao.registerOrganisation(orga1.themes, orga1.country, { from: orga1.address });
-        await yugoDao.registerOrganisation(orga2.themes, orga2.country, { from: orga2.address });
+    //     //instantiate main contract from abstraction
+    //     manager = await managerAbstraction.new({ from: admin });
+    //     yugo = await yugoAbstraction.new(manager.address, { from: admin });
+    //     yugoDao = await yugoDaoAbstraction.new(yugo.address, { from: admin });
+    //     escrow = await grantEscrowAbstraction.new(yugoDao.address, {from: admin})
+    //     //register orga 1 et 2
+    //     let orga1 = organisations.orga1;
+    //     let orga2 = organisations.orga2;
+    //     await yugoDao.registerOrganisation(orga1.themes, orga1.country, { from: orga1.address });
+    //     await yugoDao.registerOrganisation(orga2.themes, orga2.country, { from: orga2.address });
+    console.log('setup:', setup)
+    const data = await setup(accounts)
+    organisations = data.organisations;
+    escrow = data.escrow;
+    // console.log('Grant orga:', organisations)
+    console.log('escrow:', escrow)
       });
 
     describe('#depositGrant, Orga deposits the grant', function () {
