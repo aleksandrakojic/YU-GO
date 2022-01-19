@@ -88,7 +88,10 @@ function LandingPage() {
     if (!isAuthenticated) {
       await authenticate();
     }
-
+    setNewParticipant({
+      ...member,
+      ethAddress: Moralis.User.current().attributes.ethAddress,
+    });
     console.log(
       "onComplete authenticate",
       user,
@@ -122,8 +125,6 @@ function LandingPage() {
         queryParticipant[0].set("lastname", member.lastname);
         queryParticipant[0].set("organisation", member.organisation);
         queryParticipant[0].save();
-
-        /**/
       } else {
         const Participant = Moralis.Object.extend("Participants");
         const participant = new Participant();
@@ -136,10 +137,7 @@ function LandingPage() {
       setUserData({
         type: 1,
       });
-      setNewParticipant({
-        ...member,
-        ethAddress: Moralis.User.current().attributes.ethAddress,
-      });
+
       navigate("/dashboards/profile/settings");
       /*user?.set("type", 1);
         await user?.save().then(res=>{
