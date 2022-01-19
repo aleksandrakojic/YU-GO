@@ -8,7 +8,6 @@ const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
 const escrowAbstraction = artifacts.require('GrantEscrow');
-const VerifySignatureAbstraction = artifacts.require('VerifySignature');
 let catchRevert = require("./exceptions.js").catchRevert;
 
 contract('test_YugoDao', async function (accounts) {
@@ -28,24 +27,23 @@ contract('test_YugoDao', async function (accounts) {
     },
     orga3: {
       address: accounts[6],
-      members: { 0: accounts[7] },
       country: 2,
       themes: [0,1]
     },
     orga4: {
-      address: accounts[8],
+      address: accounts[7],
       country: 0,
       themes: [3,5]
     }
   };
-  const unknownOrga = accounts[9];
+  const unknownOrga = accounts[8];
   const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
   }
   
   let contestCreator = organisations.orga1.address;
   let actionCreator = organisations.orga2.address;
-  let yugoDao, yugo, manager, escrow, verifSign;
+  let yugoDao, yugo, manager, escrow;
   let contest; 
 
   const getBlockTimestamp = async () => {
@@ -66,31 +64,15 @@ contract('test_YugoDao', async function (accounts) {
       countries: [0, 1],
       applicationEndDate: _applicationEndDate, 
       votingEndDate: _votingEndDate,
-      funds: new BN(web3.utils.toWei('10'))
+      funds: web3.utils.toWei('10')
     }
   })();
 
   // setup action data 
   let action = {
     name: 'newAction',
-    funds: new BN(web3.utils.toWei('6'))
+    funds: web3.utils.toWei('6')
   };
-
-  const agreement = () => {
-    return `Lorem ipsum ${actionCreator} dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
-    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. 
-    Donec scelerisque sollicitudin ${action.funds} enim eu venenatis. Duis tincidunt laoreet ex, 
-    in pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent
-    per conubia ${contestCreator} nostra, ${contest.name} per inceptos himenaeos. Duis pharetra luctus lacus ut 
-    vestibulum. Maecenas ipsum lacus, ${contest.funds} lacinia quis posuere ut, pulvinar vitae dolor.
-    Integer eu nibh at nisi ullamcorper sagittis id vel leo. Integer feugiat 
-    faucibus libero, at maximus nisl suscipit posuere. Morbi nec enim nunc. 
-    Phasellus bibendum turpis ut ipsum egestas, sed sollicitudin elit convallis. 
-    Cras pharetra mi tristique sapien vestibulum lobortis. Nam eget bibendum metus, 
-    non dictum mauris. Nulla at tellus sagittis, viverra est a, bibendum metus.`;
-  }
-  
-  const nonce = 23;
 
   /**
    * @notice The mine function allows the mining of a new block 
@@ -113,18 +95,15 @@ contract('test_YugoDao', async function (accounts) {
     })
   }
 
-
   before('create an instance of the contract', async function createInstance() {
     //|::::: instantiate main contract from abstraction :::::|
     manager = await managerAbstraction.new({ from: admin });
     yugo = await yugoAbstraction.new(manager.address, { from: admin });
     escrow = await escrowAbstraction.new({ from: admin });
-    verifSign = await VerifySignatureAbstraction.new({from: admin});
-    yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, verifSign.address, { from: admin });
+    yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address,{ from: admin });
     //|::::: set yugo and yugoDao addresses in manager :::::|
     await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
-    await verifSign.setYugoDaoAddress(yugoDao.address, {from: admin});
-    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
+    await escrow.setYugoDaoAddress(yugoDao.address, {from: admin})
   });
 
   /**
@@ -272,7 +251,6 @@ contract('test_YugoDao', async function (accounts) {
       it('should revert', async function () {
         await expectRevert(
           yugoDao.addContest(
-            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -302,7 +280,6 @@ contract('test_YugoDao', async function (accounts) {
       })
       it('should emit the ContestCreated event', async function () {
         let tx = await yugoDao.addContest(
-          // contest.nonce,
           contest.name,
           contest.themes,
           contest.countries,
@@ -322,7 +299,6 @@ contract('test_YugoDao', async function (accounts) {
       it('should revert', async function () {
         await expectRevert(
           yugoDao.addContest(
-            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -448,25 +424,25 @@ contract('test_YugoDao', async function (accounts) {
         console.log('votingEndDate: ', contest.votingEndDate);
         console.log('currentTime: ', currentTime)
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga1.address, { from: organisations.orga1.address}),
+          yugoDao.voteForAction(contestCreator, actionCreator, { from: contestCreator }),
           'You can not vote for this action'
         );
       });
     });
     context('correct params', function () {
       it('should emit HasVotedForAction', async function () {
-        let tx = await yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] });
+        let tx = await yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[0] });
         await expectEvent(tx, 'HasVotedForAction', {
           addressContestCreator: contestCreator,
           addressActionCreator: actionCreator,
-          voterAddress: organisations.orga3.members[0]
+          voterAddress: organisations.orga1.members[0]
         });
       });
     });
     context('cant vote multiple times', function () {
       it('should revert', async function () {
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] }),
+          yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[0] }),
           'You have already voted'
         );
       });
@@ -476,7 +452,7 @@ contract('test_YugoDao', async function (accounts) {
         const futureTimestamp = contest.votingEndDate + 1
         mine(futureTimestamp);
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] }),
+          yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[1] }),
           'Voting is closed'
         );
       });
@@ -519,57 +495,27 @@ contract('test_YugoDao', async function (accounts) {
           assert(currentTime > contest.votingEndDate, 'currentTime > votingEndDate')
         }
       })
-      it('should return the VoteTallied event', async function() {
-        const hash = await yugoDao.tallyVote(contestCreator, { from: contestCreator });
-        await expectEvent(hash, 'VoteTallied', {
-          winner: actionCreator,
-          actionName: action.name,
-          nbVotes: new BN(1),
-          requiredFunds: action.funds
-        });
-        
-        // const hashTest = web3.utils.keccak256(
-        //   actionCreator, 
-        //   action.funds.toString(),
-        //   contest.nonce,
-        //   contest.seed
-        //   );
-        // const encoded = web3.eth.abi.encodeParameters(
-        //   ['address','uint','string'],
-        //   [actionCreator, contest.nonce, contest.seed]
-        //   );
-        // const hashTest = web3.utils.sha3(encoded, {encoding: 'hex'})
-        console.log('winner: ', hash.logs[0].args.winner);
-        console.log('actionName: ', hash.logs[0].args.actionName);
-        console.log('nbVotes: ', Number(hash.logs[0].args.nbVotes));
-        console.log('requiredFunds: ', Number(hash.logs[0].args.requiredFunds));
-        // console.log('hashTest: ', hashTest);
-        // assert(hash == hashTest, 'hashes are different')
-      });
     });
   });
-  describe('#getMessageHash()', function () {
-    context('contestCreator sends back the agreement + nonce', function () {
-      it('should return the right hash', async function() {
-        let _agreement = agreement();
-        let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
-        console.log('hash: ', hash);
-      });
-    });
-  });
-  // describe('#verify()', function () {
-  //   context('msg.sender is the signer of the agreement', function () {
-  //     it('should return true', async function() {
-  //       const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715';
-  //       let _agreement = agreement();
-  //       let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
-  //       const msgSigned = await verifSign.getEthSignedMessageHash.call(hash, {from: admin});
-  //       let isVerified = await verifSign.verify.call(actionCreator, action.funds, agreement, nonce, msgSigned, { from: contestCreator });
-  //       assert(isVerified == true, 'not the same signer')
-  //     });
-  //   });
-  // });
 
+  // describe("#_msgToBeSigned()", function () {
+  //   it('the message has the right variables', async function () {
+  //     let testMsg = 
+  //     // web3.utils.keccak256(
+  //             `The organisor of the contest: 
+  //             ${contest.name}, 
+  //             with ${contest.funds} Finney (Pwei) in escrow, 
+  //             hereby authorises the creator of the action:    
+  //             ${action.name} to claim ${action.funds} Finney (Pwei).
+  //             Hence, only the ethAddress: 
+  //             ${organisations.orga2.address} is eligible to the claim.`
+  //     // )
 
+  //       let createMessage = await yugoDao._msgToBeSigned(contestCreator, actionCreator, {from: admin});
+  //       // let hashedmsg = web3.utils.keccak256(createMessage);
+  //       console.log(createMessage)
+  //       assert.equal(createMessage,testMsg)
+  //   })
+  // })
 
 }); 

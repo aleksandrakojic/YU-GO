@@ -1,0 +1,12 @@
+{
+  "name": "truffle",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.4.2",
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "brownie": "^0.9.9",
+    "dotenv": "^10.0.0",
+    "web3": "^1.6.1"
+  }
+}

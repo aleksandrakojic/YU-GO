@@ -3,19 +3,19 @@ pragma solidity ^0.8.9;
 
 import "./interfaces/IYugo.sol";
 import "./interfaces/IGrantEscrow.sol";
-import "./interfaces/IVerifySignature.sol";
+import {convert} from "./libraries/Convert.sol";
 
 /**  @title Smart Contract for the DAO
 *    @notice This Smart contract stores all vote history 
 */
-contract YugoDao {
+contract YugoDao3 {
 
     struct Organisation {
         address ethAddress;
         bool isRegistered;
+        mapping (address => bool) participants;
         uint[] themes;
         uint country;
-        mapping (address => bool) participants;
     }
 
     struct Theme {
@@ -40,7 +40,9 @@ contract YugoDao {
     * @dev A participant can only create one action
     */
     struct Contest {
-        string name;    
+        string name;
+        mapping(address => bool) hasVoted;
+        mapping(address => Action) actions;
         uint[] themeIDs;
         uint[] countryIDs;
         uint applicationEndDate;
@@ -48,8 +50,6 @@ contract YugoDao {
         uint fundsAvailable;
         bool isCreated;
         address[] winningActionAddresses;
-        mapping(address => bool) hasVoted;
-        mapping(address => Action) actions;
     }
 
     event OrganizationRegistered(address addressOrga);
@@ -57,9 +57,10 @@ contract YugoDao {
     event ParticipantRemoved(address addressOrga, address addressParticipant);
     event ContestCreated(address addressOrga, string name, uint funds);
     event ActionCreated(address addressContestCreator, address addressActionCreator, string actionName, uint requiredFunds);
-    event VoteTallied(address winner, string actionName, uint nbVotes, uint requiredFunds);
+    event VoteTallied(address addressContestCreator, address[] addressActionCreator, uint nbVotes);
     event HasVotedForAction(address addressContestCreator, address addressActionCreator, address voterAddress); 
     event ActionDeleted(address addressContestCreator, address addressActioncreator, string actionName);
+    event MsgToBeSIgned(string message);
 
     mapping (address => Contest) contests;
     mapping (address => Organisation) organisation;
@@ -91,16 +92,12 @@ contract YugoDao {
 
     IYugo public yugo;
     IGrantEscrow public escrow;
-    // IVerifySignature public verifSign;
-    address private verifSignAddr;
 
-    constructor(address _yugo, address _escrow, address _verifSign) {
+    constructor(address _yugo, address _escrow) {
         setThematics();
         setCountries();
         yugo = IYugo(_yugo);
         escrow = IGrantEscrow(_escrow);
-        // verifSign = IVerifySignature(_verifSign);
-        verifSignAddr = _verifSign;
     }
 
     /**
@@ -116,11 +113,6 @@ contract YugoDao {
     {
         if (msg.sender != _account)
             revert Unauthorized();
-        _;
-    }
-
-    modifier limitedAccess() {
-        require(msg.sender == verifSignAddr, "you are not authorized");
         _;
     }
 
@@ -243,26 +235,23 @@ contract YugoDao {
     * @param _votingEndDate End Date of voting period 
     * @param _funds Value of funds 
     */
-<<<<<<< HEAD
-    function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external {
-        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
-=======
     function addContest(string memory _name, uint[] memory _themeIds, uint[] memory _eligibleCountryIds, uint _applicationEndDate, uint _votingEndDate, uint _funds) external payable {
         require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create a contest");
->>>>>>> stephPhase5_070122
         require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         require(_funds == msg.value, "Amount of funds in escrow is different from the data you provided");
-        // require(bytes(confidentials[msg.sender].seed).length == 0, "a seed phrase already exists");
-        contests[msg.sender].name = _name;
-        contests[msg.sender].themeIDs = _themeIds;
-        contests[msg.sender].countryIDs = _eligibleCountryIds;
-        contests[msg.sender].applicationEndDate = _applicationEndDate;
-        contests[msg.sender].votingEndDate = _votingEndDate;
-        contests[msg.sender].fundsAvailable = _funds;
-        contests[msg.sender].isCreated = true;
-        escrow.depositGrant(msg.sender, msg.value);
+        {
+            contests[msg.sender].name = _name;
+            contests[msg.sender].themeIDs = _themeIds;
+            contests[msg.sender].countryIDs = _eligibleCountryIds;
+            contests[msg.sender].applicationEndDate = _applicationEndDate;
+            contests[msg.sender].votingEndDate = _votingEndDate;
+            contests[msg.sender].fundsAvailable = _funds;
+            contests[msg.sender].isCreated = true;
+        }
+        escrow.depositGrant(msg.sender, msg.value); //OUT OF GAS
         emit ContestCreated(msg.sender, _name, _funds);
     }
+
 
     /**
     * @notice Creates an action
@@ -272,7 +261,7 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
-        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
+        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
@@ -329,13 +318,12 @@ contract YugoDao {
     * @param _creatorOfContest Address of Contest creator 
     * @param _actionCreator Address of Action creator
     */
-    function voteForAction(address _creatorOfContest, address _actionCreator, address _participantOrga) external {
+    function voteForAction(address _creatorOfContest, address _actionCreator) external {
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToVote == true
         require(currentTime >= contests[_creatorOfContest].applicationEndDate, 'Voting has not started');
         require(currentTime < contests[_creatorOfContest].votingEndDate, 'Voting is closed');
         require(msg.sender != _creatorOfContest && msg.sender != _actionCreator, 'You can not vote for this action');
         require(!contests[_creatorOfContest].hasVoted[msg.sender], 'You have already voted');
-        require(yugo.balanceOf(_participantOrga) > 0, "you need Yugo governance token to create a contest");
         
         contests[_creatorOfContest].actions[_actionCreator].voteNumber += 1;
         contests[_creatorOfContest].hasVoted[msg.sender] = true;
@@ -362,17 +350,12 @@ contract YugoDao {
         //TODO needs more testing for multiple winners
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToTallyVotes == true
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
-        address winner = contests[_creatorOfContest].winningActionAddresses[0];
-        emit VoteTallied(
-            winner,
-            contests[_creatorOfContest].actions[winner].name, 
-            contests[_creatorOfContest].actions[winner].voteNumber, 
-            contests[_creatorOfContest].actions[winner].requiredFunds
-            );
+        // _msgToBeSigned(_creatorOfContest, contests[_creatorOfContest].winningActionAddresses[0]);
+        emit VoteTallied(_creatorOfContest, contests[_creatorOfContest].winningActionAddresses, contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber);
     }
 
     /**
-    * @notice returns the first winner of the array winningActionAddresses
+    * @notice returns the first winenr of the array winningActionAddresses
     * @dev used in interface IYugoDao
     * @param _creatorOfContest Address of Contest creator 
     */
@@ -381,5 +364,37 @@ contract YugoDao {
         uint _requiredFunds = contests[_creatorOfContest].actions[_winner].requiredFunds;
         return (_winner, _requiredFunds);
     }
+
+    function _msgToBeSigned(address _creatorOfContest, address _actionCreator) public returns(string memory){
+        uint availableFundsInPwei = convert.wei2Pwei(contests[_creatorOfContest].fundsAvailable);
+        bytes memory availableFundsInbytes = convert.uint2str(availableFundsInPwei);
+        uint requiredFundsInPwei = convert.wei2Pwei(contests[_creatorOfContest].actions[_actionCreator].requiredFunds);
+        bytes memory requiredFundsInbytes = convert.uint2str(requiredFundsInPwei);
+        string memory message = string(
+            bytes.concat(
+                 // organisation[_creatorOfContest].name,
+                "The organisor of the contest: ",
+                bytes(contests[_creatorOfContest].name),
+                ", with ",
+                availableFundsInbytes,
+                " Finney (Pwei) in escrow, hereby authorises ",
+                // organisation[_actionCreator].name,
+                "the creator of the action: ",
+                bytes(contests[_creatorOfContest].actions[_actionCreator].name),
+                " to claim ",
+                requiredFundsInbytes,
+                " Finney (Pwei).",
+                "Hence, only the ethAddress: ",
+                 bytes(convert.addressToString(_actionCreator)),
+                 "is eligible to the claim."
+            )
+        );
+    //     emit MsgToBeSIgned(message);
+    //     // bytes memory UNIT = ' Finney (Pwei)';
+    //     return message;
+    }
     
+
+
+
 }   
