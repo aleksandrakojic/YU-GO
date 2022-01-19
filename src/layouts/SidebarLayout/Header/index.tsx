@@ -6,9 +6,7 @@ import MenuTwoToneIcon from '@mui/icons-material/MenuTwoTone';
 import { SidebarContext } from 'src/contexts/SidebarContext';
 import CloseTwoToneIcon from '@mui/icons-material/CloseTwoTone';
 
-import HeaderMenu from './Menu';
 import HeaderButtons from './Buttons';
-import HeaderUserbox from './Userbox';
 import Logo from 'src/components/Logo';
 import MetamaskBox from './MetamaskBox';
 import { AppContext } from 'src/contexts/AppContext';
@@ -35,19 +33,17 @@ const HeaderWrapper = styled(Box)(
 );
 
 function Header() {
+	const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
+	const { currentUser } = useContext(AppContext);
+	const { logout } = useMoralis();
+	const navigate = useNavigate();
 
-  const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
-  const { currentUser } = useContext(AppContext);
-  const { Moralis, logout } = useMoralis();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout().then((r) => {
-      console.log('logout', r);
-      navigate('/');
-    });
-  };
-
+	const handleLogout = async () => {
+		await logout().then((r) => {
+			console.log('logout', r);
+			navigate('/');
+		});
+	};
 
 	return (
 		<HeaderWrapper display="flex" alignItems="center">

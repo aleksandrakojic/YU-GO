@@ -10,10 +10,9 @@ import { useMoralis, useWeb3ExecuteFunction, useChain } from 'react-moralis';
 import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { IContractData, ICountryCode } from './models';
-const Moralis = require("moralis");
-
+import { usePrevious } from './helpers/utils';
 
 enum DataTypes {
 	Thematics = 'thematics',
@@ -24,27 +23,25 @@ const App = () => {
 	const content = useRoutes(routes);
 	const navigate = useNavigate();
 	const {
-		
 		isWeb3Enabled,
 		enableWeb3,
 		isInitializing,
-		isAuthenticated,
 		isWeb3EnableLoading,
 		isInitialized,
-		authenticate,
 		user,
 		logout,
 		isAuthenticating,
-		isLoggingOut
+		isLoggingOut,
 	} = useMoralis();
-	const { switchNetwork, chainId, chain, account } = useChain();
-	const { contractName, networks, abi } = contractInfo;
+	const { chainId, chain, account } = useChain();
+	const { networks, abi } = contractInfo;
 	// const contractAddress = networks[3].address; //1337
 	const [contractAddress, setContractAddress] = useState(networks[5777].address);
 	const [contractData, setContractData] = useState<IContractData>({
 		thematics: [],
 		countries: [],
 	});
+	const prevAccount = usePrevious(account);
 
 	const {
 		fetch: fetchThemes,
@@ -79,16 +76,14 @@ const App = () => {
 		if (chain && chainId) {
 			setContractAddress(networks[chain?.networkId]?.address);
 		}
-	}, []);/**/
+	}, []);
 
-	
-	Moralis.Web3.onAccountsChanged(function(accounts) {
-		
-		logout();
-		navigate("/");
-	});
-	
-
+	useEffect(() => {
+		if (prevAccount && account && prevAccount !== account) {
+			logout();
+			navigate('/');
+		}
+	}, [account]);
 
 	useEffect(() => {
 		if (chain && chainId) {
@@ -119,6 +114,7 @@ const App = () => {
 	}, [themeData, countryData, isLoadingThemes, isLoadingCountries]);
 
 	useEffect(() => {
+		console.log('isWebenabled');
 		if (!isWeb3Enabled && !isWeb3EnableLoading) {
 			enableWeb3();
 		} else {
@@ -131,7 +127,7 @@ const App = () => {
 		}
 	}, [isWeb3Enabled, isWeb3EnableLoading]);
 
-	if (isInitializing) {
+	if (isInitializing || isLoggingOut || isAuthenticating) {
 		return (
 			<Container
 				sx={{
@@ -152,20 +148,27 @@ const App = () => {
 
 	if (!isInitialized) {
 		return (
-			<Container>
+			<Container
+				sx={{
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					width: '100vw',
+					maxWidth: '100vw !important',
+					padding: '0px !important',
+					height: '100vh',
+					backgroundColor: '#111633',
+				}}
+			>
 				<Typography variant="h3">Fail to initialize</Typography>
 			</Container>
 		);
 	}
 
-	
-
-	const currentUser = Moralis?.User?.current();
-	//console.log("app", currentUser, user)
 	return (
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>
-				<AppContext.Provider value={{ ...contractData, abi, contractAddress, currentUser }}>
+				<AppContext.Provider value={{ ...contractData, abi, contractAddress, currentUser: user }}>
 					<CssBaseline />
 					{content}
 				</AppContext.Provider>
