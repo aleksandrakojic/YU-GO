@@ -20,14 +20,12 @@ import Logo from "src/components/Logo";
 
 const Moralis = require("moralis");
 
-
 enum SignupType {
   None,
   Organization,
   Member,
 }
 function LandingPage() {
-
   const navigate = useNavigate();
   const {
     enableWeb3,
@@ -40,7 +38,7 @@ function LandingPage() {
     refetchUserData,
     isUserUpdating,
     setUserData,
-    web3
+    web3,
   } = useMoralis();
   const [signup, setSignup] = useState(SignupType.None);
   const { thematics, countries, abi, contractAddress, currentUser } =
@@ -49,21 +47,6 @@ function LandingPage() {
     useWeb3ExecuteFunction();
   const [newOrganistation, setNewOrganisation] = useState<any>(null);
   const [newParticipant, setNewParticipant] = useState<any>(null);
-
-
- 
-
-  useEffect(() => {
-    // console.log("user newParticipant", user, newParticipant);
-    // if (isAuthenticated && user && newParticipant) {
-    //   setUserData(newParticipant);
-    //   if (newParticipant.type === 1) {
-    //     navigate("/dashboards/profile/settings");
-    //   }
-    //   setNewParticipant(null);
-    // }
-  }, [isAuthenticated, user, newParticipant]);
-
 
   useEffect(() => {
     if (
@@ -101,19 +84,17 @@ function LandingPage() {
     }
   }, [data]);
 
-  
-
   const handleSubmitMember = async (member) => {
     if (!isAuthenticated) {
       await authenticate();
     }
-    
+
     console.log(
       "onComplete authenticate",
       user,
       currentUser,
-      Moralis.User.current(), 
-      newParticipant, 
+      Moralis.User.current(),
+      newParticipant,
       isAuthenticated
     );
     const contractData: any = {
@@ -125,60 +106,64 @@ function LandingPage() {
         _addrParticipant: Moralis.User.current().attributes.ethAddress,
       },
     };
-    const resFunc= await Moralis.executeFunction(contractData);
-    console.log({resFunc});
-    
-    if(resFunc){
-      const queryParticipant = await participantQuery(Moralis.User.current().attributes.ethAddress);
-      
+    const resFunc = await Moralis.executeFunction(contractData);
+    console.log({ resFunc });
+
+    if (resFunc) {
+      const queryParticipant = await participantQuery(
+        Moralis.User.current().attributes.ethAddress
+      );
+
       console.log("queryParticipant authenticate", queryParticipant[0]);
-      if(queryParticipant[0]){
-        queryParticipant[0].set('email', member.email);
-        queryParticipant[0].set('name', member.name);
-        queryParticipant[0].set('firstname', member.firstname);
-        queryParticipant[0].set('lastname', member.lastname);
-        queryParticipant[0].set('organisation', member.organisation);
+      if (queryParticipant[0]) {
+        queryParticipant[0].set("email", member.email);
+        queryParticipant[0].set("name", member.name);
+        queryParticipant[0].set("firstname", member.firstname);
+        queryParticipant[0].set("lastname", member.lastname);
+        queryParticipant[0].set("organisation", member.organisation);
         queryParticipant[0].save();
-        
+
         /**/
-      }else{
+      } else {
         const Participant = Moralis.Object.extend("Participants");
         const participant = new Participant();
-        participant.save({ ...member, ethAddress: Moralis.User.current().attributes.ethAddress});
-       
+        participant.save({
+          ...member,
+          ethAddress: Moralis.User.current().attributes.ethAddress,
+        });
       }
-      
+
       setUserData({
-        type : 1
+        type: 1,
       });
-      setNewParticipant({...member,  ethAddress : Moralis.User.current().attributes.ethAddress });
+      setNewParticipant({
+        ...member,
+        ethAddress: Moralis.User.current().attributes.ethAddress,
+      });
       navigate("/dashboards/profile/settings");
       /*user?.set("type", 1);
         await user?.save().then(res=>{
           console.log(res);
            navigate("/dashboards/profile/settings");
         })*/
-      
     }
-      
   };
 
   const handleSubmitOrganization = (organization) => {
     console.log("handleSubmitOrganization", organization);
     if (isAuthenticated) {
-        const contractData: any = {
-          abi,
-          contractAddress,
-          functionName: "registerOrganisation",
-          params: {
-            thematicIds: organization?.thematics,
-            countryId: organization?.country,
-          },
-        };
-        //const resFunc= await Moralis.executeFunction(contractData);
-        fetch({ params: contractData });
-        setNewOrganisation(organization);
-      
+      const contractData: any = {
+        abi,
+        contractAddress,
+        functionName: "registerOrganisation",
+        params: {
+          thematicIds: organization?.thematics,
+          countryId: organization?.country,
+        },
+      };
+      //const resFunc= await Moralis.executeFunction(contractData);
+      fetch({ params: contractData });
+      setNewOrganisation(organization);
     } else {
       authenticate().then((res) => {
         const contractData: any = {
@@ -239,18 +224,30 @@ function LandingPage() {
   };
 
   const userConnect = async () => {
-    console.log("userConnect", Moralis.User.current(), isAuthenticated, isWeb3Enabled);
+    console.log(
+      "userConnect",
+      Moralis.User.current(),
+      isAuthenticated,
+      isWeb3Enabled
+    );
 
-    if(!isAuthenticated){
-      try{
- 
+    if (!isAuthenticated) {
+      try {
         await authenticate();
-        console.log("address", Moralis.User.current().attributes, Moralis.User.current().attributes.ethAddress);
-        let participant =  await participantQuery(Moralis.User.current().attributes.ethAddress);
-        let organisation =  await organisationQuery(Moralis.User.current().attributes.ethAddress);
+        console.log(
+          "address",
+          Moralis.User.current().attributes,
+          Moralis.User.current().attributes.ethAddress
+        );
+        let participant = await participantQuery(
+          Moralis.User.current().attributes.ethAddress
+        );
+        let organisation = await organisationQuery(
+          Moralis.User.current().attributes.ethAddress
+        );
         console.log("query", participant, organisation);
 
-        if(participant[0]){
+        if (participant[0]) {
           const contractData: any = {
             abi,
             contractAddress,
@@ -260,15 +257,15 @@ function LandingPage() {
               _addrParticipant: Moralis.User.current().attributes.ethAddress,
             },
           };
-          const resFunc= await Moralis.executeFunction(contractData);
-          console.log({resFunc});
-          if(resFunc){
+          const resFunc = await Moralis.executeFunction(contractData);
+          console.log({ resFunc });
+          if (resFunc) {
             setNewParticipant(participant);
-            navigate('/dashboards/profile/settings');
+            navigate("/dashboards/profile/settings");
           }
         }
 
-        if(organisation[0]){
+        if (organisation[0]) {
           const contractData: any = {
             abi,
             contractAddress,
@@ -277,11 +274,11 @@ function LandingPage() {
               _orga: Moralis.User.current().attributes.ethAddress,
             },
           };
-          const resFunc= await Moralis.executeFunction(contractData);
-          console.log({resFunc});
-          if(resFunc){
+          const resFunc = await Moralis.executeFunction(contractData);
+          console.log({ resFunc });
+          if (resFunc) {
             setNewOrganisation(organisation);
-            navigate('/dashboards/organization/settings');
+            navigate("/dashboards/organization/settings");
           }
         }
 
@@ -289,31 +286,29 @@ function LandingPage() {
           logout();
           navigate('/');
         }*/
-
-
-      }catch(error){
-        console.warn(error)
+      } catch (error) {
+        console.warn(error);
       }
     }
   };
 
-  const participantQuery = async (address) : Promise<any>  => {
+  const participantQuery = async (address): Promise<any> => {
     const Participant = Moralis.Object.extend("Participants");
     const query = new Moralis.Query(Participant);
     query.equalTo("ethAddress", address);
     const object = await query.find();
-    
-    return object;
-  }
 
-  const organisationQuery = async (address)  : Promise<any> => {
+    return object;
+  };
+
+  const organisationQuery = async (address): Promise<any> => {
     const Organisation = Moralis.Object.extend("Organisations");
     const query = new Moralis.Query(Organisation);
     query.equalTo("ethAddress", address);
     const object = await query.find();
-    
+
     return object;
-  }
+  };
 
   const renderAppBar = () => {
     if (isAuthenticated && user) {
@@ -322,11 +317,8 @@ function LandingPage() {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Logo /> <h1>Yu-go DAO</h1>
           </Box>
-          <h4>{user.get('ethAddress')}</h4>
-          <Button
-            onClick={() => logout()}
-            variant="contained"
-          >
+          <h4>{user.get("ethAddress")}</h4>
+          <Button onClick={() => logout()} variant="contained">
             Logout
           </Button>
         </AppBar>
@@ -372,33 +364,30 @@ function LandingPage() {
         </Container>
 
         <Container maxWidth="sm">
-          <EnableWeb3>
-            {signup === SignupType.None && (
-              <Box>
-                <Typography variant="h1" sx={{ fontSize: "3rem" }}>
-                  Unlock the next step in community cooperation
-                </Typography>
-                <Typography sx={{ fontSize: "1.5rem", padding: "20px 0px" }}>
-                  YU-GO DAO gives direct power to the women of ex-Yugoslavie.
-                  Join us in pioneering a future where magic internet
-                  communities unlock the power of women-centric coordination.
-                </Typography>
-              </Box>
-            )}
-            <Box sx={{ textAlign: "center" }}>
-              {signup !== SignupType.None && (
-                <Button onClick={() => setSignup(SignupType.None)}>
-                  <KeyboardBackspaceIcon /> <div>Back</div>
-                </Button>
-              )}
-              {renderForm()}
+          {signup === SignupType.None && (
+            <Box>
+              <Typography variant="h1" sx={{ fontSize: "3rem" }}>
+                Unlock the next step in community cooperation
+              </Typography>
+              <Typography sx={{ fontSize: "1.5rem", padding: "20px 0px" }}>
+                YU-GO DAO gives direct power to the women of ex-Yugoslavie. Join
+                us in pioneering a future where magic internet communities
+                unlock the power of women-centric coordination.
+              </Typography>
             </Box>
-          </EnableWeb3>
+          )}
+          <Box sx={{ textAlign: "center" }}>
+            {signup !== SignupType.None && (
+              <Button onClick={() => setSignup(SignupType.None)}>
+                <KeyboardBackspaceIcon /> <div>Back</div>
+              </Button>
+            )}
+            {renderForm()}
+          </Box>
         </Container>
       </MainContent>
     </Wrapper>
   );
-
 }
 
 export default LandingPage;
