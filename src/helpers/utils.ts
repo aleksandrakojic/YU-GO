@@ -1,3 +1,15 @@
+import { useRef, useEffect } from 'react';
+
+export function usePrevious<T>(value: T) {
+	const ref = useRef<T | undefined>();
+
+	useEffect(() => {
+		ref.current = value;
+	}, [value]);
+
+	return ref.current as T;
+}
+
 export const findCommentArrayElements = (arr1: Array<any>, arr2: Array<any>): boolean =>
 	arr1?.some((item) => arr2?.includes(item));
 

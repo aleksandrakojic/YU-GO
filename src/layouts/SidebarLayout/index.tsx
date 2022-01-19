@@ -8,11 +8,11 @@ import Header from './Header';
 import { useMoralis } from 'react-moralis';
 
 interface SidebarLayoutProps {
-  children?: ReactNode;
+	children?: ReactNode;
 }
 
 const MainWrapper = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
     flex: 1 1 auto;
     display: flex;
     height: 100%;
@@ -24,7 +24,7 @@ const MainWrapper = styled(Box)(
 );
 
 const MainContent = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         margin-top: ${theme.header.height};
         flex: 1 1 auto;
         overflow: auto;
@@ -32,17 +32,17 @@ const MainContent = styled(Box)(
 );
 
 const SidebarLayout: FC<SidebarLayoutProps> = () => {
-  return (
-    <>
-      <Sidebar />
-      <MainWrapper>
-        <Header />
-        <MainContent>
-          <Outlet />
-        </MainContent>
-      </MainWrapper>
-    </>
-  );
+	return (
+		<>
+			<Sidebar />
+			<MainWrapper>
+				<Header />
+				<MainContent>
+					<Outlet />
+				</MainContent>
+			</MainWrapper>
+		</>
+	);
 };
 
 export default SidebarLayout;

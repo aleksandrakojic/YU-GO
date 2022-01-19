@@ -9,9 +9,10 @@ import ActivityTab from './ActivityTab';
 import EditProfileTab from './EditProfileTab';
 import NotificationsTab from './NotificationsTab';
 import SecurityTab from './SecurityTab';
+import YugoTokenTab from './YugoTokenTab';
 
 const TabsWrapper = styled(Tabs)(
-  () => `
+	() => `
     .MuiTabs-scrollableX {
       overflow-x: auto !important;
     }
@@ -19,51 +20,53 @@ const TabsWrapper = styled(Tabs)(
 );
 
 function ManagementUserSettings() {
-  const [currentTab, setCurrentTab] = useState<string>('edit_profile');
+	const [currentTab, setCurrentTab] = useState<string>('token');
 
-  const tabs = [
-    { value: 'activity', label: 'Activity' },
-    { value: 'edit_profile', label: 'Edit Profile' },
-    { value: 'notifications', label: 'Notifications' },
-    { value: 'security', label: 'Passwords/Security' }
-  ];
+	const tabs = [
+		{ value: 'activity', label: 'Activity' },
+		{ value: 'edit_profile', label: 'Edit Profile' },
+		{ value: 'notifications', label: 'Notifications' },
+		{ value: 'security', label: 'Passwords/Security' },
+		{ value: 'token', label: 'YUGO Token' },
+	];
 
-  const handleTabsChange = (event: ChangeEvent<any>, value: string): void => {
-    setCurrentTab(value);
-  };
+	const handleTabsChange = (event: ChangeEvent<any>, value: string): void => {
+		setCurrentTab(value);
+	};
 
-  return (
-    <>
-      <PageTitleWrapper>
-        <PageHeader />
-      </PageTitleWrapper>
-      <Container maxWidth="lg">
-        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
-          <Grid item xs={12}>
-            <TabsWrapper
-              onChange={handleTabsChange}
-              value={currentTab}
-              variant="scrollable"
-              scrollButtons="auto"
-              textColor="primary"
-              indicatorColor="primary"
-            >
-              {tabs.map((tab) => (
-                <Tab key={tab.value} label={tab.label} value={tab.value} />
-              ))}
-            </TabsWrapper>
-          </Grid>
-          <Grid item xs={12}>
-            {currentTab === 'activity' && <ActivityTab />}
-            {currentTab === 'edit_profile' && <EditProfileTab />}
-            {currentTab === 'notifications' && <NotificationsTab />}
-            {currentTab === 'security' && <SecurityTab />}
-          </Grid>
-        </Grid>
-      </Container>
-      <Footer />
-    </>
-  );
+	return (
+		<>
+			<PageTitleWrapper>
+				<PageHeader />
+			</PageTitleWrapper>
+			<Container maxWidth="lg">
+				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
+					<Grid item xs={12}>
+						<TabsWrapper
+							onChange={handleTabsChange}
+							value={currentTab}
+							variant="scrollable"
+							scrollButtons="auto"
+							textColor="primary"
+							indicatorColor="primary"
+						>
+							{tabs.map((tab) => (
+								<Tab key={tab.value} label={tab.label} value={tab.value} />
+							))}
+						</TabsWrapper>
+					</Grid>
+					<Grid item xs={12}>
+						{currentTab === 'activity' && <ActivityTab />}
+						{currentTab === 'edit_profile' && <EditProfileTab />}
+						{currentTab === 'notifications' && <NotificationsTab />}
+						{currentTab === 'security' && <SecurityTab />}
+						{currentTab === 'token' && <YugoTokenTab />}
+					</Grid>
+				</Grid>
+			</Container>
+			<Footer />
+		</>
+	);
 }
 
 export default ManagementUserSettings;
