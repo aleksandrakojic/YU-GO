@@ -5,8 +5,10 @@ import "./interfaces/IYugo.sol";
 import "./interfaces/IGrantEscrow.sol";
 import "./interfaces/IVerifySignature.sol";
 
-/**  @title Smart Contract for the DAO
-*    @notice This Smart contract stores all vote history 
+/**  
+* @title Smart Contract for the DAO
+* @notice This Smart contract is the center piece of the application.  
+* @notice This contract allows you to create a contest, create an action, vote for an action, tally the votes  
 */
 contract YugoDao {
 
@@ -23,7 +25,7 @@ contract YugoDao {
         string name;
     }
 
-     struct Country {
+    struct Country {
         uint id;
         string name;
     }
@@ -91,20 +93,24 @@ contract YugoDao {
 
     IYugo public yugo;
     IGrantEscrow public escrow;
-    // IVerifySignature public verifSign;
     address private verifSignAddr;
 
+    /**
+    * @notice Set smart contracts' address from migration
+    * @param _yugo Address of the YugoToken contract
+    * @param _escrow Address of the GrantEscrow contract
+    * @param _verifSign Address of the VerifySignature contract
+    */
     constructor(address _yugo, address _escrow, address _verifSign) {
         setThematics();
         setCountries();
         yugo = IYugo(_yugo);
         escrow = IGrantEscrow(_escrow);
-        // verifSign = IVerifySignature(_verifSign);
         verifSignAddr = _verifSign;
     }
 
     /**
-    * @dev Sender not authorized for this operation.
+    * @notice used when sender not authorized for an operation.
     */
     error Unauthorized();
 
@@ -176,7 +182,6 @@ contract YugoDao {
     * @param countryId Country id
     * 
     */
-    // function registerOrganisation(uint[] memory thematicIds, uint countryId) external {
     function registerOrganisation(uint[] memory thematicIds, uint countryId) external {
         require(!organisation[msg.sender].isRegistered, 'Organisation already registered');
         require(thematicIds.length > 0 && countryId >= 0, 'You must provide thematics and country');
@@ -252,7 +257,6 @@ contract YugoDao {
 >>>>>>> stephPhase5_070122
         require(!contests[msg.sender].isCreated, 'Organisation already created a contest');
         require(_funds == msg.value, "Amount of funds in escrow is different from the data you provided");
-        // require(bytes(confidentials[msg.sender].seed).length == 0, "a seed phrase already exists");
         contests[msg.sender].name = _name;
         contests[msg.sender].themeIDs = _themeIds;
         contests[msg.sender].countryIDs = _eligibleCountryIds;
@@ -328,6 +332,7 @@ contract YugoDao {
     * @dev Emit HasVotedForAction event
     * @param _creatorOfContest Address of Contest creator 
     * @param _actionCreator Address of Action creator
+    * @param _participantOrga Address of the participant's organisation
     */
     function voteForAction(address _creatorOfContest, address _actionCreator, address _participantOrga) external {
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToVote == true
@@ -358,8 +363,7 @@ contract YugoDao {
     * @param _creatorOfContest Address of Contest creator 
     */
     function tallyVote(address _creatorOfContest) external {
-        // TODO: tallying votes with time counter / controller / check only callable from manager
-        //TODO needs more testing for multiple winners
+        //NOTE needs more testing for multiple winners
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToTallyVotes == true
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
         address winner = contests[_creatorOfContest].winningActionAddresses[0];
