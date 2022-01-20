@@ -415,8 +415,6 @@ contract('test_YugoDao', async function (accounts) {
     });
   });
 
-  // see test_deleteAction.js for the deleteAction function
-
   /**
    * The following tests the voteForAction
    * It tests that :
@@ -528,23 +526,11 @@ contract('test_YugoDao', async function (accounts) {
           requiredFunds: action.funds
         });
         
-        // const hashTest = web3.utils.keccak256(
-        //   actionCreator, 
-        //   action.funds.toString(),
-        //   contest.nonce,
-        //   contest.seed
-        //   );
-        // const encoded = web3.eth.abi.encodeParameters(
-        //   ['address','uint','string'],
-        //   [actionCreator, contest.nonce, contest.seed]
-        //   );
-        // const hashTest = web3.utils.sha3(encoded, {encoding: 'hex'})
         console.log('winner: ', hash.logs[0].args.winner);
         console.log('actionName: ', hash.logs[0].args.actionName);
         console.log('nbVotes: ', Number(hash.logs[0].args.nbVotes));
         console.log('requiredFunds: ', Number(hash.logs[0].args.requiredFunds));
-        // console.log('hashTest: ', hashTest);
-        // assert(hash == hashTest, 'hashes are different')
+
       });
     });
   });
@@ -557,6 +543,7 @@ contract('test_YugoDao', async function (accounts) {
       });
     });
   });
+  //NOTE: recent changes in the verify function implies to change the test (in progress)
   // describe('#verify()', function () {
   //   context('msg.sender is the signer of the agreement', function () {
   //     it('should return true', async function() {
