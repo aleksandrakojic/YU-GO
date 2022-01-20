@@ -26,7 +26,6 @@ const initAction = {
 
 export default function AddActionModal({ isOpen, onClose, onSubmit, eligibleContests }: Props) {
 	const [action, setAction] = React.useState(initAction);
-	console.log('eligibleContests', eligibleContests);
 
 	const handleSubmit = () => {
 		onSubmit({ ...action, requiredFunds: Number(action.requiredFunds) });

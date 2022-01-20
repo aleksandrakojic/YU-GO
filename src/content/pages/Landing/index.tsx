@@ -5,7 +5,7 @@ import {
   Container,
   Button,
   Stack,
-  Paper,
+  LinearProgress,
 } from "@mui/material";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 
@@ -17,9 +17,9 @@ import { AppContext } from "src/contexts/AppContext";
 import { useWeb3ExecuteFunction, useMoralis } from "react-moralis";
 import { useNavigate } from "react-router-dom";
 import Logo from "src/components/Logo";
-
-const Moralis = require("moralis");
-
+import { ProfileType } from "src/models";
+import { useSnackbar, VariantType } from "notistack";
+import { LoadingButton } from "@mui/lab";
 
 enum SignupType {
   None,
@@ -29,158 +29,103 @@ enum SignupType {
 function LandingPage() {
   const navigate = useNavigate();
   const {
-    enableWeb3,
+    Moralis,
+    account,
     authenticate,
-    isWeb3Enabled,
     isAuthenticated,
     isAuthenticating,
     user,
     logout,
-    refetchUserData,
-    isUserUpdating,
-    setUserData,
-    web3,
   } = useMoralis();
+  const { enqueueSnackbar } = useSnackbar();
   const [signup, setSignup] = useState(SignupType.None);
-  const { thematics, countries, abi, contractAddress, currentUser } =
+  const { thematics, countries, abi, contractAddress, setType, type } =
     useContext(AppContext);
   const { data, isLoading, isFetching, fetch, error } =
     useWeb3ExecuteFunction();
   const [newOrganistation, setNewOrganisation] = useState<any>(null);
   const [newParticipant, setNewParticipant] = useState<any>(null);
 
-
-
   useEffect(() => {
-    
-    if (
-      data &&
-      newOrganistation?.name &&
-      newOrganistation?.email &&
-      newOrganistation?.thematics &&
-      newOrganistation
-    ) {
-      if ((data as any)?.events?.OrganizationRegistered) {
-        console.log("inside create orga db", data);
+    if (data && newOrganistation) {
+      const d: any = data;
+      if (d?.events?.OrganizationRegistered) {
         const Organisation = Moralis.Object.extend("Organisations");
         const orga = new Organisation();
 
-        orga.save({ ...newOrganistation, ethAddress: (data as any)?.from }).then(
+        orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
           (res) => {
-            user?.set("type", 2);
-            user?.save().then(
-              (res) => {
-                navigate("/dashboards/organization/settings");
-                console.log(res);
-              },
-              (err) => {
-                console.warn("error saving user", err);
-              }
-            );
+            authenticate();
+            setType(ProfileType.Organization);
           },
           (error) => {
-            console.warn("error saving orga", error);
+            console.error("error saving orga", error);
           }
         );
       }
       setNewOrganisation(null);
     }
-  }, [data]);
+  }, [data, newOrganistation]);
+
+  useEffect(() => {
+    if (data && newParticipant) {
+      if (data) {
+        const Participant = Moralis.Object.extend("Participants");
+        const participant = new Participant();
+        participant.save({ ...newParticipant, ethAddress: account }).then(
+          (res) => {
+            authenticate();
+            setType(ProfileType.Member);
+          },
+          (error) => {
+            console.error("error saving member", error);
+          }
+        );
+      }
+      setNewParticipant(null);
+    }
+  }, [data, newParticipant]);
+
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      !user?.attributes?.type &&
+      type === ProfileType.None
+    ) {
+      handleSnackMessage("You need to be registered !", "warning");
+    }
+  }, [type, isAuthenticated]);
+
+  const handleSnackMessage = (message: string, variant: VariantType) => {
+    enqueueSnackbar(message, { variant });
+  };
 
   const handleSubmitMember = async (member) => {
-    if (!isAuthenticated) {
-      await authenticate();
-    }
-    
-    console.log(
-      "onComplete authenticate",
-      user,
-      currentUser,
-      Moralis.User.current(),
-      newParticipant,
-      isAuthenticated
-    );
     const contractData: any = {
       abi,
       contractAddress,
       functionName: "participantIsWhiteListed",
       params: {
         _addrOrganisation: member.organisation,
-        _addrParticipant: Moralis.User.current().attributes.ethAddress,
+        _addrParticipant: account,
       },
     };
-    const resFunc = await Moralis.executeFunction(contractData);
-    console.log({ resFunc });
-
-    if (resFunc) {
-      const queryParticipant = await participantQuery(
-        Moralis.User.current().attributes.ethAddress
-      );
-
-      console.log("queryParticipant authenticate", queryParticipant[0]);
-      if (queryParticipant[0]) {
-        queryParticipant[0].set("email", member.email);
-        queryParticipant[0].set("name", member.name);
-        queryParticipant[0].set("firstname", member.firstname);
-        queryParticipant[0].set("lastname", member.lastname);
-        queryParticipant[0].set("organisation", member.organisation);
-        queryParticipant[0].save();
-      } else {
-        const Participant = Moralis.Object.extend("Participants");
-        const participant = new Participant();
-        participant.save({
-          ...member,
-          ethAddress: Moralis.User.current().attributes.ethAddress,
-        });
-      }
-
-      setUserData({
-        type: 1,
-      });
-
-      setNewParticipant({
-        ...member,
-        ethAddress: Moralis.User.current().attributes.ethAddress,
-      });
-      navigate("/dashboards/profile/settings");
-      /*user?.set("type", 1);
-        await user?.save().then(res=>{
-          console.log(res);
-           navigate("/dashboards/profile/settings");
-        })*/
-    }
+    fetch({ params: contractData });
+    setNewParticipant(member);
   };
 
   const handleSubmitOrganization = (organization) => {
-    console.log("handleSubmitOrganization", organization);
-    if (isAuthenticated) {
-      const contractData: any = {
-        abi,
-        contractAddress,
-        functionName: "registerOrganisation",
-        params: {
-          thematicIds: organization?.thematics,
-          countryId: organization?.country,
-        },
-      };
-      //const resFunc= await Moralis.executeFunction(contractData);
-      fetch({ params: contractData });
-      setNewOrganisation(organization);
-    } else {
-      authenticate().then((res) => {
-        const contractData: any = {
-          abi,
-          contractAddress,
-          functionName: "registerOrganisation",
-          params: {
-            thematicIds: organization?.thematics,
-            countryId: organization?.country,
-          },
-        };
-        fetch({ params: contractData });
-        setNewOrganisation(organization);
-      });
-    }
+    const contractData: any = {
+      abi,
+      contractAddress,
+      functionName: "registerOrganisation",
+      params: {
+        thematicIds: organization?.thematics,
+        countryId: organization?.country,
+      },
+    };
+    fetch({ params: contractData });
+    setNewOrganisation(organization);
   };
 
   const renderForm = () => {
@@ -225,122 +170,40 @@ function LandingPage() {
   };
 
   const userConnect = async () => {
-    console.log(
-      "userConnect",
-      Moralis.User.current(),
-      isAuthenticated,
-      isWeb3Enabled
-    );
-
-    if (!isAuthenticated) {
-      try {
-        await authenticate();
-        console.log(
-          "address",
-          Moralis.User.current().attributes,
-          Moralis.User.current().attributes.ethAddress
-        );
-        let participant = await participantQuery(
-          Moralis.User.current().attributes.ethAddress
-        );
-        let organisation = await organisationQuery(
-          Moralis.User.current().attributes.ethAddress
-        );
-        console.log("query", participant, organisation);
-
-        if (participant[0]) {
-          const contractData: any = {
-            abi,
-            contractAddress,
-            functionName: "participantIsWhiteListed",
-            params: {
-              _addrOrganisation: participant[0].attributes.organisation,
-              _addrParticipant: Moralis.User.current().attributes.ethAddress,
-            },
-          };
-          const resFunc = await Moralis.executeFunction(contractData);
-          console.log({ resFunc });
-          if (resFunc) {
-            setNewParticipant(participant);
-            navigate("/dashboards/profile/settings");
-          }
-        }
-
-        if (organisation[0]) {
-          const contractData: any = {
-            abi,
-            contractAddress,
-            functionName: "organisationRegistrationStatus",
-            params: {
-              _orga: Moralis.User.current().attributes.ethAddress,
-            },
-          };
-          const resFunc = await Moralis.executeFunction(contractData);
-          console.log({ resFunc });
-          if (resFunc) {
-            setNewOrganisation(organisation);
-            navigate("/dashboards/organization/settings");
-          }
-        }
-
-        /*if(!organisation && !participant){
-          logout();
-          navigate('/');
-        }*/
-      } catch (error) {
-        console.warn(error);
-      }
+    if (!isAuthenticated && !user) {
+      authenticate();
     }
   };
 
-  const participantQuery = async (address): Promise<any> => {
-    const Participant = Moralis.Object.extend("Participants");
-    const query = new Moralis.Query(Participant);
-    query.equalTo("ethAddress", address);
-    const object = await query.find();
-
-    return object;
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setType(ProfileType.None);
   };
 
-  const organisationQuery = async (address): Promise<any> => {
-    const Organisation = Moralis.Object.extend("Organisations");
-    const query = new Moralis.Query(Organisation);
-    query.equalTo("ethAddress", address);
-    const object = await query.find();
-
-    return object;
-  };
-
-  const renderAppBar = () => {
-    if (isAuthenticated && user) {
-      return (
-        <AppBar>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Logo /> <h1>Yu-go DAO</h1>
-          </Box>
-          <h4>{user.get("ethAddress")}</h4>
-          <Button onClick={() => logout()} variant="contained">
+  const renderAppBar = () => (
+    <AppBar>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Logo /> <h1>Yu-Go DAO</h1>
+      </Box>
+      {isAuthenticated && user ? (
+        <Box sx={{ textAlign: "right" }}>
+          <Button onClick={handleLogout} variant="contained">
             Logout
           </Button>
-        </AppBar>
-      );
-    }
-    return (
-      <AppBar>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Logo /> <h1>Yu-go DAO</h1>
+          <h4>{user.get("ethAddress")}</h4>
         </Box>
-        <Button
-          onClick={() => {
-            userConnect();
-          }}
+      ) : (
+        <LoadingButton
+          onClick={userConnect}
           variant="contained"
+          loading={isAuthenticating}
         >
           Connect Wallet
-        </Button>
-      </AppBar>
-    );
-  };
+        </LoadingButton>
+      )}
+    </AppBar>
+  );
 
   return (
     <Wrapper>
@@ -365,26 +228,29 @@ function LandingPage() {
         </Container>
 
         <Container maxWidth="sm">
-          {signup === SignupType.None && (
-            <Box>
-              <Typography variant="h1" sx={{ fontSize: "3rem" }}>
-                Unlock the next step in community cooperation
-              </Typography>
-              <Typography sx={{ fontSize: "1.5rem", padding: "20px 0px" }}>
-                YU-GO DAO gives direct power to the women of ex-Yugoslavie. Join
-                us in pioneering a future where magic internet communities
-                unlock the power of women-centric coordination.
-              </Typography>
-            </Box>
-          )}
-          <Box sx={{ textAlign: "center" }}>
-            {signup !== SignupType.None && (
-              <Button onClick={() => setSignup(SignupType.None)}>
-                <KeyboardBackspaceIcon /> <div>Back</div>
-              </Button>
+          <EnableWeb3>
+            {signup === SignupType.None && (
+              <Box>
+                <Typography variant="h1" sx={{ fontSize: "3rem" }}>
+                  Unlock the next step in community cooperation
+                </Typography>
+                <Typography sx={{ fontSize: "1.5rem", padding: "20px 0px" }}>
+                  YU-GO DAO gives direct power to the women of ex-Yugoslavia.
+                  Join us in pioneering a future where magic internet
+                  communities unlock the power of women-centric coordination.
+                </Typography>
+              </Box>
             )}
-            {renderForm()}
-          </Box>
+            <Box sx={{ textAlign: "center" }}>
+              {signup !== SignupType.None && (
+                <Button onClick={() => setSignup(SignupType.None)}>
+                  <KeyboardBackspaceIcon /> <div>Back</div>
+                </Button>
+              )}
+              {(isLoading || isFetching) && <LinearProgress color="primary" />}
+              {renderForm()}
+            </Box>
+          </EnableWeb3>
         </Container>
       </MainContent>
     </Wrapper>

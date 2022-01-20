@@ -8,10 +8,10 @@ import Contests from './Contests';
 import AddContestModal from './AddContestModal';
 import { AppContext } from 'src/contexts/AppContext';
 import { useWeb3ExecuteFunction, useMoralis, useMoralisQuery } from 'react-moralis';
-import { findCommentArrayElements, getEligibleFormattedContests } from 'src/helpers/utils';
+import { getEligibleFormattedContests } from 'src/helpers/utils';
 
 function ContestsContainer() {
-	const { Moralis, user, account } = useMoralis();
+	const { Moralis, account } = useMoralis();
 	const { abi, contractAddress, thematics, countries } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,7 +27,6 @@ function ContestsContainer() {
 	} = useMoralisQuery('Contests', (query) => query.includeAll(), [], {
 		live: true,
 	});
-	console.log('contestData', contestData, organization, account);
 
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
@@ -79,6 +78,7 @@ function ContestsContainer() {
 			abi,
 			contractAddress,
 			functionName: 'addContest',
+			msgValue: contest.availableFunds,
 			params: {
 				_name: contest.name,
 				_themeIds: contest.thematics,
@@ -116,7 +116,7 @@ function ContestsContainer() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
-						{(isLoading || isFetching) && <LinearProgress color="primary" />}
+						{(isLoading || isFetching || isLoadingContest) && <LinearProgress color="primary" />}
 						<Contests account={account} contests={contests} />
 					</Grid>
 				</Grid>

@@ -10,6 +10,7 @@ import {
 	Button,
 	ListItemAvatar,
 	CircularProgress,
+	Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import contractManager from 'src/contracts/YugoManager.json';
@@ -26,14 +27,13 @@ const YugoToken = styled(Box)(
 		border-radius: 50%;
 		border: 7px solid ${theme.colors.primary.dark};
 		background-color: ${theme.colors.primary.main};
-		color: ${theme.colors.secondary.dark};
 		box-shadow: 0 0 0 0 rgba(0, 0, 0, 2);
 		transform: scale(1);
 		animation: pulse 2s infinite;
 		background: linear-gradient(
 			to right, 
-			hsl(90 100% 63%), 
-			hsl(205 100% 59%)
+			hsl(280 100% 65%), 
+			hsl(200 100% 80%)
   	);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
@@ -59,12 +59,11 @@ const YugoToken = styled(Box)(
 );
 
 function YugoTokenTab() {
+	const [hasYugo, setHasYugo] = useState(false);
 	const { Moralis } = useMoralis();
 	const { chain, account } = useChain();
 	const { networks, abi } = contractManager;
-	const [contractAddress, setContractAddress] = useState(
-		networks[chain?.networkId ?? 5777].address
-	);
+	const contractAddress = networks[chain?.networkId ?? 5777].address;
 
 	const {
 		fetch: fetchBalance,
@@ -81,24 +80,91 @@ function YugoTokenTab() {
 		},
 	});
 
-	useEffect(() => {
-		if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
-			fetchBalance();
-		}
-	}, []);
+	const {
+		fetch: fetchLedgerState,
+		data: ledgerData,
+		isFetching: isFetchingLedger,
+		isLoading: isLoadingLedger,
+		error: errorLedger,
+	} = useWeb3ExecuteFunction({
+		abi,
+		contractAddress,
+		functionName: 'hasEthDeposit',
+		params: {
+			_account: account,
+		},
+	});
 
-	const { fetch, error, isFetching } = useWeb3Transfer({
+	const {
+		fetch: transferYugo,
+		data: transferYugoData,
+		isFetching: isTransferingYugo,
+		isLoading: isLoadingTransferYugo,
+		error: errorTransferYugo,
+	} = useWeb3ExecuteFunction({
+		abi,
+		contractAddress,
+		functionName: 'transferYugo',
+	});
+
+	const { fetch, error, isFetching, data } = useWeb3Transfer({
 		amount: Moralis.Units.ETH(0.1),
 		type: 'native',
 		receiver: contractAddress,
 		contractAddress: contractAddress,
 	});
 
+	useEffect(() => {
+		if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
+			fetchBalance();
+		}
+	}, []);
+
+	useEffect(() => {
+		if (data) {
+			fetchBalance();
+			fetchLedgerState();
+		}
+	}, [data]);
+
+	useEffect(() => {
+		if (balanceData === '0' && !isLoadingBalance && !ledgerData) {
+			fetchLedgerState();
+		}
+	}, [balanceData, isLoadingBalance]);
+
+	useEffect(() => {
+		if ((transferYugoData as any)?.events?.YugoTransfer && !isLoadingTransferYugo && !hasYugo) {
+			setHasYugo(true);
+		}
+	}, [transferYugoData, isLoadingTransferYugo]);
+
 	const handleBuyToken = () => {
 		fetch();
 	};
 
-	console.log('error', error, balanceData, isFetchingBalance, isLoadingBalance, errorBalance);
+	const handleRedeemToken = () => {
+		transferYugo();
+	};
+
+	const errorMessage = () => {
+		if (error) return JSON.stringify(error);
+		if (errorBalance) return JSON.stringify(errorBalance);
+		if (errorTransferYugo) return JSON.stringify(errorTransferYugo);
+		if (errorLedger) return JSON.stringify(errorLedger);
+		return null;
+	};
+
+	console.log('datas', balanceData, ledgerData, transferYugoData, data, hasYugo);
+
+	const isLoading =
+		isFetching ||
+		isFetchingBalance ||
+		isLoadingBalance ||
+		isFetchingLedger ||
+		isLoadingLedger ||
+		isTransferingYugo ||
+		isLoadingTransferYugo;
 
 	return (
 		<Grid container spacing={3}>
@@ -122,18 +188,45 @@ function YugoTokenTab() {
 									lineHeight: 1,
 								}}
 								primary="Yugo Token"
-								secondary="Get Yugo token to be able to create your community, contests and actions"
+								secondary={
+									balanceData !== '0' || hasYugo
+										? 'You have full access on the platform'
+										: 'Get Yugo token to be able to create your community, contests and actions'
+								}
 							/>
-							{isFetching || isLoadingBalance ? (
-								<CircularProgress />
-							) : (
+							{isLoading && <CircularProgress />}
+							{!isLoading && balanceData === '0' && !ledgerData && (
 								<Button color="info" size="large" variant="contained" onClick={handleBuyToken}>
 									Buy
 								</Button>
 							)}
+							{!isLoading && balanceData === '0' && ledgerData && !hasYugo && (
+								<Button
+									color="warning"
+									size="large"
+									variant="contained"
+									onClick={handleRedeemToken}
+								>
+									Redeem
+								</Button>
+							)}
+							{!isLoading && (balanceData !== '0' || hasYugo) && (
+								<Chip
+									label="1 YUGO"
+									color="primary"
+									sx={{ color: 'black', fontWeight: 'bold', borderRadius: '3px' }}
+								/>
+							)}
 						</ListItem>
 					</List>
 				</Card>
+				{errorMessage() && (
+					<Card>
+						<List>
+							<ListItem sx={{ color: 'red' }}>{errorMessage()}</ListItem>
+						</List>
+					</Card>
+				)}
 			</Grid>
 		</Grid>
 	);

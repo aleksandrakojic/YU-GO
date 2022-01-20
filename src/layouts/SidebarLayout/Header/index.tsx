@@ -12,6 +12,7 @@ import MetamaskBox from './MetamaskBox';
 import { AppContext } from 'src/contexts/AppContext';
 import { useMoralis } from 'react-moralis';
 import { useNavigate } from 'react-router-dom';
+import { ProfileType } from 'src/models';
 
 const HeaderWrapper = styled(Box)(
 	({ theme }) => `
@@ -34,15 +35,15 @@ const HeaderWrapper = styled(Box)(
 
 function Header() {
 	const { sidebarToggle, toggleSidebar } = useContext(SidebarContext);
+	const { setType } = useContext(AppContext);
 	const { currentUser } = useContext(AppContext);
 	const { logout } = useMoralis();
 	const navigate = useNavigate();
 
-	const handleLogout = async () => {
-		await logout().then((r) => {
-			console.log('logout', r);
-			navigate('/');
-		});
+	const handleLogout = () => {
+		logout();
+		navigate('/');
+		setType(ProfileType.None);
 	};
 
 	return (

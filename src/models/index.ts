@@ -17,6 +17,7 @@ export const ICountryCode = {
 };
 
 export enum ProfileType {
+	None,
 	Organization,
 	Member,
 }

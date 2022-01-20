@@ -60,7 +60,7 @@ function a11yProps(index: number) {
 
 interface Props {
 	currentUser?: any;
-	actions?: IAction[];
+	actions?: any[];
 }
 
 function Actions({ currentUser, actions }: Props) {
@@ -71,7 +71,9 @@ function Actions({ currentUser, actions }: Props) {
 	};
 
 	const orgContests = actions?.filter(
-		(c) => c?.addrOrgaCreator?.toLowerCase() === currentUser?.attributes?.ethAddress
+		(c) =>
+			c?.attributes?.addrOrgaCreator?.toLowerCase() ===
+			currentUser?.attributes?.ethAddress?.toLowerCase()
 	);
 
 	return (

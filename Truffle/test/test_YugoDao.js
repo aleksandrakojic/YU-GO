@@ -7,6 +7,8 @@ const { expect, assert } = require('chai');
 const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
+const escrowAbstraction = artifacts.require('GrantEscrow');
+const VerifySignatureAbstraction = artifacts.require('VerifySignature');
 let catchRevert = require("./exceptions.js").catchRevert;
 
 contract('test_YugoDao', async function (accounts) {
@@ -26,23 +28,24 @@ contract('test_YugoDao', async function (accounts) {
     },
     orga3: {
       address: accounts[6],
+      members: { 0: accounts[7] },
       country: 2,
       themes: [0,1]
     },
     orga4: {
-      address: accounts[7],
+      address: accounts[8],
       country: 0,
       themes: [3,5]
     }
   };
-  const unknownOrga = accounts[8];
+  const unknownOrga = accounts[9];
   const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
   }
   
   let contestCreator = organisations.orga1.address;
   let actionCreator = organisations.orga2.address;
-  let yugoDao, yugo, manager;
+  let yugoDao, yugo, manager, escrow, verifSign;
   let contest; 
 
   const getBlockTimestamp = async () => {
@@ -55,23 +58,39 @@ contract('test_YugoDao', async function (accounts) {
   //setup contest data on test execution
   (async function () {
     const _timestamp = await getBlockTimestamp();
-    const _applicationEndDate = _timestamp + 1; // 1 second
-    const _votingEndDate =  _timestamp + 100; // 100 seconds
+    const _applicationEndDate = _timestamp + 10; // 10 second
+    const _votingEndDate =  _timestamp + 20; // 20 seconds
     contest = {
-      name: 'test',
+      name: 'Education for all',
       themes: [0, 1],
       countries: [0, 1],
       applicationEndDate: _applicationEndDate, 
       votingEndDate: _votingEndDate,
-      funds: new BN(9000)
+      funds: new BN(web3.utils.toWei('10'))
     }
   })();
 
   // setup action data 
   let action = {
     name: 'newAction',
-    funds: new BN(9000)
+    funds: new BN(web3.utils.toWei('6'))
   };
+
+  const agreement = () => {
+    return `Lorem ipsum ${actionCreator} dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
+    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. 
+    Donec scelerisque sollicitudin ${action.funds} enim eu venenatis. Duis tincidunt laoreet ex, 
+    in pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent
+    per conubia ${contestCreator} nostra, ${contest.name} per inceptos himenaeos. Duis pharetra luctus lacus ut 
+    vestibulum. Maecenas ipsum lacus, ${contest.funds} lacinia quis posuere ut, pulvinar vitae dolor.
+    Integer eu nibh at nisi ullamcorper sagittis id vel leo. Integer feugiat 
+    faucibus libero, at maximus nisl suscipit posuere. Morbi nec enim nunc. 
+    Phasellus bibendum turpis ut ipsum egestas, sed sollicitudin elit convallis. 
+    Cras pharetra mi tristique sapien vestibulum lobortis. Nam eget bibendum metus, 
+    non dictum mauris. Nulla at tellus sagittis, viverra est a, bibendum metus.`;
+  }
+  
+  const nonce = 23;
 
   /**
    * @notice The mine function allows the mining of a new block 
@@ -94,13 +113,18 @@ contract('test_YugoDao', async function (accounts) {
     })
   }
 
+
   before('create an instance of the contract', async function createInstance() {
     //|::::: instantiate main contract from abstraction :::::|
     manager = await managerAbstraction.new({ from: admin });
     yugo = await yugoAbstraction.new(manager.address, { from: admin });
-    yugoDao = await yugoDaoAbstraction.new(yugo.address, { from: admin });
+    escrow = await escrowAbstraction.new({ from: admin });
+    verifSign = await VerifySignatureAbstraction.new({from: admin});
+    yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, verifSign.address, { from: admin });
     //|::::: set yugo and yugoDao addresses in manager :::::|
     await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
+    await verifSign.setYugoDaoAddress(yugoDao.address, {from: admin});
+    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
   });
 
   /**
@@ -194,6 +218,44 @@ contract('test_YugoDao', async function (accounts) {
   });
 
   /**
+   * The following function tests participantIsWhiteListed()
+   * It tests that:
+   * it returns true if participant is in the whitelist
+   * it returns false if the caller is not in the whitelist
+   * it reverts if organisation givern by the caller is not yet registered
+   */
+   describe('#participantIsWhiteListed()', function () {
+    context('with correct members address', function () {
+      it('should return true for each member address', async function () {
+        let _orga1 = organisations.orga1;
+        for (const member of Object.values(_orga1.members)) {
+          let isWhitelisted = await yugoDao.participantIsWhiteListed(_orga1.address, member, { from: _orga1.address });
+          assert.equal(isWhitelisted, true, `${member} is not in the whitelist`);
+        }
+      });
+    });
+    context('Member trying to register is not in the whitelist', function () {
+      it('should return false', async function () {
+        let _orga1 = organisations.orga1;
+        let _orga2 = organisations.orga2;
+        let isWhitelisted = await yugoDao.participantIsWhiteListed(_orga1.address, _orga2.members[0], {
+          from: _orga1.address
+        });
+        assert.equal(isWhitelisted, false, `${_orga2.members[0]} is in the whitelist`);
+      });
+    });
+    context('orga selected by member is not registered', function () {
+      it('should return revert', async function () {
+        let _orga1 = organisations.orga1;
+        let isWhitelisted = await yugoDao.participantIsWhiteListed(unknownOrga, _orga1.members[0], {
+          from: _orga1.members[0]
+        });
+        assert.equal(isWhitelisted, false, `${_orga1.members[0]} is in the whitelist`);
+      });
+    });
+  }); 
+
+  /**
    * The following tests the addContest
    * It tests that :
    * revert  voting session not over
@@ -201,15 +263,16 @@ contract('test_YugoDao', async function (accounts) {
    */
   describe('#addContest()', function () {
     context('orga did not purchase a Yugo token', function () {
-      it('yugo balance of orga1 should be 0', async function () {
-        let expectedOrga1YugoBal = new BN(0);
+      // it('yugo balance of orga1 should be 0', async function () {
+      //   let expectedOrga1YugoBal = new BN(0);
         // check balance by calling Yugo directly
         // let orga1YugoBal = await yugo.balanceOf(contestCreator, {from: contestCreator});
         // expect(orga1YugoBal).to.be.bignumber.equal(expectedOrga1YugoBal);
-      })
+      // })
       it('should revert', async function () {
         await expectRevert(
           yugoDao.addContest(
+            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -221,30 +284,32 @@ contract('test_YugoDao', async function (accounts) {
           );
       });
     });
+    
     context('orga1 buys token first, then creates contest', function () {
-      it('check orga1 is registered', async function () {
-        let isRegistered = await yugoDao.organisationRegistrationStatus(contestCreator,{from: manager.address});
-        assert.equal(isRegistered, true, 'you need to be registered to purchase the token');
-      })
+      // it('check orga1 is registered', async function () {
+      //   let isRegistered = await yugoDao.organisationRegistrationStatus(contestCreator,{from: manager.address});
+      //   assert.equal(isRegistered, true, 'you need to be registered to purchase the token');
+      // })
       it('should emit Received events', async function () {
         let _value = web3.utils.toWei('0.1', "ether")
-        let tx = await manager.sendTransaction({to:manager.address, from:contestCreator, value: _value});
+        let tx = await manager.purchaseYugo({to:manager.address, from:contestCreator, value: _value});
         await expectEvent(tx, 'Received', {organisation: contestCreator, value: _value});
       });
-      it('Token is claimed by orga1', async function () {
+      it('should emit YugoTransfer events', async function () {
         const tx = await manager.transferYugo({from: contestCreator})
         const tokenAmount = web3.utils.toWei('1');
         expectEvent(tx, 'YugoTransfer', {recipient : contestCreator, amount: tokenAmount })
       })
       it('should emit the ContestCreated event', async function () {
         let tx = await yugoDao.addContest(
+          // contest.nonce,
           contest.name,
           contest.themes,
           contest.countries,
           contest.applicationEndDate,
           contest.votingEndDate,
           contest.funds,
-          { from: contestCreator }
+          { from: contestCreator, value: contest.funds }
         );
         await expectEvent(tx, 'ContestCreated', {
           addressOrga: contestCreator,
@@ -257,6 +322,7 @@ contract('test_YugoDao', async function (accounts) {
       it('should revert', async function () {
         await expectRevert(
           yugoDao.addContest(
+            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -279,7 +345,7 @@ contract('test_YugoDao', async function (accounts) {
         async ([orga, data]) => { 
               let tx1 = await yugoDao.registerOrganisation(data.themes, data.country, { from: data.address });
               expectEvent(tx1, 'OrganizationRegistered', { addressOrga: data.address });
-              let tx2 = await manager.sendTransaction({to:manager.address, from:data.address , value: _ETH});
+              let tx2 = await manager.purchaseYugo({to:manager.address, from:data.address , value: _ETH});
               expectEvent(tx2, 'Received', {organisation: data.address, value: _ETH});
               let tx3 = await manager.transferYugo({from: data.address})
               expectEvent(tx3, 'YugoTransfer', {recipient : data.address, amount: tokenAmount })
@@ -349,8 +415,6 @@ contract('test_YugoDao', async function (accounts) {
     });
   });
 
-  // see test_deleteAction.js for the deleteAction function
-
   /**
    * The following tests the voteForAction
    * It tests that :
@@ -382,25 +446,25 @@ contract('test_YugoDao', async function (accounts) {
         console.log('votingEndDate: ', contest.votingEndDate);
         console.log('currentTime: ', currentTime)
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, { from: contestCreator }),
+          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga1.address, { from: organisations.orga1.address}),
           'You can not vote for this action'
         );
       });
     });
     context('correct params', function () {
       it('should emit HasVotedForAction', async function () {
-        let tx = await yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[0] });
+        let tx = await yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] });
         await expectEvent(tx, 'HasVotedForAction', {
           addressContestCreator: contestCreator,
           addressActionCreator: actionCreator,
-          voterAddress: organisations.orga1.members[0]
+          voterAddress: organisations.orga3.members[0]
         });
       });
     });
     context('cant vote multiple times', function () {
       it('should revert', async function () {
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[0] }),
+          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] }),
           'You have already voted'
         );
       });
@@ -410,7 +474,7 @@ contract('test_YugoDao', async function (accounts) {
         const futureTimestamp = contest.votingEndDate + 1
         mine(futureTimestamp);
         await expectRevert(
-          yugoDao.voteForAction(contestCreator, actionCreator, { from: organisations.orga1.members[1] }),
+          yugoDao.voteForAction(contestCreator, actionCreator, organisations.orga3.address, { from: organisations.orga3.members[0] }),
           'Voting is closed'
         );
       });
@@ -431,7 +495,7 @@ contract('test_YugoDao', async function (accounts) {
         let currentTime = await getBlockTimestamp();
         console.log('votingEndDate: ', contest.votingEndDate);
         console.log('currentTime: ', currentTime)
-        assert(currentTime < contest.votingEndDate, 'currentTime > votingEndDate')
+        assert(currentTime < contest.votingEndDate, 'currentTime is not < votingEndDate')
       })
       it('should revert', async function () {
         await expectRevert(
@@ -453,44 +517,46 @@ contract('test_YugoDao', async function (accounts) {
           assert(currentTime > contest.votingEndDate, 'currentTime > votingEndDate')
         }
       })
+      it('should return the VoteTallied event', async function() {
+        const hash = await yugoDao.tallyVote(contestCreator, { from: contestCreator });
+        await expectEvent(hash, 'VoteTallied', {
+          winner: actionCreator,
+          actionName: action.name,
+          nbVotes: new BN(1),
+          requiredFunds: action.funds
+        });
+        
+        console.log('winner: ', hash.logs[0].args.winner);
+        console.log('actionName: ', hash.logs[0].args.actionName);
+        console.log('nbVotes: ', Number(hash.logs[0].args.nbVotes));
+        console.log('requiredFunds: ', Number(hash.logs[0].args.requiredFunds));
+
+      });
     });
   });
+  describe('#getMessageHash()', function () {
+    context('contestCreator sends back the agreement + nonce', function () {
+      it('should return the right hash', async function() {
+        let _agreement = agreement();
+        let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
+        console.log('hash: ', hash);
+      });
+    });
+  });
+  //NOTE: recent changes in the verify function implies to change the test (in progress)
+  // describe('#verify()', function () {
+  //   context('msg.sender is the signer of the agreement', function () {
+  //     it('should return true', async function() {
+  //       const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715';
+  //       let _agreement = agreement();
+  //       let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
+  //       const msgSigned = await verifSign.getEthSignedMessageHash.call(hash, {from: admin});
+  //       let isVerified = await verifSign.verify.call(actionCreator, action.funds, agreement, nonce, msgSigned, { from: contestCreator });
+  //       assert(isVerified == true, 'not the same signer')
+  //     });
+  //   });
+  // });
 
-  /**
-   * The following function tests participantIsWhiteListed()
-   * It tests that:
-   * it returns true if participant is in the whitelist
-   * it returns false if the caller is not in the whitelist
-   * it reverts if organisation givern by the caller is not yet registered
-   */
-  describe('#participantIsWhiteListed()', function () {
-    context('with correct members address', function () {
-      it('should return true for each member address', async function () {
-        let _orga1 = organisations.orga1;
-        for (const member of Object.values(_orga1.members)) {
-          let isWhitelisted = await yugoDao.participantIsWhiteListed(_orga1.address, member, { from: _orga1.address });
-          assert.equal(isWhitelisted, true, `${member} is not in the whitelist`);
-        }
-      });
-    });
-    context('Member trying to register is not in the whitelist', function () {
-      it('should return false', async function () {
-        let _orga1 = organisations.orga1;
-        let _orga2 = organisations.orga2;
-        let isWhitelisted = await yugoDao.participantIsWhiteListed(_orga1.address, _orga2.members[0], {
-          from: _orga1.address
-        });
-        assert.equal(isWhitelisted, false, `${_orga2.members[0]} is in the whitelist`);
-      });
-    });
-    context('orga selected by member is not registered', function () {
-      it('should return revert', async function () {
-        let _orga1 = organisations.orga1;
-        let isWhitelisted = await yugoDao.participantIsWhiteListed(unknownOrga, _orga1.members[0], {
-          from: _orga1.members[0]
-        });
-        assert.equal(isWhitelisted, false, `${_orga1.members[0]} is in the whitelist`);
-      });
-    });
-  }); 
+
+
 }); 
