@@ -15,7 +15,7 @@ import { IAction } from 'src/models';
 import { Box, Button } from '@mui/material';
 
 interface Props {
-	action: IAction;
+	action: any;
 	index: number;
 }
 
@@ -66,11 +66,11 @@ export default function ContestCard({ action, index }: Props) {
 			<CardMedia component="img" height="190" image={renderImg()} alt="action" />
 			<CardContent>
 				<Typography variant="h5" color="primary">
-					<u>Requested funds</u> : {action?.requiredFunds} ETH
+					<u>Requested funds</u> : {action?.attributes?.requiredFunds} ETH
 				</Typography>
 				<br />
 				<Typography variant="body2" color="secondary">
-					{action.description}
+					{action?.attributes?.description}
 				</Typography>
 			</CardContent>
 			<CardActionsWrapper

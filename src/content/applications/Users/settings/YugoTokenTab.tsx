@@ -90,6 +90,9 @@ function YugoTokenTab() {
 		abi,
 		contractAddress,
 		functionName: 'hasEthDeposit',
+		params: {
+			_account: account,
+		},
 	});
 
 	const {
@@ -125,7 +128,7 @@ function YugoTokenTab() {
 	}, [data]);
 
 	useEffect(() => {
-		if (balanceData === '0' && !ledgerData) {
+		if (balanceData === '0' && !isLoadingBalance && !ledgerData) {
 			fetchLedgerState();
 		}
 	}, [balanceData, isLoadingBalance]);
@@ -151,6 +154,8 @@ function YugoTokenTab() {
 		if (errorLedger) return JSON.stringify(errorLedger);
 		return null;
 	};
+
+	console.log('datas', balanceData, ledgerData, transferYugoData, data, hasYugo);
 
 	const isLoading =
 		isFetching ||

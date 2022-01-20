@@ -50,7 +50,7 @@ function ActionsContainer() {
 
 	useEffect(() => {
 		queryActions();
-	}, [actionsData]);
+	}, [actionsData, contestData]);
 
 	useEffect(() => {
 		const addrGrantOrga = (
@@ -85,7 +85,6 @@ function ActionsContainer() {
 			const queryActions = new Moralis.Query('Actions');
 			const query = await queryActions.containedIn('addrOrgaCreator', arrayAddr);
 			const filteredActions = await query.find();
-			console.log('addresses', arrayAddr, filteredActions);
 			setActions(filteredActions);
 		}
 	};
@@ -121,7 +120,7 @@ function ActionsContainer() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
-						{(isLoading || isFetching) && <LinearProgress color="primary" />}
+						{(isLoading || isFetching || isLoadingContest) && <LinearProgress color="primary" />}
 						<Actions currentUser={currentUser} actions={actions} />
 					</Grid>
 				</Grid>
