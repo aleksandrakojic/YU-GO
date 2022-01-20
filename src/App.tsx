@@ -83,12 +83,12 @@ const App = () => {
 		}
 	}, []);
 
-	useEffect(() => {
+	/*useEffect(() => {
 		if (prevAccount && account && prevAccount !== account) {
 			logout();
 			navigate('/');
 		}
-	}, [account]);
+	}, [account]);*/
 
 	useEffect(() => {
 		if (chain && chainId) {
@@ -119,17 +119,14 @@ const App = () => {
 	}, [themeData, countryData, isLoadingThemes, isLoadingCountries]);
 
 	useEffect(() => {
-		console.log('isWebenabled');
-		if (!isWeb3Enabled && !isWeb3EnableLoading) {
-			enableWeb3();
-		} else {
-			if (!themeData && !contractData.thematics.length) {
-				fetchThemes();
-			}
-			if (!countryData && !contractData.countries.length) {
-				fetchCountries();
-			}
-		}
+	
+    if (!themeData && !contractData.thematics.length) {
+      fetchThemes();
+    }
+    if (!countryData && !contractData.countries.length) {
+      fetchCountries();
+    }
+		
 	}, [isWeb3Enabled, isWeb3EnableLoading]);
 
 	if (isInitializing || isLoggingOut || isAuthenticating) {

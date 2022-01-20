@@ -20,6 +20,7 @@ import Logo from "src/components/Logo";
 
 const Moralis = require("moralis");
 
+
 enum SignupType {
   None,
   Organization,
@@ -48,7 +49,10 @@ function LandingPage() {
   const [newOrganistation, setNewOrganisation] = useState<any>(null);
   const [newParticipant, setNewParticipant] = useState<any>(null);
 
+
+
   useEffect(() => {
+    
     if (
       data &&
       newOrganistation?.name &&
@@ -56,13 +60,12 @@ function LandingPage() {
       newOrganistation?.thematics &&
       newOrganistation
     ) {
-      const d: any = data;
-      if (d?.events?.OrganizationRegistered) {
+      if ((data as any)?.events?.OrganizationRegistered) {
         console.log("inside create orga db", data);
         const Organisation = Moralis.Object.extend("Organisations");
         const orga = new Organisation();
 
-        orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
+        orga.save({ ...newOrganistation, ethAddress: (data as any)?.from }).then(
           (res) => {
             user?.set("type", 2);
             user?.save().then(
@@ -88,10 +91,7 @@ function LandingPage() {
     if (!isAuthenticated) {
       await authenticate();
     }
-    setNewParticipant({
-      ...member,
-      ethAddress: Moralis.User.current().attributes.ethAddress,
-    });
+    
     console.log(
       "onComplete authenticate",
       user,
@@ -138,6 +138,10 @@ function LandingPage() {
         type: 1,
       });
 
+      setNewParticipant({
+        ...member,
+        ethAddress: Moralis.User.current().attributes.ethAddress,
+      });
       navigate("/dashboards/profile/settings");
       /*user?.set("type", 1);
         await user?.save().then(res=>{
@@ -169,7 +173,6 @@ function LandingPage() {
           contractAddress,
           functionName: "registerOrganisation",
           params: {
-            name: organization?.name,
             thematicIds: organization?.thematics,
             countryId: organization?.country,
           },
