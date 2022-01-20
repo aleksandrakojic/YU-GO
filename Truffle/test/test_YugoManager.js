@@ -6,6 +6,8 @@ const { expect, assert } = require('chai');
 const managerAbstraction = artifacts.require('YugoManager');
 const yugoAbstraction = artifacts.require('Yugo');
 const yugoDaoAbstraction = artifacts.require('YugoDao');
+const GrantEscrowAbstraction = artifacts.require('GrantEscrow');
+const VerifySignatureAbstraction = artifacts.require('VerifySignature');
 
 contract('test_manager', async function (accounts) {
     const admin = accounts[0];
@@ -23,19 +25,15 @@ contract('test_manager', async function (accounts) {
     
     let manager, yugo, yugoDao;
 
-   let logAddresses = async function() {
-    console.log('admin address:', admin);
-    console.log('manager address:', manager.address);
-    console.log('yugo address:', yugo.address);
-    console.log('orga1 address:', orga1);
-   }
-
     before('create an instance of the contract', async function createInstance() {
       //instantiate main contract from abstraction
       manager = await managerAbstraction.new({ from: admin });
       yugo = await yugoAbstraction.new(manager.address, { from: admin });
-      yugoDao = await yugoDaoAbstraction.new(yugo.address, { from: admin });
-      await logAddresses();
+      escrow = await GrantEscrowAbstraction.new({ from: admin });
+      verifSign = await VerifySignatureAbstraction.new({from: admin});
+      yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, verifSign.address, { from: admin });
+      //set yugo and yugoDao addresses in manager
+      await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
     });
 
     /**

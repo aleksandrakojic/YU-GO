@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {convert} from "./libraries/Convert.sol";
 import "./interfaces/IYugoDao.sol";
 
+/**
+* @notice This smart contract handles the signature of an agreement, confirming that the winner can claim the price.
+*/
 contract VerifySignature is Ownable {
     
     struct Confidential {
@@ -24,9 +27,9 @@ contract VerifySignature is Ownable {
     mapping( address => mapping (address => bool)) private unlockFunds;
     
     /**
-    * @notice Set the address of teh YugoDao contract
-    * @dev Only the account deploying can call this function
-    * @dev require boolean yugoAddrSet to be false
+    * @notice Set the address of teh YugoDao contract <br />
+    * @dev Only the account deploying can call this function <br />
+    * @dev require boolean yugoAddrSet to be false <br />
     * @dev yugoAddrSet is updated to true to avoid any further attempt to change the address
     * @param _dao YugoDao contract address
     */
@@ -37,6 +40,17 @@ contract VerifySignature is Ownable {
         emit YugoDaoAddrSet(_dao);
     }
 
+    /**
+    * @notice Set the address of teh YugoDao contract <br />
+    * @dev Only the account deploying can call this function <br />
+    * @dev require boolean yugoAddrSet to be false <br />
+    * @dev yugoAddrSet is updated to true to avoid any further attempt to change the address <br />
+    * @param _to Address of the recipient 
+    * @param _amount Funds required by the action 
+    * @param _agreement Agreement unsigned 
+    * @param _nonce The secret number used for the hash 
+    * @return Hash as a Bytes32
+    */
     function getMessageHash(
         address _to,
         uint _amount,
@@ -50,6 +64,11 @@ contract VerifySignature is Ownable {
         return _msgHash;
     }
 
+    /**
+    * @notice Adds "Ethereum Signed Message" to the hash
+    * @param _messageHash The hash from getMEssageHash 
+    * @return Hash as a Bytes32
+    */
     function getEthSignedMessageHash(bytes32 _messageHash)
         public
         pure
@@ -62,7 +81,15 @@ contract VerifySignature is Ownable {
             );
     }
 
-
+    /**
+    * @notice Allows the Grant Orga to claim the funds in escrow
+    * @param _to Address of the recipient 
+    * @param _amount Funds required by the action 
+    * @param _agreement Agreement unsigned 
+    * @param _nonce The secret number used for the hash 
+    * @param signature The hash signed fy teh Grant Orga 
+    * @return True if msg.sender is the signer
+    */
     function verify(
         address _to,
         uint _amount,
@@ -81,6 +108,13 @@ contract VerifySignature is Ownable {
         }
     }
 
+
+    /**
+    * @notice Recover the signer of a hash
+    * @param _ethSignedMessageHash The first part of the signature
+    * @param _signature The hash signed by the Grant Orga 
+    * @return the signer
+    */
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
         public
         pure
@@ -91,6 +125,10 @@ contract VerifySignature is Ownable {
         return ecrecover(_ethSignedMessageHash, v, r, s);
     }
 
+    /**
+    * @notice Function to split the signature
+    * @param sig The hash signed by the Grant Orga 
+    */
     function splitSignature(bytes memory sig)
         public
         pure
@@ -123,6 +161,12 @@ contract VerifySignature is Ownable {
         // implicitly return (r, s, v)
     }
 
+    /**
+    * @notice Checks teh boolean of mapping unlockFunds 
+    * @dev called from GrantEscrow when claiming funds in escrow
+    * @param _from The address of the Grant Orga 
+    * @param _to The address of the recipient
+    */
     function canWithdraw(address _from, address _to) external view returns(bool) {
         return unlockFunds[_from][_to];
     }
