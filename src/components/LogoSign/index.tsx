@@ -4,7 +4,7 @@ import { styled } from '@mui/material/styles';
 import React from 'react';
 
 const LogoWrapper = styled(Link)(
-  ({ theme }) => `
+	({ theme }) => `
         color: ${theme.palette.text.primary};
         display: flex;
         text-decoration: none;
@@ -15,14 +15,14 @@ const LogoWrapper = styled(Link)(
 );
 
 const LogoSignWrapper = styled(Box)(
-  () => `
+	() => `
         width: 52px;
         height: 38px;
 `
 );
 
 const LogoSign = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         background: ${theme.general.reactFrameworkColor};
         width: 18px;
         height: 18px;
@@ -59,7 +59,7 @@ const LogoSign = styled(Box)(
 );
 
 const LogoSignInner = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
         width: 16px;
         height: 16px;
         position: absolute;
@@ -72,17 +72,17 @@ const LogoSignInner = styled(Box)(
 );
 
 function Logo() {
-  return (
-    <Tooltip title="YU-GO DAO" arrow>
-      <LogoWrapper to="/overview">
-        <LogoSignWrapper>
-          <LogoSign>
-            <LogoSignInner/>
-          </LogoSign>
-        </LogoSignWrapper>
-      </LogoWrapper>
-    </Tooltip>
-  );
+	return (
+		<Tooltip title="YU-GO DAO" arrow>
+			<LogoWrapper to="/overview">
+				<LogoSignWrapper>
+					<LogoSign>
+						<LogoSignInner />
+					</LogoSign>
+				</LogoSignWrapper>
+			</LogoWrapper>
+		</Tooltip>
+	);
 }
 
 export default Logo;

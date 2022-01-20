@@ -83,11 +83,12 @@ contract YugoManager is Ownable {
     }
 
     /**
-    * @notice Checks if an organisation has purchased a token 
-    * @return _ledgerState boolean true if organisation has purchased a yugo token
+    * @notice Returns deposit state of organization
+    * @return _ledgerState boolean true if organisation has deposit for yugo token
     */
-    function hasEthDeposit() external view returns(bool _ledgerState) {        
-        return EthLedger[msg.sender] == yugoTokenCost;
+    function hasEthDeposit(address _account) external view returns(bool _ledgerState) {        
+        _ledgerState = EthLedger[_account] == yugoTokenCost;
+        return _ledgerState;
     }
 
     /**
