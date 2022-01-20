@@ -27,7 +27,6 @@ function ContestsContainer() {
 	} = useMoralisQuery('Contests', (query) => query.includeAll(), [], {
 		live: true,
 	});
-	console.log('contestData', contestData, organization, account);
 
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 

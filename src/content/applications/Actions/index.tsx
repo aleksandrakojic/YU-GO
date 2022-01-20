@@ -99,7 +99,6 @@ function ActionsContainer() {
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
 	const handleSubmit = (action: any) => {
-		console.log('action', action);
 		const contractData: any = {
 			abi,
 			contractAddress,
@@ -113,8 +112,6 @@ function ActionsContainer() {
 		fetch({ params: contractData });
 		setNewAction(action);
 	};
-
-	console.log('create action', data, isLoading, isFetching, eligibleContests, actionsData);
 
 	return (
 		<>

@@ -26,6 +26,7 @@
     "final-form": "^4.20.6",
     "framer-motion": "^5.5.5",
     "moralis": "latest",
+    "notistack": "^2.0.3",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "react": "latest",

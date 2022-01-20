@@ -9,9 +9,10 @@ import { CircularProgress, Container, CssBaseline, Typography } from '@mui/mater
 import { useMoralis, useWeb3ExecuteFunction, useChain } from 'react-moralis';
 import contractInfo from 'src/contracts/YugoDao.json';
 import { AppContext } from './contexts/AppContext';
+import { SnackbarProvider } from 'notistack';
 
 import { useNavigate } from 'react-router-dom';
-import { IContractData, ICountryCode } from './models';
+import { IContractData, ICountryCode, ProfileType } from './models';
 import { usePrevious } from './helpers/utils';
 
 enum DataTypes {
@@ -30,8 +31,9 @@ const App = () => {
 		isInitialized,
 		user,
 		logout,
-		isAuthenticating,
+		isAuthenticated,
 		isLoggingOut,
+		setUserData,
 	} = useMoralis();
 	const { chainId, chain, account } = useChain();
 	const { networks, abi } = contractInfo;
@@ -41,6 +43,7 @@ const App = () => {
 		thematics: [],
 		countries: [],
 	});
+	const [type, setType] = useState(ProfileType.None);
 	const prevAccount = usePrevious(account);
 
 	const {
@@ -79,9 +82,32 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
+		if (isAuthenticated) {
+			const userType = user?.attributes?.type;
+			if (userType) {
+					if (userType === ProfileType.Organization) {
+						navigate('/dashboards/organization/settings');
+					}
+					if (userType === ProfileType.Member) {
+						navigate('/dashboards/profile/details');
+					}
+			} else if (type) {
+				if (type === ProfileType.Organization) {
+					setUserData({ type });
+					navigate('/dashboards/organization/settings');
+				} else if (type === ProfileType.Member) {
+					setUserData({ type });
+					navigate('/dashboards/profile/details');
+				}
+			}
+		}
+	}, [isAuthenticated, user, type]);
+
+	useEffect(() => {
 		if (prevAccount && account && prevAccount !== account) {
 			logout();
 			navigate('/');
+			setType(ProfileType.None);
 		}
 	}, [account]);
 
@@ -122,7 +148,7 @@ const App = () => {
 		}
 	}, [isWeb3Enabled, isWeb3EnableLoading]);
 
-	if (isInitializing || isLoggingOut || isAuthenticating) {
+	if (isInitializing || isLoggingOut) {
 		return (
 			<Container
 				sx={{
@@ -163,10 +189,20 @@ const App = () => {
 	return (
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>
-				<AppContext.Provider value={{ ...contractData, abi, contractAddress, currentUser: user }}>
-					<CssBaseline />
-					{content}
-				</AppContext.Provider>
+				<SnackbarProvider
+					maxSnack={3}
+					anchorOrigin={{
+						vertical: 'top',
+						horizontal: 'left',
+					}}
+				>
+					<AppContext.Provider
+						value={{ ...contractData, abi, contractAddress, currentUser: user, type, setType }}
+					>
+						<CssBaseline />
+						{content}
+					</AppContext.Provider>
+				</SnackbarProvider>
 			</LocalizationProvider>
 		</ThemeProvider>
 	);

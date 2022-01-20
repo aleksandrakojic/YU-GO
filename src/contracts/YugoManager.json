@@ -13335,12 +13335,12 @@
         }
       },
       "links": {},
-      "address": "0xb55C7377F4F902aDC6088Ef5941F7c7EC7F926e5",
-      "transactionHash": "0x7e49329fc0ba5fe6d16dfba8e7963954c768dcdc65d48a90147b69be037e4420"
+      "address": "0x3365B69c6EDb737C6c8d4594246776A07B841412",
+      "transactionHash": "0x19517ef3718b5a47ef723e2ece1140099d6493882741b8deca1dcd003b62ee7a"
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-01-19T21:42:32.613Z",
+  "updatedAt": "2022-01-20T04:45:16.479Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
