@@ -482,12 +482,12 @@ contract('test_YugoDao', async function (accounts) {
   });
 
   /**
-   * The following tests the tallyVote
+   * The following tests the tallyVotes
    * It tests that :
    * revert if voting session not over
    * should emit VoteTallied if over
    */
-  describe('#tallyVote()', function () {
+  describe('#tallyVotes()', function () {
     context('voting session not finished', function () {
        it('currentTime < votingEndDate', async function () {
         const pastTimestamp = contest.votingEndDate - 1
@@ -499,7 +499,7 @@ contract('test_YugoDao', async function (accounts) {
       })
       it('should revert', async function () {
         await expectRevert(
-          yugoDao.tallyVote(contestCreator, { from: contestCreator }),
+          yugoDao.tallyVotes(contestCreator, { from: contestCreator }),
           'Voting has not finished yet'
         );
       });
@@ -518,7 +518,7 @@ contract('test_YugoDao', async function (accounts) {
         }
       })
       it('should return the VoteTallied event', async function() {
-        const hash = await yugoDao.tallyVote(contestCreator, { from: contestCreator });
+        const hash = await yugoDao.tallyVotes(contestCreator, { from: contestCreator });
         await expectEvent(hash, 'VoteTallied', {
           winner: actionCreator,
           actionName: action.name,

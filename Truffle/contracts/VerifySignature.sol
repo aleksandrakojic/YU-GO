@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {convert} from "./libraries/Convert.sol";
+import {utils} from "./libraries/utils.sol";
 import "./interfaces/IYugoDao.sol";
 
 /**
@@ -162,7 +162,7 @@ contract VerifySignature is Ownable {
     }
 
     /**
-    * @notice Checks teh boolean of mapping unlockFunds 
+    * @notice Checks the boolean of mapping unlockFunds 
     * @dev called from GrantEscrow when claiming funds in escrow
     * @param _from The address of the Grant Orga 
     * @param _to The address of the recipient

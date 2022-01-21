@@ -31,9 +31,9 @@ contract YugoManager is Ownable {
     event FundsTransferedToWinner(address organisation);
     event ContractsAddrSet(address yugo, address yugodao);
 
-    receive() external payable {
-        purchaseYugo();
-    }
+    // receive() external payable {
+    //     purchaseYugo();
+    // }
 
     /**
     * @notice Set smart contract addresses of YugoDao and VerifySignature
@@ -52,14 +52,12 @@ contract YugoManager is Ownable {
     * @dev verifies that the caller did not purchase a token before (token are burned at subscription deadline). 
     * @dev verifies that the ETH sent equals the token price
     */
-    function purchaseYugo() public payable {
+    function purchaseYugo() external payable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
         require(EthLedger[msg.sender] == 0, 'you have made a deposit');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
         require(msg.value == yugoTokenCost, "wrong ETH amount");
-        address sender = msg.sender;
-        uint deposited = msg.value;
-        EthLedger[sender] = deposited; // specifies that ETH was deposited
+        EthLedger[msg.sender] = msg.value; // specifies that ETH was deposited
         EligibleToClaimYugo[msg.sender] = true; //specifies that Yugo can now be claimed by the caller
         emit Received(msg.sender, msg.value);
     }
@@ -67,11 +65,12 @@ contract YugoManager is Ownable {
     /**
     * @notice sends ETH to pay for the project expenditures, only the admin can call it.  
     * @param _to - the address of a staff member
+    * @param _amount - the amount to send to the recipient
     * @dev requires success
     */
-    function sendEth(address payable _to) public payable onlyOwner {
-        bool sent = _to.send(msg.value);
-        require(sent, "Failed to send Ether");
+    function withdrawEth(address payable _to, uint _amount) public payable onlyOwner {
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Failed to send Ether");
     }
 
     /**

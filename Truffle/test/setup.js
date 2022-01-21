@@ -107,7 +107,7 @@ const setup = async function(accounts){
     //orga 1, 2 and 3 purchase a token
     let _value = web3.utils.toWei('0.1', "ether")
     for (const _orga of Object.values(orga)) {
-      await manager.sendTransaction({to:manager.address, from: _orga.address, value: _value});
+      await manager.purchaseYugo({to:manager.address, from: _orga.address, value: _value});
     }
     //orga 1, 2 and 3 claim the token
     for (const _orga of Object.values(orga)) {

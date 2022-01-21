@@ -24,9 +24,14 @@ contract GrantEscrow is Ownable {
         _;
     }
 
-    receive() external payable {
-        depositGrant(msg.sender, msg.value);
-    } 
+     modifier onlyFromYugoDao() {
+        require(msg.sender == address(yugodao), 'Only YugoDao can call this function');
+        _;
+    }
+
+    // receive() external payable {
+    //     depositGrant(msg.sender, msg.value);
+    // } 
 
     /**
     * @notice Set smart contract addresses of YugoDao and VerifySignature
@@ -44,7 +49,7 @@ contract GrantEscrow is Ownable {
     * @dev only available for registered organisations
     * @dev function also called by fallback receive()
     */
-    function depositGrant(address _orga, uint _amount) public payable onlyRegisteredOrga(_orga) {
+    function depositGrant(address _orga, uint _amount) external payable onlyFromYugoDao { //only internal, create another function pour call exterieur
         Grants[_orga] = _amount;
         emit GrantDeposited(_amount, _orga);
     }
@@ -62,7 +67,8 @@ contract GrantEscrow is Ownable {
         require(msg.sender == _winner, "you cannot withdraw, seems like you did not win the contest");
         require(verifSign.canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
         //TODO: pass unlockFunds boolean back to false
-        payable(msg.sender).transfer(_requiredFunds);
+        (bool success, ) = msg.sender.call{value:_requiredFunds}("");
+        require(success, "Transfer failed.");
         emit GrantWithdrawn(_requiredFunds, msg.sender);
     }
 
