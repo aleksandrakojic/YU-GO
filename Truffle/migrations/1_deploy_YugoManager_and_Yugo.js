@@ -24,14 +24,14 @@ module.exports = async function(deployer) {
    verifSign = await VerifySignature.deployed();
 
   //::::: Deploy YugoDao :::::|
-  await deployer.deploy(YugoDao, token.address, escrow.address, verifSign.address);
+  await deployer.deploy(YugoDao, token.address, escrow.address);
   dao = await YugoDao.deployed();
 
   //::::: Set Token and YugoDao addresses in Manager :::::|
   await manager.setContractsAddresses(token.address, dao.address);
 
   //::::: Set YugoDao addresses in VerifySignature :::::|
-  await verifSign.setYugoDaoAddress(dao.address);
+  await verifSign.setYugoDaoAddress(dao.address, escrow.address);
 
    //::::: Set YugoDao addresses in GrantEscrow :::::|
   await escrow.setContractsAddresses(dao.address, verifSign.address);

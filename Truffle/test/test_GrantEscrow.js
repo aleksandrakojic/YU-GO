@@ -20,7 +20,7 @@ contract('test_GrantEscrow', async function (accounts) {
                 let amount = web3.utils.toWei('10', "ether")
                 await expectRevert(
                     escrow.depositGrant(unknownOrga, amount, {from: unknownOrga}),
-                    'Only YugoDao can call this function'
+                    'Only YugoDao, VerifySignature or GrantEscrow (this) contract can call this function'
                 );
             });
         });

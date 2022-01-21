@@ -17,15 +17,15 @@ contract GrantEscrow is Ownable {
     event GrantWithdrawn(uint grant, address recipient);
 
     mapping(address => uint) public Grants;
-    mapping (address =>  mapping (address => bool)) UnlockFunds;
+    mapping (address =>  mapping (address => bool)) private UnlockFunds;
 
     modifier onlyRegisteredOrga(address _orga) {
         require(yugodao.organisationRegistrationStatus(_orga), 'You are not registered');
         _;
     }
 
-     modifier onlyFromYugoDao() {
-        require(msg.sender == address(yugodao), 'Only YugoDao can call this function');
+    modifier restrictedToContracts() {
+        require(msg.sender == address(yugodao) || msg.sender == address(verifSign) || msg.sender == address(this), 'Only YugoDao, VerifySignature or GrantEscrow (this) contract can call this function');
         _;
     }
 
@@ -49,7 +49,7 @@ contract GrantEscrow is Ownable {
     * @dev only available for registered organisations
     * @dev function also called by fallback receive()
     */
-    function depositGrant(address _orga, uint _amount) external payable onlyFromYugoDao { //only internal, create another function pour call exterieur
+    function depositGrant(address _orga, uint _amount) external payable restrictedToContracts { //only internal, create another function pour call exterieur
         Grants[_orga] = _amount;
         emit GrantDeposited(_amount, _orga);
     }
@@ -65,8 +65,8 @@ contract GrantEscrow is Ownable {
     function withdrawGrant(address _contestCreator) external onlyRegisteredOrga(msg.sender) {
         (address _winner, uint _requiredFunds ) = yugodao.getContestWinner(_contestCreator);
         require(msg.sender == _winner, "you cannot withdraw, seems like you did not win the contest");
-        require(verifSign.canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
-        //TODO: pass unlockFunds boolean back to false
+        require(_canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
+        setWithdrawStatus(_contestCreator, msg.sender, false);//TODO: TESTING
         (bool success, ) = msg.sender.call{value:_requiredFunds}("");
         require(success, "Transfer failed.");
         emit GrantWithdrawn(_requiredFunds, msg.sender);
@@ -78,6 +78,28 @@ contract GrantEscrow is Ownable {
     */
     function fundsInEscrow(address _contestCreator) view external returns(uint){
         return Grants[_contestCreator];
+    }
+
+     /**
+    * @notice Set the authorisation to withdraw funds 
+    * @dev can only be called by trusted contracts, in this case: VerifySignature.sol
+    * @param _from The address of the Grant Orga 
+    * @param _to The address of the recipient
+    * @param _state true: the recipient can withdraw
+    */
+    function setWithdrawStatus(address _from, address _to, bool _state) public restrictedToContracts returns(bool) {
+        UnlockFunds[_from][_to] = _state;
+        return UnlockFunds[_from][_to];
+    }
+
+    /**
+    * @notice Checks the boolean of mapping unlockFunds 
+    * @dev called from GrantEscrow when claiming funds in escrow
+    * @param _from The address of the Grant Orga 
+    * @param _to The address of the recipient
+    */
+    function _canWithdraw(address _from, address _to) internal view returns(bool) {
+        return UnlockFunds[_from][_to];
     }
 
 }

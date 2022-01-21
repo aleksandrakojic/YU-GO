@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "./interfaces/IYugo.sol";
 import "./interfaces/IGrantEscrow.sol";
-import "./interfaces/IVerifySignature.sol";
 
 /**  
 * @title Smart Contract for the DAO
@@ -93,20 +92,17 @@ contract YugoDao {
 
     IYugo public immutable yugo;
     IGrantEscrow public immutable escrow;
-    address private immutable verifSignAddr;
 
     /**
     * @notice Set smart contracts' address from migration
     * @param _yugo Address of the YugoToken contract
     * @param _escrow Address of the GrantEscrow contract
-    * @param _verifSign Address of the VerifySignature contract
     */
-    constructor(address _yugo, address _escrow, address _verifSign) {
+    constructor(address _yugo, address _escrow) {
         setThematics();
         setCountries();
         yugo = IYugo(_yugo);
         escrow = IGrantEscrow(_escrow);
-        verifSignAddr = _verifSign;
     }
 
     /**
@@ -122,11 +118,6 @@ contract YugoDao {
     {
         if (msg.sender != _account)
             revert Unauthorized();
-        _;
-    }
-
-    modifier limitedAccess() {
-        require(msg.sender == verifSignAddr, "you are not authorized");
         _;
     }
 

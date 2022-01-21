@@ -91,10 +91,10 @@ const setup = async function(accounts){
     yugo = await yugoAbstraction.new(manager.address, { from: admin });
     escrow = await GrantEscrowAbstraction.new({ from: admin });
     verifSign = await VerifySignatureAbstraction.new({from: admin});
-    yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, verifSign.address, { from: admin });
+    yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, { from: admin });
     //set yugo and yugoDao addresses in manager
     await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
-    await verifSign.setYugoDaoAddress(yugoDao.address, {from: admin});
+    await verifSign.setYugoDaoAddress(yugoDao.address, escrow.address, {from: admin});
     await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
     //register orga 1, 2 and 3
     for (const _orga of Object.values(orga)) {
