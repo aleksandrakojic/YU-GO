@@ -2,8 +2,9 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {convert} from "./libraries/Convert.sol";
+import {utils} from "./libraries/utils.sol";
 import "./interfaces/IYugoDao.sol";
+import "./interfaces/IGrantEscrow.sol";
 
 /**
 * @notice This smart contract handles the signature of an agreement, confirming that the winner can claim the price.
@@ -18,13 +19,13 @@ contract VerifySignature is Ownable {
         }
 
     IYugoDao private yugodao;
+    IGrantEscrow private escrow;
 
     bool private yugoAddrSet;
 
-    event YugoDaoAddrSet(address yugodao);
+    event YugoDaoAddrSet(address yugodao, address grantEscrow);
 
     mapping(address => mapping (address => Confidential)) private confidentials;
-    mapping( address => mapping (address => bool)) private unlockFunds;
     
     /**
     * @notice Set the address of teh YugoDao contract <br />
@@ -33,11 +34,12 @@ contract VerifySignature is Ownable {
     * @dev yugoAddrSet is updated to true to avoid any further attempt to change the address
     * @param _dao YugoDao contract address
     */
-    function setYugoDaoAddress(address _dao) external onlyOwner {
+    function setYugoDaoAddress(address _dao, address _escrow) external onlyOwner {
         require(!yugoAddrSet, "yugo address has already been set");
         yugoAddrSet = true;
         yugodao = IYugoDao(_dao);
-        emit YugoDaoAddrSet(_dao);
+        escrow = IGrantEscrow(_escrow);
+        emit YugoDaoAddrSet(_dao, _escrow);
     }
 
     /**
@@ -101,7 +103,7 @@ contract VerifySignature is Ownable {
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
         if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
-            unlockFunds[msg.sender][_to] = true;
+            escrow.setWithdrawStatus(msg.sender, _to, true);
             return true;
         } else {
             return false;
@@ -161,13 +163,5 @@ contract VerifySignature is Ownable {
         // implicitly return (r, s, v)
     }
 
-    /**
-    * @notice Checks teh boolean of mapping unlockFunds 
-    * @dev called from GrantEscrow when claiming funds in escrow
-    * @param _from The address of the Grant Orga 
-    * @param _to The address of the recipient
-    */
-    function canWithdraw(address _from, address _to) external view returns(bool) {
-        return unlockFunds[_from][_to];
-    }
+
 }

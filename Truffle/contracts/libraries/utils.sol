@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-library convert {
+library utils {
 
     function wei2Pwei(uint _wei) internal pure returns(uint pwei) {
         return _wei/(1*10**15);

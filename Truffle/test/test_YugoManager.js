@@ -31,7 +31,7 @@ contract('test_manager', async function (accounts) {
       yugo = await yugoAbstraction.new(manager.address, { from: admin });
       escrow = await GrantEscrowAbstraction.new({ from: admin });
       verifSign = await VerifySignatureAbstraction.new({from: admin});
-      yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, verifSign.address, { from: admin });
+      yugoDao = await yugoDaoAbstraction.new(yugo.address, escrow.address, { from: admin });
       //set yugo and yugoDao addresses in manager
       await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
     });
@@ -99,7 +99,7 @@ contract('test_manager', async function (accounts) {
       context('registered orga1 purchased a token for the first time', function () {
         it('should emit the Received event', async function () {
           let _value = web3.utils.toWei('0.1', "ether")
-          let tx = await manager.sendTransaction({to:manager.address, from:organisations.orga1.address, value: _value});
+          let tx = await manager.purchaseYugo({to:manager.address, from:organisations.orga1.address, value: _value});
           await expectEvent(tx, 'Received', {organisation: organisations.orga1.address, value: _value});
         });
         it('balance of manager contract should have 0.1 ETH', async function () {

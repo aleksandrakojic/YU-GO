@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "./interfaces/IYugo.sol";
 import "./interfaces/IGrantEscrow.sol";
-import "./interfaces/IVerifySignature.sol";
 
 /**  
 * @title Smart Contract for the DAO
@@ -91,22 +90,19 @@ contract YugoDao {
         "Macedonia"
     ];
 
-    IYugo public yugo;
-    IGrantEscrow public escrow;
-    address private verifSignAddr;
+    IYugo public immutable yugo;
+    IGrantEscrow public immutable escrow;
 
     /**
     * @notice Set smart contracts' address from migration
     * @param _yugo Address of the YugoToken contract
     * @param _escrow Address of the GrantEscrow contract
-    * @param _verifSign Address of the VerifySignature contract
     */
-    constructor(address _yugo, address _escrow, address _verifSign) {
+    constructor(address _yugo, address _escrow) {
         setThematics();
         setCountries();
         yugo = IYugo(_yugo);
         escrow = IGrantEscrow(_escrow);
-        verifSignAddr = _verifSign;
     }
 
     /**
@@ -122,11 +118,6 @@ contract YugoDao {
     {
         if (msg.sender != _account)
             revert Unauthorized();
-        _;
-    }
-
-    modifier limitedAccess() {
-        require(msg.sender == verifSignAddr, "you are not authorized");
         _;
     }
 
@@ -275,6 +266,7 @@ contract YugoDao {
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
+        require(_requiredFunds <= contests[_creatorOfContest].fundsAvailable, 'Funds required are superior to funds available');
         //Verify if action creator country is eligible to participate
         uint[] memory eligibleCountries = contests[_creatorOfContest].countryIDs;
         uint orgaCountry = organisation[msg.sender].country;
@@ -310,6 +302,7 @@ contract YugoDao {
     * @dev Emit ActionCreated event
     * @dev requires the msg.sender to be the action's owner
     * @dev can only be deleted before the application end date
+    * @dev Struct Action is reinitialise before delete to avoid to avoid a sort of "pointer rewinding" effect
     * @param _creatorOfContest Address of creator 
     */
     function deleteActions(address _creatorOfContest) external {
@@ -317,7 +310,8 @@ contract YugoDao {
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool applicationsClosed == false
         require(currentTime < contests[_creatorOfContest].applicationEndDate, 'Votes have started.You cannot delete this action');
         string memory actionName = contests[_creatorOfContest].actions[msg.sender].name;
-        delete contests[_creatorOfContest].actions[msg.sender];
+        contests[_creatorOfContest].actions[msg.sender] = Action('', 0, 0, false); 
+        delete contests[_creatorOfContest].actions[msg.sender]; 
         emit ActionDeleted(_creatorOfContest, msg.sender, actionName);
     }
 
@@ -357,9 +351,9 @@ contract YugoDao {
     * @dev Emit VoteTallied event
     * @param _creatorOfContest Address of Contest creator 
     */
-    function tallyVote(address _creatorOfContest) external {
+    function tallyVotes(address _creatorOfContest) external {
         //NOTE needs more testing for multiple winners
-        uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToTallyVotes == true
+        uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeTotallyVotess == true
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
         address winner = contests[_creatorOfContest].winningActionAddresses[0];
         emit VoteTallied(
