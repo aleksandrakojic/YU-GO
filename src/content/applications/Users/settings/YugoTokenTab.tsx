@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BigNumber } from 'ethers';
 import {
 	Box,
 	Typography,
@@ -64,6 +65,7 @@ function YugoTokenTab() {
 	const { chain, account } = useChain();
 	const { networks, abi } = contractManager;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
+	const [balance, setBalance] = useState<null | number>(null);
 
 	const {
 		fetch: fetchBalance,
@@ -121,6 +123,7 @@ function YugoTokenTab() {
 	}, []);
 
 	useEffect(() => {
+		console.log('DATA', data);
 		if (data) {
 			fetchBalance();
 			fetchLedgerState();
@@ -128,8 +131,13 @@ function YugoTokenTab() {
 	}, [data]);
 
 	useEffect(() => {
-		if (balanceData === '0' && !isLoadingBalance && !ledgerData) {
-			fetchLedgerState();
+		if (balanceData) {
+			const balanceNB = BigNumber.from((balanceData as any)?._hex).toNumber();
+			console.log('balanceNB', balanceData, balanceNB);
+			setBalance(balanceNB);
+			if (balanceNB === 0 && !isLoadingBalance && !ledgerData) {
+				fetchLedgerState();
+			}
 		}
 	}, [balanceData, isLoadingBalance]);
 
@@ -139,13 +147,9 @@ function YugoTokenTab() {
 		}
 	}, [transferYugoData, isLoadingTransferYugo]);
 
-	const handleBuyToken = () => {
-		fetch();
-	};
+	const handleBuyToken = () => fetch();
 
-	const handleRedeemToken = () => {
-		transferYugo();
-	};
+	const handleRedeemToken = () => transferYugo();
 
 	const errorMessage = () => {
 		if (error) return JSON.stringify(error);
@@ -189,18 +193,18 @@ function YugoTokenTab() {
 								}}
 								primary="Yugo Token"
 								secondary={
-									balanceData !== '0' || hasYugo
+									balance !== 0 || hasYugo
 										? 'You have full access on the platform'
 										: 'Get Yugo token to be able to create your community, contests and actions'
 								}
 							/>
 							{isLoading && <CircularProgress />}
-							{!isLoading && balanceData === '0' && !ledgerData && (
+							{!isLoading && balance === 0 && !ledgerData && (
 								<Button color="info" size="large" variant="contained" onClick={handleBuyToken}>
 									Buy
 								</Button>
 							)}
-							{!isLoading && balanceData === '0' && ledgerData && !hasYugo && (
+							{!isLoading && balance === 0 && ledgerData && !hasYugo && (
 								<Button
 									color="warning"
 									size="large"
@@ -210,7 +214,7 @@ function YugoTokenTab() {
 									Redeem
 								</Button>
 							)}
-							{!isLoading && (balanceData !== '0' || hasYugo) && (
+							{!isLoading && (balance !== 0 || hasYugo) && (
 								<Chip
 									label="1 YUGO"
 									color="primary"

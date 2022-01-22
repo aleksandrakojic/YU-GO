@@ -85,12 +85,12 @@ const App = () => {
 		if (isAuthenticated) {
 			const userType = user?.attributes?.type;
 			if (userType) {
-					if (userType === ProfileType.Organization) {
-						navigate('/dashboards/organization/settings');
-					}
-					if (userType === ProfileType.Member) {
-						navigate('/dashboards/profile/details');
-					}
+				if (userType === ProfileType.Organization) {
+					navigate('/dashboards/organization/settings');
+				}
+				if (userType === ProfileType.Member) {
+					navigate('/dashboards/profile/details');
+				}
 			} else if (type) {
 				if (type === ProfileType.Organization) {
 					setUserData({ type });

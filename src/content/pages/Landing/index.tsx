@@ -30,42 +30,49 @@ function LandingPage() {
 	const [newOrganistation, setNewOrganisation] = useState<any>(null);
 	const [newParticipant, setNewParticipant] = useState<any>(null);
 
-	useEffect(() => {
-		if (data && newOrganistation) {
-			const d: any = data;
-			if (d?.events?.OrganizationRegistered) {
-				const Organisation = Moralis.Object.extend('Organisations');
-				const orga = new Organisation();
+	console.log('data ', data, newOrganistation, newParticipant);
 
-				orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
-					(res) => {
-						authenticate();
-						setType(ProfileType.Organization);
-					},
-					(error) => {
-						console.error('error saving orga', error);
-					}
-				);
+	useEffect(() => {
+		const func = async () => {
+			const d: any = data;
+			if (d && newOrganistation) {
+				const scFuncResult = await d?.wait();
+				const events = scFuncResult?.events;
+				console.log('EFFECT', scFuncResult, newOrganistation);
+				if (events && events[0]?.event === 'OrganizationRegistered') {
+					const Organisation = Moralis.Object.extend('Organisations');
+					const orga = new Organisation();
+
+					orga.save({ ...newOrganistation, ethAddress: account }).then(
+						(res) => {
+							authenticate();
+							setType(ProfileType.Organization);
+						},
+						(error) => {
+							console.error('error saving orga', error);
+						}
+					);
+				}
+				setNewOrganisation(null);
 			}
-			setNewOrganisation(null);
-		}
+		};
+		func();
 	}, [data, newOrganistation]);
 
 	useEffect(() => {
+		console.log('participant', data);
 		if (data && newParticipant) {
-			if (data) {
-				const Participant = Moralis.Object.extend('Participants');
-				const participant = new Participant();
-				participant.save({ ...newParticipant, ethAddress: account }).then(
-					(res) => {
-						authenticate();
-						setType(ProfileType.Member);
-					},
-					(error) => {
-						console.error('error saving member', error);
-					}
-				);
-			}
+			const Participant = Moralis.Object.extend('Participants');
+			const participant = new Participant();
+			participant.save({ ...newParticipant, ethAddress: account }).then(
+				(res) => {
+					authenticate();
+					setType(ProfileType.Member);
+				},
+				(error) => {
+					console.error('error saving member', error);
+				}
+			);
 			setNewParticipant(null);
 		}
 	}, [data, newParticipant]);
@@ -90,7 +97,7 @@ function LandingPage() {
 				_addrParticipant: account,
 			},
 		};
-		fetch({ params: contractData });
+		fetch({ params: contractData, onComplete: () => console.log('onComplete', data) });
 		setNewParticipant(member);
 	};
 

@@ -49,110 +49,110 @@ import ActionsContainer from './content/applications/Actions';
 // const StatusMaintenance = Loader(lazy(() => import('./content/pages/Status/Maintenance')));
 
 const routes: RouteObject[] = [
-  {
-    path: '/',
-    element: <LandingPage />
-  },
-  {
-    path: 'status',
-    // element: <Navigate to="404" replace />,
-    children: [
-      // {
-      //   path: '/',
-      //   element: <Navigate to="404" replace />
-      // },
-      {
-        path: '404',
-        element: <Status404 />
-      },
-      {
-        path: '500',
-        element: <Status500 />
-      },
-      {
-        path: 'maintenance',
-        element: <StatusMaintenance />
-      },
-      {
-        path: 'coming-soon',
-        element: <StatusComingSoon />
-      }
-    ]
-  },
-  {
-    path: 'dashboards',
-    element: <SidebarLayout />,
-    children: [
-      // {
-      //   path: '/',
-      //   element: <Navigate to="/dashboards/tasks" replace />
-      // },
-      {
-        path: 'tasks',
-        element: <Tasks />
-      },
-      {
-        path: 'organization',
-        children: [
-          // {
-          //   path: '/',
-          //   element: <Navigate to="details" replace />
-          // },
-          {
-            path: 'details',
-            element: <UserProfile />
-          },
-          {
-            path: 'settings',
-            element: <UserSettings />
-          }
-        ]
-      },
-      {
-        path: 'profile',
-        children: [
-          {
-            path: '',
-            element: <Navigate to="/dashboards/organization/details" replace />
-          },
-          {
-            path: 'details',
-            element: <UserProfile />
-          },
-          {
-            path: 'settings',
-            element: <UserSettings />
-          }
-        ]
-      }
-    ]
-  },
-  {
-    path: 'management',
-    element: <SidebarLayout />,
-    children: [
-      // {
-      //   path: '/',
-      //   element: <Navigate to="/management/transactions" replace />
-      // },
-      {
-        path: 'members',
-        element: <OrganizationMembers />
-      },
-      {
-        path: 'contests',
-        element: <ContestsContainer />
-      },
-      {
-        path: 'actions',
-        element: <ActionsContainer />
-      },
-      {
-        path: 'transactions',
-        element: <Transactions />
-      }
-    ]
-  }
+	{
+		path: '/',
+		element: <LandingPage />,
+	},
+	{
+		path: 'status',
+		// element: <Navigate to="404" replace />,
+		children: [
+			// {
+			//   path: '/',
+			//   element: <Navigate to="404" replace />
+			// },
+			{
+				path: '404',
+				element: <Status404 />,
+			},
+			{
+				path: '500',
+				element: <Status500 />,
+			},
+			{
+				path: 'maintenance',
+				element: <StatusMaintenance />,
+			},
+			{
+				path: 'coming-soon',
+				element: <StatusComingSoon />,
+			},
+		],
+	},
+	{
+		path: 'dashboards',
+		element: <SidebarLayout />,
+		children: [
+			// {
+			//   path: '/',
+			//   element: <Navigate to="/dashboards/tasks" replace />
+			// },
+			{
+				path: 'tasks',
+				element: <Tasks />,
+			},
+			{
+				path: 'organization',
+				children: [
+					{
+						path: '',
+						element: <Navigate to="details" replace />,
+					},
+					{
+						path: 'details',
+						element: <UserProfile />,
+					},
+					{
+						path: 'settings',
+						element: <UserSettings />,
+					},
+				],
+			},
+			{
+				path: 'profile',
+				children: [
+					{
+						path: '',
+						element: <Navigate to="details" replace />,
+					},
+					{
+						path: 'details',
+						element: <UserProfile />,
+					},
+					{
+						path: 'settings',
+						element: <UserSettings />,
+					},
+				],
+			},
+		],
+	},
+	{
+		path: 'management',
+		element: <SidebarLayout />,
+		children: [
+			// {
+			//   path: '/',
+			//   element: <Navigate to="/management/transactions" replace />
+			// },
+			{
+				path: 'members',
+				element: <OrganizationMembers />,
+			},
+			{
+				path: 'contests',
+				element: <ContestsContainer />,
+			},
+			{
+				path: 'actions',
+				element: <ActionsContainer />,
+			},
+			{
+				path: 'transactions',
+				element: <Transactions />,
+			},
+		],
+	},
 ];
 
 export default routes;
