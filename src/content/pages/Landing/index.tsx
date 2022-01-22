@@ -49,7 +49,9 @@ function LandingPage() {
   useEffect(() => {
     if (data && newOrganistation) {
       const d: any = data;
+      console.log("test1", d);
       if (d?.events?.OrganizationRegistered) {
+        console.log("test2");
         const Organisation = Moralis.Object.extend("Organisations");
         const orga = new Organisation();
 

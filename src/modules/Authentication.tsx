@@ -32,11 +32,7 @@ export const Authentication = () => {
           ) : (
             <HStack>
               <Button onClick={() => authenticate()}>Authenticate</Button>
-              <Button
-                onClick={() => authenticate({ provider: "walletconnect" })}
-              >
-                Authenticate Walletconnect
-              </Button>
+             
             </HStack>
           )}
         </Box>

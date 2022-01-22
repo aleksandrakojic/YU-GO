@@ -11,7 +11,7 @@ export const Web3 = () => {
       <Stack spacing={6}>
         <HStack>
           <Button onClick={() => enableWeb3()}>Enable web3</Button>
-          <Button onClick={() => enableWeb3({ provider: 'walletconnect' })}>Enable web3 (Walletconnect)</Button>
+          
         </HStack>
       </Stack>
       <CodeBlock>
