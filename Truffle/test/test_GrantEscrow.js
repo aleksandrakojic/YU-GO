@@ -14,23 +14,25 @@ contract('test_GrantEscrow', async function (accounts) {
 
       });
 
-    describe('#depositGrant, Orga deposits the grant', function () {
-        context('orga is not registered', function () {
+    describe('#depositGrant', function () {
+        context('caller is not YugoDao', function () {
             it('should revert', async function () {
                 let amount = web3.utils.toWei('10', "ether")
                 await expectRevert(
-                    escrow.sendTransaction({to: escrow.address, from: unknownOrga, value: amount}),
-                    'You are not registered'
+                    escrow.depositGrant(unknownOrga, amount, {from: unknownOrga}),
+                    'Only YugoDao, VerifySignature or GrantEscrow (this) contract can call this function'
                 );
             });
         });
-        context('orga is registered', function () {
-          it('should emit the GrantDeposited event', async function () {
-            let amount = web3.utils.toWei('10', "ether")
-            let tx = await escrow.sendTransaction({to: escrow.address, from: orga.one.address, value: amount});
-            await expectEvent(tx, 'GrantDeposited', {grant: amount, depositor: orga.one.address});
-          });
-        });
+
+        // Recent changes in depositGrant function make it callable only by YugoDao 
+      //   context('caller is YugoDao', function () {
+      //     it('should emit the GrantDeposited event', async function () {
+      //       let amount = web3.utils.toWei('10', "ether")
+      //       let tx = await escrow.depositGrant(contestCreator, amount, {from: yugoDao.address});
+      //       await expectEvent(tx, 'GrantDeposited', {grant: amount, depositor: contestCreator});
+      //     });
+      //   });
       });
 
     //NOTE: recent changes in the withdrawGrant function implies to change the test (in progress)

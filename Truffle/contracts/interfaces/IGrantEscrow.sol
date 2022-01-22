@@ -9,4 +9,5 @@ interface IGrantEscrow {
     function depositGrant(address _depositor, uint _amount) external payable;
     function withdrawGrant(address _contestCreator) external;
     function fundsInEscrow(address _contestCreator) view external returns(uint);
+    function setWithdrawStatus(address _from, address _to, bool _state) external returns(bool);
 }
