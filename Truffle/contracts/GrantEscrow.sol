@@ -17,10 +17,10 @@ contract GrantEscrow is Ownable {
     event GrantWithdrawn(uint grant, address recipient);
 
     mapping(address => uint) public Grants;
-    mapping (address =>  mapping (address => bool)) private UnlockFunds;
+    mapping (address =>  mapping (address => bool)) public UnlockFunds;
 
-    modifier onlyRegisteredOrga(address _orga) {
-        require(yugodao.organisationRegistrationStatus(_orga), 'You are not registered');
+    modifier onlyRegisteredOrga(address _caller) {
+        require(yugodao.organisationRegistrationStatus(_caller), 'You are not registered');
         _;
     }
 
@@ -49,9 +49,9 @@ contract GrantEscrow is Ownable {
     * @dev only available for registered organisations
     * @dev function also called by fallback receive()
     */
-    function depositGrant(address _orga, uint _amount) external payable restrictedToContracts { //only internal, create another function pour call exterieur
-        Grants[_orga] = _amount;
-        emit GrantDeposited(_amount, _orga);
+    function depositGrant(address _contestCreator) external payable restrictedToContracts { //only internal, create another function pour call exterieur
+        Grants[_contestCreator] = msg.value;
+        emit GrantDeposited(msg.value, _contestCreator);
     }
 
     /**
@@ -62,14 +62,23 @@ contract GrantEscrow is Ownable {
     * @dev Re-entrancy - changing the state of unlockFunds in VerifySignature to false ensures that the function can not
     * be run multiple times in parallel. A second call would not pass the require.  
     */
-    function withdrawGrant(address _contestCreator) external onlyRegisteredOrga(msg.sender) {
+    function withdrawGrant(address _contestCreator) external {
         (address _winner, uint _requiredFunds ) = yugodao.getContestWinner(_contestCreator);
         require(msg.sender == _winner, "you cannot withdraw, seems like you did not win the contest");
-        require(_canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
-        setWithdrawStatus(_contestCreator, msg.sender, false);//TODO: TESTING
-        (bool success, ) = msg.sender.call{value:_requiredFunds}("");
+        require(canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
+        require(Grants[_contestCreator] >= _requiredFunds, 'Not enough funds left in grant');
+        UnlockFunds[_contestCreator][msg.sender] = false;
+        // require(!setStatus, 'wrong status set');
+        uint256 newcontestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
+        uint newActionCreatorBalance = Grants[_contestCreator] - newcontestCreatorBalance;
+        Grants[_contestCreator] = newcontestCreatorBalance;
+        Grants[msg.sender] = newActionCreatorBalance;
+        // payable(msg.sender).transfer(Grants[msg.sender]);
+        // uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
+        // payable(msg.sender).transfer(amountToTransfer);
+        (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
-        emit GrantWithdrawn(_requiredFunds, msg.sender);
+        emit GrantWithdrawn(_requiredFunds , msg.sender);
     }
 
         /**
@@ -87,7 +96,8 @@ contract GrantEscrow is Ownable {
     * @param _to The address of the recipient
     * @param _state true: the recipient can withdraw
     */
-    function setWithdrawStatus(address _from, address _to, bool _state) public restrictedToContracts returns(bool) {
+    function setWithdrawStatus(address _from, address _to, bool _state) public returns(bool) {
+        require(msg.sender == address(verifSign), 'you are not authorised to call this function');
         UnlockFunds[_from][_to] = _state;
         return UnlockFunds[_from][_to];
     }
@@ -98,7 +108,7 @@ contract GrantEscrow is Ownable {
     * @param _from The address of the Grant Orga 
     * @param _to The address of the recipient
     */
-    function _canWithdraw(address _from, address _to) internal view returns(bool) {
+    function canWithdraw(address _from, address _to) public view returns(bool) {
         return UnlockFunds[_from][_to];
     }
 
