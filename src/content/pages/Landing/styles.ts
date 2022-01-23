@@ -12,6 +12,7 @@ export const Wrapper = styled(Container)(
   display: flex;
   flex-direction: column;
   height: 100vh;
+	min-width: 100vw;
   `
 );
 
@@ -24,6 +25,7 @@ export const MainContent = styled(Box)(
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+		flex-wrap: wrap;
 `
 );
 
@@ -55,5 +57,5 @@ export const Image = styled(Box)({
 	height: '400px',
 	display: 'flex',
 	justifyContent: 'space-between',
-	flexDirection: 'column'
+	flexDirection: 'column',
 });

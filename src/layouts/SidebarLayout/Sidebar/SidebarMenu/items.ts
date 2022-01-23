@@ -79,7 +79,7 @@ const menuItems: MenuItems[] = [
 				items: [
 					{
 						name: 'Proposals',
-						link: '/dao/proposals',
+						link: '/status/coming-soon',
 					},
 					// {
 					//   name: 'Error 500',

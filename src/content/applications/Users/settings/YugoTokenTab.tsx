@@ -16,6 +16,7 @@ import {
 import { styled } from '@mui/material/styles';
 import contractManager from 'src/contracts/YugoManager.json';
 import { useChain, useMoralis, useWeb3ExecuteFunction, useWeb3Transfer } from 'react-moralis';
+import { useSnackbar } from 'notistack';
 
 const YugoToken = styled(Box)(
 	({ theme }) => `
@@ -60,13 +61,12 @@ const YugoToken = styled(Box)(
 );
 
 function YugoTokenTab() {
+	const { enqueueSnackbar } = useSnackbar();
 	const [hasYugo, setHasYugo] = useState(false);
 	const { Moralis } = useMoralis();
 	const { chain, account } = useChain();
 	const { networks, abi } = contractManager;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
-	const [balance, setBalance] = useState<null | number>(null);
-
 	const {
 		fetch: fetchBalance,
 		data: balanceData,
@@ -116,6 +116,8 @@ function YugoTokenTab() {
 		contractAddress: contractAddress,
 	});
 
+	const errorMessage = error || errorBalance || errorTransferYugo || errorLedger;
+
 	useEffect(() => {
 		if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
 			fetchBalance();
@@ -131,13 +133,8 @@ function YugoTokenTab() {
 	}, [data]);
 
 	useEffect(() => {
-		if (balanceData) {
-			const balanceNB = BigNumber.from((balanceData as any)?._hex).toNumber();
-			console.log('balanceNB', balanceData, balanceNB);
-			setBalance(balanceNB);
-			if (balanceNB === 0 && !isLoadingBalance && !ledgerData) {
-				fetchLedgerState();
-			}
+		if (balanceData === '0' && !isLoadingBalance && !ledgerData) {
+			fetchLedgerState();
 		}
 	}, [balanceData, isLoadingBalance]);
 
@@ -147,19 +144,20 @@ function YugoTokenTab() {
 		}
 	}, [transferYugoData, isLoadingTransferYugo]);
 
-	const handleBuyToken = () => fetch();
+	useEffect(() => {
+		if (errorMessage && Object.keys(errorMessage).length) {
+			enqueueSnackbar(JSON.stringify(errorMessage), { variant: 'error' });
+		}
+	}, [errorMessage]);
+
+	const handleBuyToken = () => {
+		fetch();
+	};
 
 	const handleRedeemToken = () => transferYugo();
 
-	const errorMessage = () => {
-		if (error) return JSON.stringify(error);
-		if (errorBalance) return JSON.stringify(errorBalance);
-		if (errorTransferYugo) return JSON.stringify(errorTransferYugo);
-		if (errorLedger) return JSON.stringify(errorLedger);
-		return null;
-	};
-
 	console.log('datas', balanceData, ledgerData, transferYugoData, data, hasYugo);
+	console.log('contractAddress', contractAddress);
 
 	const isLoading =
 		isFetching ||
@@ -193,18 +191,18 @@ function YugoTokenTab() {
 								}}
 								primary="Yugo Token"
 								secondary={
-									balance !== 0 || hasYugo
+									balanceData !== '0' || hasYugo
 										? 'You have full access on the platform'
 										: 'Get Yugo token to be able to create your community, contests and actions'
 								}
 							/>
 							{isLoading && <CircularProgress />}
-							{!isLoading && balance === 0 && !ledgerData && (
+							{!isLoading && balanceData === '0' && !ledgerData && (
 								<Button color="info" size="large" variant="contained" onClick={handleBuyToken}>
 									Buy
 								</Button>
 							)}
-							{!isLoading && balance === 0 && ledgerData && !hasYugo && (
+							{!isLoading && balanceData === '0' && ledgerData && !hasYugo && (
 								<Button
 									color="warning"
 									size="large"
@@ -214,7 +212,7 @@ function YugoTokenTab() {
 									Redeem
 								</Button>
 							)}
-							{!isLoading && (balance !== 0 || hasYugo) && (
+							{!isLoading && (balanceData !== '0' || hasYugo) && (
 								<Chip
 									label="1 YUGO"
 									color="primary"
@@ -224,13 +222,6 @@ function YugoTokenTab() {
 						</ListItem>
 					</List>
 				</Card>
-				{errorMessage() && (
-					<Card>
-						<List>
-							<ListItem sx={{ color: 'red' }}>{errorMessage()}</ListItem>
-						</List>
-					</Card>
-				)}
 			</Grid>
 		</Grid>
 	);

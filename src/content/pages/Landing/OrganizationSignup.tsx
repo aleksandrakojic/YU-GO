@@ -152,7 +152,12 @@ export const OrganizationSignup = ({ thematics, countries, onSubmitOrganization 
 								/>
 							</Grid>
 							<Grid item style={{ marginTop: 16 }}>
-								<Button type="button" variant="outlined" onClick={form.reset} disabled={submitting}>
+								<Button
+									type="button"
+									variant="outlined"
+									onClick={handleResetForm}
+									disabled={submitting}
+								>
 									Reset
 								</Button>
 							</Grid>

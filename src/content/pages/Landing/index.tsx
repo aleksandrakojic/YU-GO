@@ -26,41 +26,34 @@ function LandingPage() {
 	const { enqueueSnackbar } = useSnackbar();
 	const [signup, setSignup] = useState(SignupType.None);
 	const { thematics, countries, abi, contractAddress, setType, type } = useContext(AppContext);
-	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [newOrganistation, setNewOrganisation] = useState<any>(null);
 	const [newParticipant, setNewParticipant] = useState<any>(null);
+	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 
 	console.log('data ', data, newOrganistation, newParticipant);
 
 	useEffect(() => {
-		const func = async () => {
+		if (data && newOrganistation) {
 			const d: any = data;
-			if (d && newOrganistation) {
-				const scFuncResult = await d?.wait();
-				const events = scFuncResult?.events;
-				console.log('EFFECT', scFuncResult, newOrganistation);
-				if (events && events[0]?.event === 'OrganizationRegistered') {
-					const Organisation = Moralis.Object.extend('Organisations');
-					const orga = new Organisation();
+			if (d?.events?.OrganizationRegistered) {
+				const Organisation = Moralis.Object.extend('Organisations');
+				const orga = new Organisation();
 
-					orga.save({ ...newOrganistation, ethAddress: account }).then(
-						(res) => {
-							authenticate();
-							setType(ProfileType.Organization);
-						},
-						(error) => {
-							console.error('error saving orga', error);
-						}
-					);
-				}
-				setNewOrganisation(null);
+				orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
+					(res) => {
+						authenticate();
+						setType(ProfileType.Organization);
+					},
+					(error) => {
+						console.error('error saving orga', error);
+					}
+				);
 			}
-		};
-		func();
+			setNewOrganisation(null);
+		}
 	}, [data, newOrganistation]);
 
 	useEffect(() => {
-		console.log('participant', data);
 		if (data && newParticipant) {
 			const Participant = Moralis.Object.extend('Participants');
 			const participant = new Participant();
@@ -81,13 +74,16 @@ function LandingPage() {
 		if (isAuthenticated && !user?.attributes?.type && type === ProfileType.None) {
 			handleSnackMessage('You need to be registered !', 'warning');
 		}
-	}, [type, isAuthenticated]);
+		if (error) {
+			handleSnackMessage(error[0] ?? 'Error occured', 'error');
+		}
+	}, [type, isAuthenticated, error]);
 
 	const handleSnackMessage = (message: string, variant: VariantType) => {
 		enqueueSnackbar(message, { variant });
 	};
 
-	const handleSubmitMember = async (member) => {
+	const handleSubmitMember = (member) => {
 		const contractData: any = {
 			abi,
 			contractAddress,
@@ -97,7 +93,7 @@ function LandingPage() {
 				_addrParticipant: account,
 			},
 		};
-		fetch({ params: contractData, onComplete: () => console.log('onComplete', data) });
+		fetch({ params: contractData });
 		setNewParticipant(member);
 	};
 
@@ -111,6 +107,7 @@ function LandingPage() {
 				countryId: organization?.country,
 			},
 		};
+
 		fetch({ params: contractData });
 		setNewOrganisation(organization);
 	};
@@ -162,6 +159,8 @@ function LandingPage() {
 		setType(ProfileType.None);
 	};
 
+	console.log('use func', data, isLoading, isFetching, error);
+
 	const renderAppBar = () => (
 		<AppBar>
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -196,7 +195,7 @@ function LandingPage() {
 							flexDirection: 'column',
 						}}
 					>
-						<img alt="Coming Soon" height={400} src="/static/images/logo/woman.svg" />
+						<img alt="Business woman" height={400} src="/static/images/logo/woman.svg" />
 					</Box>
 				</Container>
 
@@ -207,7 +206,7 @@ function LandingPage() {
 								<Typography variant="h1" sx={{ fontSize: '3rem' }}>
 									Unlock the next step in community cooperation
 								</Typography>
-								<Typography sx={{ fontSize: '1.5rem', padding: '20px 0px' }}>
+								<Typography sx={{ fontSize: '1.3rem', padding: '20px 0px' }}>
 									YU-GO DAO gives direct power to the women of ex-Yugoslavia. Join us in pioneering
 									a future where magic internet communities unlock the power of women-centric
 									coordination.
@@ -220,7 +219,9 @@ function LandingPage() {
 									<KeyboardBackspaceIcon /> <div>Back</div>
 								</Button>
 							)}
-							{(isLoading || isFetching) && <LinearProgress color="primary" />}
+							{(isLoading || isFetching) && !(signup !== SignupType.None) && (
+								<LinearProgress color="primary" sx={{ maxWidth: '90%', margin: '0px auto' }} />
+							)}
 							{renderForm()}
 						</Box>
 					</EnableWeb3>

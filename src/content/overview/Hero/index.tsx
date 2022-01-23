@@ -6,19 +6,19 @@ import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 
 const TypographyH1 = styled(Typography)(
-  ({ theme }) => `
+	({ theme }) => `
     font-size: ${theme.typography.pxToRem(50)};
 `
 );
 
 const TypographyH2 = styled(Typography)(
-  ({ theme }) => `
+	({ theme }) => `
     font-size: ${theme.typography.pxToRem(17)};
 `
 );
 
 const LabelWrapper = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
     background-color: ${theme.colors.success.main};
     color: ${theme.palette.success.contrastText};
     font-weight: bold;
@@ -32,7 +32,7 @@ const LabelWrapper = styled(Box)(
 );
 
 const MuiAvatar = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
     width: ${theme.spacing(8)};
     height: ${theme.spacing(8)};
     border-radius: ${theme.general.borderRadius};
@@ -52,7 +52,7 @@ const MuiAvatar = styled(Box)(
 );
 
 const TsAvatar = styled(Box)(
-  ({ theme }) => `
+	({ theme }) => `
     width: ${theme.spacing(8)};
     height: ${theme.spacing(8)};
     border-radius: ${theme.general.borderRadius};
@@ -72,36 +72,42 @@ const TsAvatar = styled(Box)(
 );
 
 function Hero() {
-  return (
-    <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-      <Grid spacing={{ xs: 6, md: 10 }} justifyContent="center" alignItems="center" container>
-        <Grid item md={10} lg={8} mx="auto">
-          <LabelWrapper color="success">Version 1.1.0</LabelWrapper>
-          <TypographyH1 sx={{ mb: 2 }} variant="h1">
-            Web3 React Admin Dashboard
-          </TypographyH1>
-          <TypographyH2 sx={{ lineHeight: 1.5, pb: 4 }} variant="h4" color="text.secondary" fontWeight="normal">
-            Web3 React Admin Dashboard is built using the latest industry standards and features a clean and premium
-            design style, making use of colors and accents to improve the user experience for all included flows and
-            pages.
-          </TypographyH2>
-          <Button component={RouterLink} to="/dashboards/tasks" size="large" variant="contained">
-            Browse Live Preview
-          </Button>
-          <Button
-            sx={{ ml: 2 }}
-            component="a"
-            target="_blank"
-            rel="noopener"
-            href="https://www.google.com"
-            size="large"
-            variant="text">
-            Key Features
-          </Button>
-        </Grid>
-      </Grid>
-    </Container>
-  );
+	return (
+		<Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+			<Grid spacing={{ xs: 6, md: 10 }} justifyContent="center" alignItems="center" container>
+				<Grid item md={10} lg={8} mx="auto">
+					<LabelWrapper color="success">Version 1.1.0</LabelWrapper>
+					<TypographyH1 sx={{ mb: 2 }} variant="h1">
+						Web3 React Admin Dashboard
+					</TypographyH1>
+					<TypographyH2
+						sx={{ lineHeight: 1.5, pb: 4 }}
+						variant="h4"
+						color="text.secondary"
+						fontWeight="normal"
+					>
+						Web3 React Admin Dashboard is built using the latest industry standards and features a
+						clean and premium design style, making use of colors and accents to improve the user
+						experience for all included flows and pages.
+					</TypographyH2>
+					<Button component={RouterLink} to="/dashboards/tasks" size="large" variant="contained">
+						Browse Live Preview
+					</Button>
+					<Button
+						sx={{ ml: 2 }}
+						component="a"
+						target="_blank"
+						rel="noopener"
+						href="https://www.google.com"
+						size="large"
+						variant="text"
+					>
+						Key Features
+					</Button>
+				</Grid>
+			</Grid>
+		</Container>
+	);
 }
 
 export default Hero;
