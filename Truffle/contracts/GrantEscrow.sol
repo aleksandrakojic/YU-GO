@@ -69,12 +69,14 @@ contract GrantEscrow is Ownable {
         require(Grants[_contestCreator] >= _requiredFunds, 'Not enough funds left in grant');
         UnlockFunds[_contestCreator][msg.sender] = false;
         // require(!setStatus, 'wrong status set');
-        uint256 newBalance = Grants[_contestCreator] - _requiredFunds;
-        Grants[_contestCreator] = newBalance;
-        // payable(msg.sender).transfer(_requiredFunds);
-        uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
+        uint256 newcontestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
+        uint newActionCreatorBalance = Grants[_contestCreator] - newcontestCreatorBalance;
+        Grants[_contestCreator] = newcontestCreatorBalance;
+        Grants[msg.sender] = newActionCreatorBalance;
+        // payable(msg.sender).transfer(Grants[msg.sender]);
+        // uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
         // payable(msg.sender).transfer(amountToTransfer);
-        (bool success, ) = msg.sender.call{value: amountToTransfer}("");
+        (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
         emit GrantWithdrawn(_requiredFunds , msg.sender);
     }

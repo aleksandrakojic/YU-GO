@@ -6,7 +6,15 @@ var web3 = new Web3(Web3.givenProvider)
 const { expect, assert } = require('chai');
 
 contract('test', async function (accounts, provider) {
-    console.log(web3.getAccounts)
+//    console.log(await web3.eth.getBalance(accounts[0], 'latest', ));
+//    console.log(web3.eth)
+var ethAccounts = ['0xabc', '0xdef', '0x123'];
+   function testCallback( value1, value2 ) {
+    console.log(value1 + ", " + value2 );
+}
+web3.eth.getBalance(accounts[0], undefined, testCallback );
+
+    // console.log(web3.getAccounts)
     // await accounts.forEach(function(a){ console.log(web3.fromWei(web3.eth.getBalance(a), 'ether')) })
     // console.log(web3.eth.accounts.wallet);
     // let expectedBalance = web3.utils.toBN(web3.toWei(3, 'ether'));

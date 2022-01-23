@@ -105,22 +105,6 @@ contract('test_YugoDao', async function (accounts) {
     return new Promise((resolve, reject) => {
       web3.currentProvider.send({
         jsonrpc: '2.0',
-    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
-  });
-
-  /**
-   * The following function tests registerOrganisation().
-   * It tests that:
-   * it emits the orgaRegistered event
-   * it reverts if orga was already registered
-   */
-  describe('#registerOrganisation() with orga1', function () {
-    context('with wrong parameters', async function () {
-      it('no thematics, should revert ', async function () {
-        let _orga1addr = organisations.orga1.address;
-        let idCountry = 0;
-        let idThematic = [];
-        await expectRevert(
         method: 'evm_mine', // also see "evm_increaseTime"
         id: Date.now(),
         params: [timestamp],
@@ -142,6 +126,22 @@ contract('test_YugoDao', async function (accounts) {
     //|::::: set yugo and yugoDao addresses in manager :::::|
     await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
     await verifSign.setYugoDaoAddress(yugoDao.address, escrow.address,{from: admin});
+    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
+  });
+
+  /**
+   * The following function tests registerOrganisation().
+   * It tests that:
+   * it emits the orgaRegistered event
+   * it reverts if orga was already registered
+   */
+  describe('#registerOrganisation() with orga1', function () {
+    context('with wrong parameters', async function () {
+      it('no thematics, should revert ', async function () {
+        let _orga1addr = organisations.orga1.address;
+        let idCountry = 0;
+        let idThematic = [];
+        await expectRevert(
           yugoDao.registerOrganisation(idThematic, idCountry, { from: _orga1addr }),
           'You must provide thematics and country'
         );
@@ -294,7 +294,7 @@ contract('test_YugoDao', async function (accounts) {
       // })
       it('should emit Received events', async function () {
         let _value = web3.utils.toWei('0.1', "ether")
-        let tx = await manager.purchaseYugo({to:manager.address, from:contestCreator, value: _value});
+        let tx = await manager.sendTransaction({to:manager.address, from:contestCreator, value: _value});
         await expectEvent(tx, 'Received', {organisation: contestCreator, value: _value});
       });
       it('should emit YugoTransfer events', async function () {
@@ -313,7 +313,7 @@ contract('test_YugoDao', async function (accounts) {
           contest.funds,
           { from: contestCreator, value: contest.funds }
         );
-      console.log('tx: ', tx);
+      // console.log('tx: ', tx);
         // await expectEvent(tx, 'GrantDeposited', {
         //   grant: contest.funds,
         //   depositor: contestCreator});
@@ -357,7 +357,7 @@ contract('test_YugoDao', async function (accounts) {
         async ([orga, data]) => { 
               let tx1 = await yugoDao.registerOrganisation(data.themes, data.country, { from: data.address });
               expectEvent(tx1, 'OrganizationRegistered', { addressOrga: data.address });
-              let tx2 = await manager.purchaseYugo({to:manager.address, from:data.address , value: _ETH});
+              let tx2 = await manager.sendTransaction({to:manager.address, from:data.address , value: _ETH});
               expectEvent(tx2, 'Received', {organisation: data.address, value: _ETH});
               let tx3 = await manager.transferYugo({from: data.address})
               expectEvent(tx3, 'YugoTransfer', {recipient : data.address, amount: tokenAmount })
@@ -571,22 +571,24 @@ contract('test_YugoDao', async function (accounts) {
 
   describe('#withdrawGrant()', function () {
     context('caller is authorised to withdraw', function () {
-      it('setWithdrawStatus()', async function () {
-        let setStatus = await escrow.setWithdrawStatus.call(contestCreator, actionCreator, true, {from: contestCreator})
-        assert(setStatus === true, 'msg false')
-      })
-      it('_canWithdraw should return true', async function () {
-        console.log('contestCreator: ', contestCreator)
-        console.log('actionCreator: ', actionCreator)
-        let status = await escrow.canWithdraw.call(contestCreator, actionCreator, {from: admin});
-        console.log('status:', status);
-        assert(status === true, 'status is false');
-      });
+      // it('setWithdrawStatus()', async function () {
+      //   let setStatus = await escrow.setWithdrawStatus.call(contestCreator, actionCreator, true, {from: contestCreator})
+      //   assert(setStatus === true, 'msg false')
+      // })
+      // it('_canWithdraw should return true', async function () {
+      //   console.log('contestCreator: ', contestCreator)
+      //   console.log('actionCreator: ', actionCreator)
+      //   let status = await escrow.canWithdraw.call(contestCreator, actionCreator, {from: admin});
+      //   console.log('status:', status);
+      //   assert(status === true, 'status is false');
+      // });
       it('should emit the GrantWithdrawn event', async function () {
         // actionCreatorBalanceBeforeClaim = await new BN(web3.eth.getBalance(actionCreator)); //get current balance of actionCreator to compare later
         // console.log('actionCreator balance before claim: ', actionCreatorBalanceBeforeClaim);
         const wd = await escrow.withdrawGrant(contestCreator, {from: actionCreator});
-        // console.log(wd)
+        // console.log('recipient :', wd.logs);
+        console.log('grants :', Number(wd.logs[0].args.grant));
+        console.log('recipient :', wd.logs[0].args.recipient);
         await expectEvent(wd, 'GrantWithdrawn', {grant: action.funds, recipient: actionCreator});
       });
       // it('balance of actionCreator should have increase', async function () {

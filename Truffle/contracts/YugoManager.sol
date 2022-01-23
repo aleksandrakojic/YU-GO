@@ -52,7 +52,7 @@ contract YugoManager is Ownable {
     * @dev verifies that the caller did not purchase a token before (token are burned at subscription deadline). 
     * @dev verifies that the ETH sent equals the token price
     */
-    function purchaseYugo() external payable {
+    receive() external payable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
         require(EthLedger[msg.sender] == 0, 'you have made a deposit');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");
