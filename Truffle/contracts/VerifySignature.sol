@@ -99,11 +99,18 @@ contract VerifySignature is Ownable {
         uint _nonce,
         bytes memory signature
     ) public returns (bool) {
-        bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
-        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+        // bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
+        // bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
-        if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
-            escrow.setWithdrawStatus(msg.sender, _to, true);
+        // if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
+        //     escrow.setWithdrawStatus(msg.sender, _to, true);
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        address _from = msg.sender;
+        escrow.setWithdrawStatus(_from, _to, true);
+        if (escrow.canWithdraw(_from, _to) == true) {
             return true;
         } else {
             return false;

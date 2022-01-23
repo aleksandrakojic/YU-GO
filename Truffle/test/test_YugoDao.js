@@ -45,6 +45,8 @@ contract('test_YugoDao', async function (accounts) {
   
   let contestCreator = organisations.orga1.address;
   let actionCreator = organisations.orga2.address;
+  let actionCreatorBalanceBeforeClaim;
+  let actionCreatorBalanceAfterClaim;
   let yugoDao, yugo, manager, escrow, verifSign;
   let contest; 
 
@@ -103,6 +105,22 @@ contract('test_YugoDao', async function (accounts) {
     return new Promise((resolve, reject) => {
       web3.currentProvider.send({
         jsonrpc: '2.0',
+    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
+  });
+
+  /**
+   * The following function tests registerOrganisation().
+   * It tests that:
+   * it emits the orgaRegistered event
+   * it reverts if orga was already registered
+   */
+  describe('#registerOrganisation() with orga1', function () {
+    context('with wrong parameters', async function () {
+      it('no thematics, should revert ', async function () {
+        let _orga1addr = organisations.orga1.address;
+        let idCountry = 0;
+        let idThematic = [];
+        await expectRevert(
         method: 'evm_mine', // also see "evm_increaseTime"
         id: Date.now(),
         params: [timestamp],
@@ -124,22 +142,6 @@ contract('test_YugoDao', async function (accounts) {
     //|::::: set yugo and yugoDao addresses in manager :::::|
     await manager.setContractsAddresses(yugo.address, yugoDao.address, {from: admin})
     await verifSign.setYugoDaoAddress(yugoDao.address, escrow.address,{from: admin});
-    await escrow.setContractsAddresses(yugoDao.address, verifSign.address, {from: admin});
-  });
-
-  /**
-   * The following function tests registerOrganisation().
-   * It tests that:
-   * it emits the orgaRegistered event
-   * it reverts if orga was already registered
-   */
-  describe('#registerOrganisation() with orga1', function () {
-    context('with wrong parameters', async function () {
-      it('no thematics, should revert ', async function () {
-        let _orga1addr = organisations.orga1.address;
-        let idCountry = 0;
-        let idThematic = [];
-        await expectRevert(
           yugoDao.registerOrganisation(idThematic, idCountry, { from: _orga1addr }),
           'You must provide thematics and country'
         );
@@ -311,12 +313,22 @@ contract('test_YugoDao', async function (accounts) {
           contest.funds,
           { from: contestCreator, value: contest.funds }
         );
+      console.log('tx: ', tx);
+        // await expectEvent(tx, 'GrantDeposited', {
+        //   grant: contest.funds,
+        //   depositor: contestCreator});
         await expectEvent(tx, 'ContestCreated', {
           addressOrga: contestCreator,
           name: contest.name,
           funds: contest.funds
-        });
+        }); 
       });
+      it('amount deposited is correctly stored in Grants mapping', async function () {
+        const deposit = await escrow.fundsInEscrow.call(contestCreator, {from: contestCreator});
+        console.log('deposit :', Number(deposit));
+        console.log('contest.funds :', Number(contest.funds))
+        assert(deposit == Number(contest.funds), 'not deposited');
+      })
     });
     context('contest already created by orga', function () {
       it('should revert', async function () {
@@ -544,18 +556,46 @@ contract('test_YugoDao', async function (accounts) {
     });
   });
   //NOTE: recent changes in the verify function implies to change the test (in progress)
-  // describe('#verify()', function () {
-  //   context('msg.sender is the signer of the agreement', function () {
-  //     it('should return true', async function() {
-  //       const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715';
-  //       let _agreement = agreement();
-  //       let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
-  //       const msgSigned = await verifSign.getEthSignedMessageHash.call(hash, {from: admin});
-  //       let isVerified = await verifSign.verify.call(actionCreator, action.funds, agreement, nonce, msgSigned, { from: contestCreator });
-  //       assert(isVerified == true, 'not the same signer')
-  //     });
-  //   });
-  // });
+  describe('#verify()', function () {
+    context('msg.sender is the signer of the agreement', function () {
+      it('should return true', async function() {
+        const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715';
+        let _agreement = agreement();
+        let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
+        const msgSigned = await verifSign.getEthSignedMessageHash(hash, {from: admin});
+        await verifSign.verify(actionCreator, action.funds, agreement, nonce, msgSigned, { from: contestCreator });
+        // assert(isVerified == true, 'not the same signer')
+      });
+    });
+  });
+
+  describe('#withdrawGrant()', function () {
+    context('caller is authorised to withdraw', function () {
+      it('setWithdrawStatus()', async function () {
+        let setStatus = await escrow.setWithdrawStatus.call(contestCreator, actionCreator, true, {from: contestCreator})
+        assert(setStatus === true, 'msg false')
+      })
+      it('_canWithdraw should return true', async function () {
+        console.log('contestCreator: ', contestCreator)
+        console.log('actionCreator: ', actionCreator)
+        let status = await escrow.canWithdraw.call(contestCreator, actionCreator, {from: admin});
+        console.log('status:', status);
+        assert(status === true, 'status is false');
+      });
+      it('should emit the GrantWithdrawn event', async function () {
+        // actionCreatorBalanceBeforeClaim = await new BN(web3.eth.getBalance(actionCreator)); //get current balance of actionCreator to compare later
+        // console.log('actionCreator balance before claim: ', actionCreatorBalanceBeforeClaim);
+        const wd = await escrow.withdrawGrant(contestCreator, {from: actionCreator});
+        // console.log(wd)
+        await expectEvent(wd, 'GrantWithdrawn', {grant: action.funds, recipient: actionCreator});
+      });
+      // it('balance of actionCreator should have increase', async function () {
+      //   actionCreatorBalanceAfterClaim = await new BN(web3.eth.getBalance(actionCreator))
+      //   console.log('actionCreator balance after claim: ', actionCreatorBalanceAfterClaim);
+      //   assert(actionCreatorBalanceAfterClaim === actionCreatorBalanceBeforeClaim + action.funds, 'wrong balance')
+      // })
+    }); //end context
+  })
 
 
 
