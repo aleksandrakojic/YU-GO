@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.9;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugo.sol";
@@ -17,6 +17,7 @@ contract YugoManager is Ownable {
     mapping (address => uint) EthLedger;
     mapping (address => bool) EligibleToClaimYugo;
     bool internal locked;
+    bool private AllAddrSet;
 
     modifier noReentrant() {
         require(!locked, "No re-entrancy");
@@ -41,6 +42,8 @@ contract YugoManager is Ownable {
     * @param _dao Address of YugoDao
     */
     function setContractsAddresses(address _yugo, address _dao) external onlyOwner {
+        require(!AllAddrSet, "All contracts have already been set");
+        AllAddrSet = true;
         yugo = IYugo(_yugo);
         yugoDao = IYugoDao(_dao);
         emit ContractsAddrSet(_yugo, _dao);
@@ -52,7 +55,7 @@ contract YugoManager is Ownable {
     * @dev verifies that the caller did not purchase a token before (token are burned at subscription deadline). 
     * @dev verifies that the ETH sent equals the token price
     */
-    function purchaseYugo() external payable {
+    receive() external payable {
         require(yugoDao.organisationRegistrationStatus(msg.sender) == true, 'you need to be registered to purchase the token');
         require(EthLedger[msg.sender] == 0, 'you have made a deposit');
         require(yugo.balanceOf(msg.sender) == 0, "you already purchased a token");

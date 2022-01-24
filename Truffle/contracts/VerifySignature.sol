@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {utils} from "./libraries/utils.sol";
@@ -9,7 +9,7 @@ import "./interfaces/IGrantEscrow.sol";
 /**
 * @notice This smart contract handles the signature of an agreement, confirming that the winner can claim the price.
 */
-contract VerifySignature is Ownable {
+contract VerifySignature  is Ownable {
     
     struct Confidential {
             string agreement;
@@ -24,6 +24,7 @@ contract VerifySignature is Ownable {
     bool private yugoAddrSet;
 
     event YugoDaoAddrSet(address yugodao, address grantEscrow);
+    event SignerVerified(address caller, address signer, bool verified, bytes signature);
 
     mapping(address => mapping (address => Confidential)) private confidentials;
     
@@ -72,7 +73,7 @@ contract VerifySignature is Ownable {
     * @return Hash as a Bytes32
     */
     function getEthSignedMessageHash(bytes32 _messageHash)
-        public
+        internal
         pure
         returns (bytes32)
     {
@@ -90,7 +91,6 @@ contract VerifySignature is Ownable {
     * @param _agreement Agreement unsigned 
     * @param _nonce The secret number used for the hash 
     * @param signature The hash signed fy teh Grant Orga 
-    * @return True if msg.sender is the signer
     */
     function verify(
         address _to,
@@ -98,16 +98,23 @@ contract VerifySignature is Ownable {
         string memory _agreement,
         uint _nonce,
         bytes memory signature
-    ) public returns (bool) {
+    ) external {
         bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
-
-        if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
+        bool verified;
+        address _signer = recoverSigner(ethSignedMessageHash, signature);
+        if ( _signer == msg.sender) {
             escrow.setWithdrawStatus(msg.sender, _to, true);
-            return true;
-        } else {
-            return false;
+            verified = true;
         }
+        // address _from = msg.sender;
+        // escrow.setWithdrawStatus(_from, _to, true);
+        // if (escrow.canWithdraw(_from, _to) == true) {
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        emit SignerVerified(msg.sender, _signer, verified, signature);
     }
 
 
@@ -118,7 +125,7 @@ contract VerifySignature is Ownable {
     * @return the signer
     */
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
-        public
+        internal
         pure
         returns (address)
     {
@@ -132,7 +139,7 @@ contract VerifySignature is Ownable {
     * @param sig The hash signed by the Grant Orga 
     */
     function splitSignature(bytes memory sig)
-        public
+        internal
         pure
         returns (
             bytes32 r,

@@ -10,4 +10,5 @@ interface IGrantEscrow {
     function withdrawGrant(address _contestCreator) external;
     function fundsInEscrow(address _contestCreator) view external returns(uint);
     function setWithdrawStatus(address _from, address _to, bool _state) external returns(bool);
+    function canWithdraw(address _from, address _to) external view returns(bool);
 }
