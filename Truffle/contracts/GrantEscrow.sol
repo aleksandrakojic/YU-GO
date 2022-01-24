@@ -14,7 +14,7 @@ contract GrantEscrow is Ownable {
 
     event AddressesSet(address yugodao, address verifySign);
     event GrantDeposited(uint grant, address depositor);
-    event GrantWithdrawn(uint grant, address recipient);
+    event GrantWithdrawn(uint amountWithdrawn, address recipient);
 
     mapping(address => uint) public Grants;
     mapping (address =>  mapping (address => bool)) public UnlockFunds;
@@ -69,16 +69,16 @@ contract GrantEscrow is Ownable {
         require(Grants[_contestCreator] >= _requiredFunds, 'Not enough funds left in grant');
         UnlockFunds[_contestCreator][msg.sender] = false;
         // require(!setStatus, 'wrong status set');
-        uint256 newcontestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
-        uint newActionCreatorBalance = Grants[_contestCreator] - newcontestCreatorBalance;
-        Grants[_contestCreator] = newcontestCreatorBalance;
+        uint256 newContestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
+        uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
+        Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
         // payable(msg.sender).transfer(Grants[msg.sender]);
         // uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
         // payable(msg.sender).transfer(amountToTransfer);
         (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
-        emit GrantWithdrawn(_requiredFunds , msg.sender);
+        emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
     }
 
         /**

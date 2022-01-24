@@ -68,14 +68,14 @@ contract('test_YugoDao', async function (accounts) {
       countries: [0, 1],
       applicationEndDate: _applicationEndDate, 
       votingEndDate: _votingEndDate,
-      funds: new BN(web3.utils.toWei('10'))
+      funds: new BN(web3.utils.toWei('1'))
     }
   })();
 
   // setup action data 
   let action = {
     name: 'newAction',
-    funds: new BN(web3.utils.toWei('6'))
+    funds: new BN(web3.utils.toWei('0.5'))
   };
 
   const agreement = () => {
@@ -558,47 +558,37 @@ contract('test_YugoDao', async function (accounts) {
   //NOTE: recent changes in the verify function implies to change the test (in progress)
   describe('#verify()', function () {
     context('msg.sender is the signer of the agreement', function () {
-      it('should return true', async function() {
-        const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715';
-        let _agreement = agreement();
+      it('should emit the SignerVerified event', async function() {
+        const privateKey = '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1';
+        let _agreement = 'test'; //agreement();
         let hash = await verifSign.getMessageHash.call(actionCreator, action.funds, _agreement, nonce,{ from: contestCreator });
-        const msgSigned = await verifSign.getEthSignedMessageHash(hash, {from: admin});
-        await verifSign.verify(actionCreator, action.funds, agreement, nonce, msgSigned, { from: contestCreator });
-        // assert(isVerified == true, 'not the same signer')
+        // const signature = await web3.eth.sign(hash, contestCreator)
+        // const sign = await web3.eth.accounts.sign(hash, privateKey);
+        // const signature = sign.signature;
+        const signature = await web3.eth.personal.sign(hash, contestCreator, 'password');
+        console.log('signature :', signature);
+        let isVerified = await verifSign.verify(actionCreator, action.funds, agreement, nonce, signature, { from: contestCreator });
+        console.log('contestCreator :', contestCreator);
+        await expectEvent(
+          isVerified, 
+          'SignerVerified', 
+          { signer: contestCreator, verified: true, signature: signature });
       });
     });
   });
 
   describe('#withdrawGrant()', function () {
     context('caller is authorised to withdraw', function () {
-      // it('setWithdrawStatus()', async function () {
-      //   let setStatus = await escrow.setWithdrawStatus.call(contestCreator, actionCreator, true, {from: contestCreator})
-      //   assert(setStatus === true, 'msg false')
-      // })
-      // it('_canWithdraw should return true', async function () {
-      //   console.log('contestCreator: ', contestCreator)
-      //   console.log('actionCreator: ', actionCreator)
-      //   let status = await escrow.canWithdraw.call(contestCreator, actionCreator, {from: admin});
-      //   console.log('status:', status);
-      //   assert(status === true, 'status is false');
-      // });
       it('should emit the GrantWithdrawn event', async function () {
-        // actionCreatorBalanceBeforeClaim = await new BN(web3.eth.getBalance(actionCreator)); //get current balance of actionCreator to compare later
-        // console.log('actionCreator balance before claim: ', actionCreatorBalanceBeforeClaim);
         const wd = await escrow.withdrawGrant(contestCreator, {from: actionCreator});
-        // console.log('recipient :', wd.logs);
-        console.log('grants :', Number(wd.logs[0].args.grant));
+        console.log('grants :', Number(wd.logs[0].args.amountWithdrawn));
         console.log('recipient :', wd.logs[0].args.recipient);
-        await expectEvent(wd, 'GrantWithdrawn', {grant: action.funds, recipient: actionCreator});
+        await expectEvent(
+          wd, 
+          'GrantWithdrawn', 
+          {amountWithdrawn: action.funds, recipient: actionCreator});
       });
-      // it('balance of actionCreator should have increase', async function () {
-      //   actionCreatorBalanceAfterClaim = await new BN(web3.eth.getBalance(actionCreator))
-      //   console.log('actionCreator balance after claim: ', actionCreatorBalanceAfterClaim);
-      //   assert(actionCreatorBalanceAfterClaim === actionCreatorBalanceBeforeClaim + action.funds, 'wrong balance')
-      // })
-    }); //end context
-  })
-
-
+    }); 
+  });
 
 }); 

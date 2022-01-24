@@ -24,6 +24,7 @@ contract VerifySignature is Ownable {
     bool private yugoAddrSet;
 
     event YugoDaoAddrSet(address yugodao, address grantEscrow);
+    event SignerVerified(address caller, address signer, bool verified, bytes signature);
 
     mapping(address => mapping (address => Confidential)) private confidentials;
     
@@ -90,7 +91,6 @@ contract VerifySignature is Ownable {
     * @param _agreement Agreement unsigned 
     * @param _nonce The secret number used for the hash 
     * @param signature The hash signed fy teh Grant Orga 
-    * @return True if msg.sender is the signer
     */
     function verify(
         address _to,
@@ -98,23 +98,23 @@ contract VerifySignature is Ownable {
         string memory _agreement,
         uint _nonce,
         bytes memory signature
-    ) public returns (bool) {
-        // bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
-        // bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
-
-        // if (recoverSigner(ethSignedMessageHash, signature) == msg.sender) {
-        //     escrow.setWithdrawStatus(msg.sender, _to, true);
+    ) external {
+        bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
+        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+        bool verified;
+        address _signer = recoverSigner(ethSignedMessageHash, signature);
+        if ( _signer == msg.sender) {
+            escrow.setWithdrawStatus(msg.sender, _to, true);
+            verified = true;
+        }
+        // address _from = msg.sender;
+        // escrow.setWithdrawStatus(_from, _to, true);
+        // if (escrow.canWithdraw(_from, _to) == true) {
         //     return true;
         // } else {
         //     return false;
         // }
-        address _from = msg.sender;
-        escrow.setWithdrawStatus(_from, _to, true);
-        if (escrow.canWithdraw(_from, _to) == true) {
-            return true;
-        } else {
-            return false;
-        }
+        emit SignerVerified(msg.sender, _signer, verified, signature);
     }
 
 
