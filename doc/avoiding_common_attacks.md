@@ -6,10 +6,11 @@ The steps and mesures we took to avoid common attacks and potential hacks of our
 
 ## Re-Entrancy
 
-We use modifiers to prevent re-entrancy calls of payable functions in our contracts using the `nonReentrant` modifier from OpenZeppelin's `ReentrancyGuard` contract.
+We extensively use checks ('require') and modifiers to prevent re-entrancy calls of payable functions and some non-payable functions in our contracts. Our modifiers are similar to the `nonReentrant` modifier from OpenZeppelin's `ReentrancyGuard` contract.
 
 [Reference](https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard)
 [Reference](https://solidity-by-example.org/hacks/re-entrancy/)
+
 ## Pausable
 
 A common emergency response mechanism that can pause functionality while a remediation is pending..

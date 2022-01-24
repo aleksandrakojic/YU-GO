@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {utils} from "./libraries/utils.sol";
@@ -9,7 +9,7 @@ import "./interfaces/IGrantEscrow.sol";
 /**
 * @notice This smart contract handles the signature of an agreement, confirming that the winner can claim the price.
 */
-contract VerifySignature is Ownable {
+contract VerifySignature  is Ownable {
     
     struct Confidential {
             string agreement;
@@ -73,7 +73,7 @@ contract VerifySignature is Ownable {
     * @return Hash as a Bytes32
     */
     function getEthSignedMessageHash(bytes32 _messageHash)
-        public
+        internal
         pure
         returns (bytes32)
     {
@@ -125,7 +125,7 @@ contract VerifySignature is Ownable {
     * @return the signer
     */
     function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
-        public
+        internal
         pure
         returns (address)
     {
@@ -139,7 +139,7 @@ contract VerifySignature is Ownable {
     * @param sig The hash signed by the Grant Orga 
     */
     function splitSignature(bytes memory sig)
-        public
+        internal
         pure
         returns (
             bytes32 r,

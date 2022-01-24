@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.9;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugo.sol";
@@ -17,6 +17,7 @@ contract YugoManager is Ownable {
     mapping (address => uint) EthLedger;
     mapping (address => bool) EligibleToClaimYugo;
     bool internal locked;
+    bool private AllAddrSet;
 
     modifier noReentrant() {
         require(!locked, "No re-entrancy");
@@ -41,6 +42,8 @@ contract YugoManager is Ownable {
     * @param _dao Address of YugoDao
     */
     function setContractsAddresses(address _yugo, address _dao) external onlyOwner {
+        require(!AllAddrSet, "All contracts have already been set");
+        AllAddrSet = true;
         yugo = IYugo(_yugo);
         yugoDao = IYugoDao(_dao);
         emit ContractsAddrSet(_yugo, _dao);
