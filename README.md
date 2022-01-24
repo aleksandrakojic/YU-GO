@@ -1,43 +1,46 @@
 # `Yu-Go DAO`
 
-YU-GO DAO a un contexte social et un modèle de conception centré sur les femmes qui utilise les technologies blockchain avec son potentiel pour donner des pouvoirs aux communautés marginalisées grâce à la décentralisation.
+YU-GO DAO has a social background and a female-centered design model that utilizes blockchain technologies with its potential to empower marginalized communities through decentralization.
 
-L'objectif principal du DAO est d'impliquer les organisations non-gouvernementales et les activistes des droits des femmes dans le but de protéger, émanciper et autonomiser les femmes sur le territoire de l'ex-Yougoslavie, en promouvant différentes formes de valeur communautaire, en améliorant l'organisation autour d'actions communes et l'engagement des utilisateurs finaux à travers prise de décision démocratique, système de vote automatisé et transfert de fonds instantané pour les actions proposées grâce à une technologie blockchain.
+The main objective of the DAO is to involve non-governmental organizations and women's rights activists with the aim of protecting, emancipating and empowering women in the territory of the former Yugoslavia :  
+- by promoting different forms of community value,  
+- by improving the organization around common actions,  
+- by engaging end users through democratic decision-making, an automated voting system and instantaneous transfer of funds for proposed actions thanks to blockchain technology.
 
-Ce projet est réalisé avec [react-moralis](https://github.com/MoralisWeb3/react-moralis) et [Moralis](https://moralis.io?utm_source=github&utm_medium=readme&utm_campaign=ethereum-boilerplate).
+This project was made with [react-moralis](https://github.com/MoralisWeb3/react-moralis) and [Moralis](https://moralis.io?utm_source=github&utm_medium=readme&utm_campaign=ethereum-boilerplate).
 
-Veuillez voir [official documentation](https://docs.moralis.io/#user) pour toutes informations sur les fonctionnalités de Moralis.
+Take a look at [official documentation](https://docs.moralis.io/#user) for more information on Moralis functionalities.
 
-# Sommaire
+# Table of Content
 
-- [ Mise en place](#-quick-start)
-- [ Fonctionnement](#-fonctionnement)
+- [Quickstart](#-Quickstart)
+- [CONCEPT](#-Concept)
 - [ YG Token](#-yg-token)
 
-# Mise en place
+# Quickstart
 
-📄 Clone ou fork `Yu-Go`:
+📄 Clone or fork `Yu-Go`:
 
 ```sh
 git clone https://github.com/aleksandraDev/YU-GO
 ```
 
-💿 Installation des dépendances:
+💿 Install dependencies:
 
 ```sh
 cd YU-GO
 npm install
 ```
 
-✏ Renomme `.env.example` en `.env` dans le dossier principale puis renseigner votre `appId` et `serverUrl` provenant de Moralis ([How to start Moralis Server](https://docs.moralis.io/moralis-server/getting-started/create-a-moralis-server))
-Exemple:
+✏ Rename `.env.example` in `.env` in the root folder then add your Moralis `appId` and `serverUrl` ([How to start Moralis Server](https://docs.moralis.io/moralis-server/getting-started/create-a-moralis-server))
+Example:
 
 ```jsx
 REACT_APP_MORALIS_APPLICATION_ID = xxxxxxxxxxxx
 REACT_APP_MORALIS_SERVER_URL = https://xxxxxx.grandmoralis.com:2053/server
 ```
 
-✏ Ou utiliser notre serveur de test
+✏ Or use our Testnet
 
 ```jsx
 REACT_APP_MORALIS_APP_ID = 7xj9eFvOciZLstw0sL4zvJXG2Qc9uwLMkXwG3S32
@@ -50,36 +53,36 @@ chain = ganache
 moralisSubdomain = xxxxxxx.usemoralis.com
 ```
 
-🚴‍♂️ Lancement de l'App:
+🚴‍♂️ Launch the app:
 
 ```sh
 npm start
 ```
 
-🚴‍♂️ Lancement du Ganache Local:
+🚴‍♂️ Launch Ganach locally:
 
 ```sh
 npm run devchain
 ```
 
-🚴‍♂️ Deploiement :
+🚴‍♂️ Deploy:
 
 ```sh
 npm run deploy
 ```
 
-# Fonctionnement
+# Concept
 
 ![alt text](https://i.ibb.co/GCBR8jz/how-it-works.png)
 
-Le YU-GO DAO n'a pas besoin d'autorité centrale. Au lieu de cela, le groupe prend des décisions collectivement et démocratiquement avec transparence, équité et fiabilité en votant sur les actions préalables proposées par les organisations, où l'organisation de la proposition gagnante obtient des paiements automatiques autorisés pour financer et réaliser son action.
+The YU-GO DAO does not need a central authority. Instead, the group makes decisions collectively and democratically with transparency, fairness, and reliability by voting on 'actions' proposed by organizations. At the end of the vote, the winning organization can withdraw the funds and carry out on its action.
 
-Les fonds pour la réalisation des actions proviennent des organismes subventionnaires, qui disposent d'un budget dédié au financement de nouveaux projets. Les organismes subventionnaires proposent un certain fond à travers un concours où d'autres organismes peuvent postuler avec leurs propositions d'action. Après fin automatique de l'application à la date proposée par le concours créé, les membres de DAO peuvent voter pour les actions proposées. La fin du vote est suivie de transferts automatiques de fonds aux organisations des actions gagnantes qui sont portées du budget proposé par concours.
+The funds for carrying out the actions come from Grant Organisations (organisations that receive funds from their donators), which have a budget dedicated to financing new projects (actions). A Grant Organisation offers funding through a competition where other organisations can apply with their proposal of action. Once the 'action proposal' deadline is reached on the date imposed by the competition, DAO members can vote for the proposed actions. The end of the vote is followed by automatic transfers of funds to the organizations of the winning actions.
 
-Chaque organisation est catégorisé par sa thematique et pays. Lorsqu'un concours est proposé, seul les orgnisations qui correspondent à la thématique et le pays peuvent participer au vote.
+Each organization is categorized by its theme and country. When a competition is proposed, only the organizations with matching themes and country can take part in the vote.
 
-L'historique des votes est stocké d'une manière transparent sur la blockchain. Cependant les données utilisateurs et organisation sont stocké (nom, prenom, tel, ... ) sur la base de donnée Moralis.
+Voting history is stored transparently on the blockchain. However, user and organization data is stored (surname, first name, phone, etc.) on the Moralis database.
 
 # YG Token
 
-Chaque organisation achète un token de participation à la plateforme. Potentiellement, avec une souscription mensuelle/annuelle. A la fin de la souscription, le token est burné. Le token n'est transferable que par l'owner.
+Each organization buys a participation token from the platform. An annual subscription. At the end of the subscription, the token is burned. The token can only be manipulated by the Manager contract.

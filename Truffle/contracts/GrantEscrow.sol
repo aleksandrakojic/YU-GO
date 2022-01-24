@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugoDao.sol";
@@ -12,9 +12,11 @@ contract GrantEscrow is Ownable {
     IYugoDao private yugodao;
     IVerifySignature private verifSign;
 
+    bool private AllAddrSet;
+
     event AddressesSet(address yugodao, address verifySign);
     event GrantDeposited(uint grant, address depositor);
-    event GrantWithdrawn(uint grant, address recipient);
+    event GrantWithdrawn(uint amountWithdrawn, address recipient);
 
     mapping(address => uint) public Grants;
     mapping (address =>  mapping (address => bool)) public UnlockFunds;
@@ -39,6 +41,8 @@ contract GrantEscrow is Ownable {
     * @param _verifSign Address of VerifySignature
     */
     function setContractsAddresses(address _dao, address _verifSign) external onlyOwner {
+        require(!AllAddrSet, "All contracts have already been set");
+        AllAddrSet = true;
         yugodao = IYugoDao(_dao);
         verifSign = IVerifySignature(_verifSign);
         emit AddressesSet(_dao, _verifSign);
@@ -65,20 +69,20 @@ contract GrantEscrow is Ownable {
     function withdrawGrant(address _contestCreator) external {
         (address _winner, uint _requiredFunds ) = yugodao.getContestWinner(_contestCreator);
         require(msg.sender == _winner, "you cannot withdraw, seems like you did not win the contest");
-        require(canWithdraw(_contestCreator, msg.sender), "You cannot withdraw the grant at this time; agreement is not yet signed");
+        require(UnlockFunds[_contestCreator][msg.sender], "You cannot withdraw the grant at this time; agreement is not yet signed");
         require(Grants[_contestCreator] >= _requiredFunds, 'Not enough funds left in grant');
         UnlockFunds[_contestCreator][msg.sender] = false;
         // require(!setStatus, 'wrong status set');
-        uint256 newcontestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
-        uint newActionCreatorBalance = Grants[_contestCreator] - newcontestCreatorBalance;
-        Grants[_contestCreator] = newcontestCreatorBalance;
+        uint256 newContestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
+        uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
+        Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
         // payable(msg.sender).transfer(Grants[msg.sender]);
         // uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
         // payable(msg.sender).transfer(amountToTransfer);
         (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
-        emit GrantWithdrawn(_requiredFunds , msg.sender);
+        emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
     }
 
         /**
