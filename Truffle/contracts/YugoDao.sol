@@ -250,7 +250,7 @@ contract YugoDao {
         contests[msg.sender].votingEndDate = _votingEndDate;
         contests[msg.sender].fundsAvailable = _funds;
         contests[msg.sender].isCreated = true;
-        (bool success, bytes memory data) = address(escrow).call{value: msg.value}(
+        (bool success,) = address(escrow).call{value: msg.value}(
             abi.encodeWithSignature("depositGrant(address)", msg.sender)
         );
         require(success, "Deposit failed.");
