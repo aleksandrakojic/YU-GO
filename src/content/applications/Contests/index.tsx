@@ -3,6 +3,7 @@ import PageTitleWrapper from 'src/components/PageTitleWrapper';
 import { Grid, Container, LinearProgress } from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, { useContext, useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 
 import Contests from './Contests';
 import AddContestModal from './AddContestModal';
@@ -11,6 +12,7 @@ import { useWeb3ExecuteFunction, useMoralis, useMoralisQuery } from 'react-moral
 import { getEligibleFormattedContests } from 'src/helpers/utils';
 
 function ContestsContainer() {
+	const { enqueueSnackbar } = useSnackbar();
 	const { Moralis, account } = useMoralis();
 	const { abi, contractAddress, thematics, countries } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
@@ -41,6 +43,12 @@ function ContestsContainer() {
 			setContests(eligibleContest);
 		}
 	}, [contestData, organization]);
+
+	useEffect(() => {
+		if (!isLoadingContest && contestError) {
+			enqueueSnackbar(contestError[0] ?? JSON.stringify(contestError), { variant: 'error' });
+		}
+	}, [contestError, isLoadingContest]);
 
 	useEffect(() => {
 		const addrOrga = (data as any)?.events?.ContestCreated?.returnValues?.addressOrga;
@@ -78,14 +86,14 @@ function ContestsContainer() {
 			abi,
 			contractAddress,
 			functionName: 'addContest',
-			msgValue: contest.availableFunds,
+			msgValue: Moralis.Units.ETH(contest.availableFunds),
 			params: {
 				_name: contest.name,
 				_themeIds: contest.thematics,
 				_eligibleCountryIds: contest.countries,
 				_applicationEndDate: new Date(contest.applicationEndDate).getTime(),
 				_votingEndDate: new Date(contest.votingEndDate).getTime(),
-				_funds: contest.availableFunds,
+				_funds: Moralis.Units.ETH(contest.availableFunds),
 			},
 		};
 		fetch({ params: contractData });

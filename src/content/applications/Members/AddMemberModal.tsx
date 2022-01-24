@@ -7,14 +7,16 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Divider } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 
 interface Props {
 	isOpen: boolean;
+	isLoading: boolean;
 	onClose: () => void;
 	onSubmit: (addr: string) => void;
 }
 
-export default function AddMemberModal({ isOpen, onClose, onSubmit }: Props) {
+export default function AddMemberModal({ isOpen, isLoading, onClose, onSubmit }: Props) {
 	const [addr, setAddr] = React.useState('');
 
 	const handleSubmit = () => {
@@ -54,12 +56,12 @@ export default function AddMemberModal({ isOpen, onClose, onSubmit }: Props) {
 				/>
 			</DialogContent>
 			<DialogActions sx={{ marginRight: '20px' }}>
-				<Button variant="outlined" color="secondary" onClick={handleClose}>
+				<Button variant="outlined" color="secondary" onClick={handleClose} disabled={isLoading}>
 					Cancel
 				</Button>
-				<Button variant="outlined" onClick={handleSubmit}>
+				<LoadingButton variant="outlined" onClick={handleSubmit} loading={isLoading}>
 					Submit
-				</Button>
+				</LoadingButton>
 			</DialogActions>
 		</Dialog>
 	);

@@ -62,7 +62,6 @@ interface Props {
 }
 
 function MetamaskBox({ currentUser, logout }: Props) {
-	console.log('currentUser', currentUser);
 	const addr = currentUser?.attributes?.ethAddress;
 	const user = {
 		name: 'Ethereum network',

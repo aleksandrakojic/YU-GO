@@ -1,8 +1,9 @@
 import PageHeader from './PageHeader';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
-import { Grid, Container } from '@mui/material';
+import { Grid, Container, LinearProgress } from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, { useContext, useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 
 import Members from './Members';
 import AddMemberModal from './AddMemberModal';
@@ -11,13 +12,13 @@ import { useWeb3ExecuteFunction, useMoralis, useMoralisQuery } from 'react-moral
 import { IMemberStatus } from 'src/models';
 
 function OrganizationMembers() {
-	const { Moralis, account, user } = useMoralis();
+	const { enqueueSnackbar } = useSnackbar();
+	const { Moralis, account } = useMoralis();
 	const { abi, contractAddress, currentUser } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [newAddr, setNewAddr] = useState<any>(null);
 	const [allMembers, setAllMembers] = useState([]);
-	const [orgaParticipant, setOrgaParticipant] = useState<any[]>([]);
 
 	const {
 		data: participantsData,
@@ -44,6 +45,15 @@ function OrganizationMembers() {
 	}, [whitelistData, participantsData]);
 
 	useEffect(() => {
+		if (!isLoadingParticipants && !isLoadingWhitelist) {
+			const err = participantsError || whitelistError;
+			if (err) {
+				enqueueSnackbar(err[0] ?? JSON.stringify(err), { variant: 'error' });
+			}
+		}
+	}, [participantsError, whitelistError]);
+
+	useEffect(() => {
 		if (!(isLoading && isFetching && error) && newAddr) {
 			const queryFunc = async () => {
 				const addresses = (data as any)?.events?.ParticipantWhitelisted?.returnValues;
@@ -63,11 +73,11 @@ function OrganizationMembers() {
 			};
 			queryFunc();
 		}
-	}, [data, isFetching, newAddr]);
+	}, [data, isFetching, isLoading, newAddr]);
 
 	const getWhitelistedAddresses = async () => {
 		const organization = whitelistData.find((w) => {
-			return w.attributes.ethAddress == account;
+			return w.attributes.ethAddress === account;
 		});
 
 		setWhitelistedAddresses(organization?.attributes?.whitelisted);
@@ -78,7 +88,7 @@ function OrganizationMembers() {
 
 		const whitelistedAddrs = whitelisted?.map((memberAddr) => {
 			const participant = participantsData.find((e) => {
-				return e.attributes.ethAddress == memberAddr;
+				return e.attributes.ethAddress === memberAddr;
 			});
 			console.log(participantsData, participant);
 			return {
@@ -98,8 +108,6 @@ function OrganizationMembers() {
 	};
 
 	const handleSubmit = (addr: string) => {
-		setIsModalOpen(false);
-		setNewAddr(addr);
 		const contractData: any = {
 			abi,
 			contractAddress,
@@ -109,7 +117,13 @@ function OrganizationMembers() {
 				_addrParticipant: addr,
 			},
 		};
-		fetch({ params: contractData });
+		fetch({
+			params: contractData,
+			onComplete: () => {
+				setIsModalOpen(false);
+			},
+		});
+		setNewAddr(addr);
 	};
 
 	console.log('add participant', data, isLoading, isFetching, error, newAddr, currentUser, account);
@@ -122,12 +136,18 @@ function OrganizationMembers() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
+						{(isLoading || isFetching || isLoadingWhitelist) && <LinearProgress color="primary" />}
 						<Members members={allMembers} />
 					</Grid>
 				</Grid>
 			</Container>
 			<Footer />
-			<AddMemberModal isOpen={isModalOpen} onClose={toggleModalState} onSubmit={handleSubmit} />
+			<AddMemberModal
+				isOpen={isModalOpen}
+				onClose={toggleModalState}
+				onSubmit={handleSubmit}
+				isLoading={isLoading || isFetching}
+			/>
 		</>
 	);
 }

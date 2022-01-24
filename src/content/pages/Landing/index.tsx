@@ -75,7 +75,7 @@ function LandingPage() {
 			handleSnackMessage('You need to be registered !', 'warning');
 		}
 		if (error) {
-			handleSnackMessage(error[0] ?? 'Error occured', 'error');
+			handleSnackMessage(error[0] || error['message'] || 'An error occured ...', 'error');
 		}
 	}, [type, isAuthenticated, error]);
 
@@ -219,7 +219,7 @@ function LandingPage() {
 									<KeyboardBackspaceIcon /> <div>Back</div>
 								</Button>
 							)}
-							{(isLoading || isFetching) && !(signup !== SignupType.None) && (
+							{(isLoading || isFetching) && signup !== SignupType.None && (
 								<LinearProgress color="primary" sx={{ maxWidth: '90%', margin: '0px auto' }} />
 							)}
 							{renderForm()}
