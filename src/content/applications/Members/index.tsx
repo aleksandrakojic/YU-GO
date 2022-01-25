@@ -36,8 +36,6 @@ function OrganizationMembers() {
 		live: true,
 	});
 
-	console.log(participantsData, whitelistData);
-
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
 	useEffect(() => {
@@ -65,7 +63,6 @@ function OrganizationMembers() {
 					const query = new Moralis.Query(Organisations);
 					query.equalTo('ethAddress', orgAddr.toLowerCase());
 					const res = await query.first();
-					console.log(memberAddr, orgAddr, res);
 					res?.addUnique('whitelisted', newAddr.toLowerCase());
 					res?.save();
 					setNewAddr(null);
@@ -84,13 +81,10 @@ function OrganizationMembers() {
 	};
 
 	const setWhitelistedAddresses = (whitelisted) => {
-		console.log('whitelisted', whitelisted);
-
 		const whitelistedAddrs = whitelisted?.map((memberAddr) => {
 			const participant = participantsData.find((e) => {
 				return e.attributes.ethAddress === memberAddr;
 			});
-			console.log(participantsData, participant);
 			return {
 				id: Math.random().toString(36).substring(2, 7),
 				firstname: participant?.attributes?.firstname,
@@ -125,8 +119,6 @@ function OrganizationMembers() {
 		});
 		setNewAddr(addr);
 	};
-
-	console.log('add participant', data, isLoading, isFetching, error, newAddr, currentUser, account);
 
 	return (
 		<>

@@ -125,7 +125,6 @@ function YugoTokenTab() {
 	}, []);
 
 	useEffect(() => {
-		console.log('DATA', data);
 		if (data) {
 			fetchBalance();
 			fetchLedgerState();
@@ -155,9 +154,6 @@ function YugoTokenTab() {
 	};
 
 	const handleRedeemToken = () => transferYugo();
-
-	console.log('datas', balanceData, ledgerData, transferYugoData, data, hasYugo);
-	console.log('contractAddress', contractAddress);
 
 	const isLoading =
 		isFetching ||

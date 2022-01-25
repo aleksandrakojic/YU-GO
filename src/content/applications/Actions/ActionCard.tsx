@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -16,6 +16,7 @@ import { Button, Chip } from '@mui/material';
 import { useMoralis, useWeb3ExecuteFunction } from 'react-moralis';
 import { AppContext } from 'src/contexts/AppContext';
 import { LoadingButton } from '@mui/lab';
+import { useSnackbar, VariantType } from 'notistack';
 
 interface Props {
 	action: any;
@@ -30,25 +31,70 @@ const CardActionsWrapper = styled(CardActions)(
 );
 
 export default function ActionCard({ action, index }: Props) {
-	const { user, account } = useMoralis();
+	const { enqueueSnackbar } = useSnackbar();
+	const { user, account, Moralis } = useMoralis();
 	const { abi, contractAddress } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const isVoteDisabled = user?.attributes?.type === ProfileType.Organization;
-	// function voteForAction(address _creatorOfContest, address _actionCreator, address _participantOrga) external
-	console.log('VOTING', data, isLoading, isFetching, error, contractAddress, action);
+	const hasVoted = action?.attributes?.voters?.includes(account?.toLowerCase());
+	const [membersOrgaAddr, setMembersOrgaAddr] = useState();
+
+	useEffect(() => {
+		getMembersOrganisationAddr();
+	}, []);
+
+	useEffect(() => {
+		if (data) {
+			const event = (data as any)?.events?.HasVotedForAction?.event;
+			if (event === 'HasVotedForAction') {
+				const queryFunc = async () => {
+					const query = new Moralis.Query('Actions');
+					const votedAction = await query
+						.equalTo('addrOrgaCreator', action?.attributes?.addrOrgaCreator?.toLowerCase())
+						.first();
+					if (votedAction) {
+						votedAction?.addUnique('voters', account);
+						const votes = votedAction?.attributes?.nbOfVotes + 1;
+						votedAction?.set('nbOfVotes', votes);
+						votedAction.save();
+					}
+				};
+				queryFunc();
+			}
+		}
+	}, [data]);
+
+	useEffect(() => {
+		if (error) {
+			handleSnackMessage(error[0] || error['message'] || 'An error occured ...', 'error');
+		}
+	}, [error]);
+
+	const getMembersOrganisationAddr = async () => {
+		const query = new Moralis.Query('Participants');
+		const member = await query.equalTo('ethAddress', account).first();
+
+		const membersOrgaAddr = member?.attributes?.organisation;
+		setMembersOrgaAddr(membersOrgaAddr);
+	};
+
+	const handleSnackMessage = (message: string, variant: VariantType) => {
+		enqueueSnackbar(message, { variant });
+	};
 
 	const handleVote = () => {
 		const votingData: any = {
 			abi,
 			contractAddress,
 			functionName: 'voteForAction',
+			msgSender: account,
 			params: {
 				_actionCreator: action?.attributes?.addrOrgaCreator,
 				_creatorOfContest: action?.attributes?.addrGrantOrga,
-				_participantOrga: account,
+				_participantOrga: membersOrgaAddr,
 			},
 		};
-		fetch({ params: votingData, onComplete: () => console.log('complete') });
+		fetch({ params: votingData });
 	};
 
 	// TODO: put images in db / IPFS
@@ -70,7 +116,7 @@ export default function ActionCard({ action, index }: Props) {
 			}}
 		>
 			<CardHeader
-				sx={{ '.MuiCardHeader-title': { fontSize: '1.5rem' } }}
+				sx={{ '.MuiCardHeader-title': { fontSize: '1.2rem' } }}
 				avatar={
 					<Avatar sx={{ bgcolor: 'lightcoral' }} aria-label="recipe">
 						O
@@ -81,7 +127,7 @@ export default function ActionCard({ action, index }: Props) {
 						<MoreVertIcon />
 					</IconButton>
 				}
-				title={action.name}
+				title={action?.attributes?.name}
 				subheader={
 					<p>
 						<i>{action?.createdAt?.toUTCString()}</i>
@@ -123,11 +169,11 @@ export default function ActionCard({ action, index }: Props) {
 						sx={{ mr: 2 }}
 						startIcon={<ThumbUpAltTwoToneIcon />}
 						variant="contained"
-						disabled={isVoteDisabled}
+						disabled={isVoteDisabled || hasVoted}
 						onClick={handleVote}
 						loading={isLoading || isFetching}
 					>
-						Vote
+						{hasVoted ? 'Voted' : 'Vote'}
 					</LoadingButton>
 				)}
 				<Button startIcon={<CommentTwoToneIcon />} variant="outlined">

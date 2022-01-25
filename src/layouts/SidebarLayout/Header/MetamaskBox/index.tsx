@@ -20,6 +20,7 @@ import ExpandMoreTwoToneIcon from '@mui/icons-material/ExpandMoreTwoTone';
 import AccountBoxTwoToneIcon from '@mui/icons-material/AccountBoxTwoTone';
 import LockOpenTwoToneIcon from '@mui/icons-material/LockOpenTwoTone';
 import AccountTreeTwoToneIcon from '@mui/icons-material/AccountTreeTwoTone';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 
 const MetamaskButton = styled(Button)(
 	({ theme }) => `
@@ -55,6 +56,25 @@ const MetamaskBoxDescription = styled(Typography)(
         color: ${lighten(theme.palette.secondary.main, 0.5)}
 `
 );
+
+export const MetamaskLogoutButton = (name, address) => {
+	const ethAddress = address
+		? `${address?.substring(0, 6)}...${address.substring(address.length - 4, address.length)}`
+		: '';
+
+	return (
+		<MetamaskButton color="secondary">
+			<Avatar variant="rounded" alt={name} src="/static/images/avatars/MetaMask.png" />
+			<MetamaskBoxText>
+				<MetamaskBoxDescription variant="body1">Ethereum network</MetamaskBoxDescription>
+				<MetamaskBoxDescription variant="h5">{ethAddress}</MetamaskBoxDescription>
+			</MetamaskBoxText>
+			<Box>
+				<LockOpenTwoToneIcon sx={{ mr: 1 }} />
+			</Box>
+		</MetamaskButton>
+	);
+};
 
 interface Props {
 	currentUser?: any;

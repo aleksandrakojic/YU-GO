@@ -13,6 +13,7 @@ import Logo from 'src/components/Logo';
 import { ProfileType } from 'src/models';
 import { useSnackbar, VariantType } from 'notistack';
 import { LoadingButton } from '@mui/lab';
+import { MetamaskLogoutButton } from 'src/layouts/SidebarLayout/Header/MetamaskBox';
 
 enum SignupType {
 	None,
@@ -29,8 +30,6 @@ function LandingPage() {
 	const [newOrganistation, setNewOrganisation] = useState<any>(null);
 	const [newParticipant, setNewParticipant] = useState<any>(null);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
-
-	console.log('data ', data, newOrganistation, newParticipant);
 
 	useEffect(() => {
 		if (data && newOrganistation) {
@@ -159,19 +158,14 @@ function LandingPage() {
 		setType(ProfileType.None);
 	};
 
-	console.log('use func', data, isLoading, isFetching, error);
-
 	const renderAppBar = () => (
 		<AppBar>
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
-				<Logo /> <h1>Yu-Go DAO</h1>
+				<Logo />
 			</Box>
 			{isAuthenticated && user ? (
-				<Box sx={{ textAlign: 'right' }}>
-					<Button onClick={handleLogout} variant="contained">
-						Logout
-					</Button>
-					<h4>{user.get('ethAddress')}</h4>
+				<Box sx={{ textAlign: 'right' }} onClick={handleLogout}>
+					{MetamaskLogoutButton(user.get('name'), user.get('ethAddress'))}
 				</Box>
 			) : (
 				<LoadingButton onClick={userConnect} variant="contained" loading={isAuthenticating}>

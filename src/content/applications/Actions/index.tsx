@@ -6,7 +6,6 @@ import ActionsContainerOrgaView from './ActionsContainerOrgaView';
 
 const ActionsContainer = () => {
 	const { user } = useMoralis();
-	console.log('user', user?.attributes);
 
 	return user?.attributes?.type === ProfileType.Organization ? (
 		<ActionsContainerOrgaView />

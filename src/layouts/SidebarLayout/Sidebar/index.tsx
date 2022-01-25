@@ -45,7 +45,7 @@ function Sidebar() {
 				<SidebarWrapper>
 					<Scrollbars autoHide>
 						<TopSection>
-							<Logo /> <h1>Yu-Go DAO</h1>
+							<Logo />
 						</TopSection>
 						<SidebarMenu />
 					</Scrollbars>

@@ -50,7 +50,7 @@ function ActionsContainerMemberView() {
 
 	useEffect(() => {
 		queryActions();
-	}, [actionsData, contestData]);
+	}, [actionsData, contestData, eligibleContests]);
 
 	useEffect(() => {
 		if (!isLoadingAction && !isLoadingContest) {
@@ -69,7 +69,6 @@ function ActionsContainerMemberView() {
 			const queryActions = new Moralis.Query('Actions');
 			const query = await queryActions.containedIn('addrOrgaCreator', arrayAddr);
 			const filteredActions = await query.find();
-			console.log('query action', filteredActions);
 			setActions(filteredActions);
 		}
 	};
@@ -81,7 +80,6 @@ function ActionsContainerMemberView() {
 			setOrganization(orga);
 		}
 	};
-	console.log('actionsData', actionsData, eligibleContests);
 
 	return (
 		<>

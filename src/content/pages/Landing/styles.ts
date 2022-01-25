@@ -3,8 +3,10 @@ import { Box, Paper, styled, Container } from '@mui/material';
 export const AppBar = styled(Paper)({
 	display: 'flex',
 	justifyContent: 'space-between',
+	alignItems: 'center',
 	backgroundColor: '#2d2656',
-	padding: '20px',
+	padding: '10px 20px',
+	maxHeight: '100px',
 });
 
 export const Wrapper = styled(Container)(

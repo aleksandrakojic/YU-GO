@@ -44,7 +44,7 @@ function ActionsContainerOrgaView() {
 	}, []);
 
 	useEffect(() => {
-		if (contestData && organization && eligibleContests?.length === 0) {
+		if (contestData && organization) {
 			const eligibleContest = getEligibleFormattedContests(contestData, organization, account);
 			setEligibleContests(eligibleContest);
 		}
@@ -52,7 +52,7 @@ function ActionsContainerOrgaView() {
 
 	useEffect(() => {
 		queryActions();
-	}, [actionsData, contestData]);
+	}, [actionsData, eligibleContests]);
 
 	useEffect(() => {
 		if (!isLoadingAction && !isLoadingContest) {
@@ -122,8 +122,6 @@ function ActionsContainerOrgaView() {
 		fetch({ params: contractData });
 		setNewAction(action);
 	};
-
-	console.log('actionsData', actionsData, eligibleContests);
 
 	return (
 		<>
