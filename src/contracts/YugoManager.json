@@ -13575,11 +13575,30 @@
           ],
           "name": "YugoTransfer",
           "type": "event"
+        },
+        "0x9002c211abd499252e56273224dd6a3f259ba469ff482e4e6e4a13fb3d6b154e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "yugo",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "yugodao",
+              "type": "address"
+            }
+          ],
+          "name": "ContractsAddrSet",
+          "type": "event"
         }
       },
       "links": {},
-      "address": "0xFF33fcBBe98eA7d294E971430a7459071CE421EA",
-      "transactionHash": "0x1332efdaca9013cc37b49566ecb8f29185c812670766b4cc41b217468c0cd560"
+      "address": "0xC562339880B554B47835b4750459BABB70880D5D",
+      "transactionHash": "0x9360f5c1c9a6e1d2446cfa62c364b3b40feed93eb92ee7bfb3b2f85ef1592173"
     },
     "1337": {
       "events": {
@@ -13820,7 +13839,7 @@
     }
   },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-01-24T23:47:31.934Z",
+  "updatedAt": "2022-01-25T02:58:54.206Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
