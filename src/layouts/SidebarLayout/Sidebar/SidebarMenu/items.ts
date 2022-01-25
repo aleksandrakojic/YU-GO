@@ -5,6 +5,7 @@ import BrightnessLowTwoToneIcon from '@mui/icons-material/BrightnessLowTwoTone';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import TableChartTwoToneIcon from '@mui/icons-material/TableChartTwoTone';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
+import FemaleIcon from '@mui/icons-material/Female';
 import VerifiedUserTwoToneIcon from '@mui/icons-material/VerifiedUserTwoTone';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -23,7 +24,7 @@ export interface MenuItems {
 	heading: string;
 }
 
-const menuItems: MenuItems[] = [
+export const organizationMenuItems: MenuItems[] = [
 	{
 		heading: 'Dashboards',
 		items: [
@@ -70,7 +71,7 @@ const menuItems: MenuItems[] = [
 		],
 	},
 	{
-		heading: 'Yu-GO DAO',
+		heading: 'Yugo DAO',
 		items: [
 			{
 				name: 'DAO',
@@ -79,7 +80,7 @@ const menuItems: MenuItems[] = [
 				items: [
 					{
 						name: 'Proposals',
-						link: '/dao/proposals',
+						link: '/status/coming-soon',
 					},
 					// {
 					//   name: 'Error 500',
@@ -88,6 +89,10 @@ const menuItems: MenuItems[] = [
 					{
 						name: 'Maintenance',
 						link: '/status/maintenance',
+					},
+					{
+						name: 'Tasks',
+						link: '/status/tasks',
 					},
 					// {
 					//   name: 'Coming Soon',
@@ -99,4 +104,68 @@ const menuItems: MenuItems[] = [
 	},
 ];
 
-export default menuItems;
+export const memberMenuItems: MenuItems[] = [
+	{
+		heading: 'Dashboards',
+		items: [
+			{
+				name: 'Member',
+				link: '/dashboards/profile',
+				icon: FemaleIcon,
+				items: [
+					{
+						name: 'Details',
+						link: '/dashboards/profile/details',
+					},
+				],
+			},
+		],
+	},
+	{
+		heading: 'Happenings',
+		items: [
+			{
+				name: 'Contests',
+				icon: CampaignIcon,
+				link: '/happenings/contests',
+			},
+			{
+				name: 'Actions',
+				icon: PendingActionsOutlinedIcon,
+				link: '/happenings/actions',
+			},
+		],
+	},
+	{
+		heading: 'Yugo DAO',
+		items: [
+			{
+				name: 'DAO',
+				icon: VerifiedUserTwoToneIcon,
+				link: '/dao',
+				items: [
+					{
+						name: 'Proposals',
+						link: '/status/coming-soon',
+					},
+					// {
+					//   name: 'Error 500',
+					//   link: '/status/500'
+					// },
+					{
+						name: 'Maintenance',
+						link: '/status/maintenance',
+					},
+					{
+						name: 'Tasks',
+						link: '/status/tasks',
+					},
+					// {
+					//   name: 'Coming Soon',
+					//   link: '/status/coming-soon'
+					// }
+				],
+			},
+		],
+	},
+];

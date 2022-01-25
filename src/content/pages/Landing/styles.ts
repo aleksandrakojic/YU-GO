@@ -3,8 +3,10 @@ import { Box, Paper, styled, Container } from '@mui/material';
 export const AppBar = styled(Paper)({
 	display: 'flex',
 	justifyContent: 'space-between',
+	alignItems: 'center',
 	backgroundColor: '#2d2656',
-	padding: '20px',
+	padding: '10px 20px',
+	maxHeight: '100px',
 });
 
 export const Wrapper = styled(Container)(
@@ -12,6 +14,7 @@ export const Wrapper = styled(Container)(
   display: flex;
   flex-direction: column;
   height: 100vh;
+	min-width: 100vw;
   `
 );
 
@@ -24,6 +27,7 @@ export const MainContent = styled(Box)(
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+		flex-wrap: wrap;
 `
 );
 
@@ -55,5 +59,5 @@ export const Image = styled(Box)({
 	height: '400px',
 	display: 'flex',
 	justifyContent: 'space-between',
-	flexDirection: 'column'
+	flexDirection: 'column',
 });

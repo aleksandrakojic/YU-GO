@@ -85,12 +85,12 @@ const App = () => {
 		if (isAuthenticated) {
 			const userType = user?.attributes?.type;
 			if (userType) {
-					if (userType === ProfileType.Organization) {
-						navigate('/dashboards/organization/settings');
-					}
-					if (userType === ProfileType.Member) {
-						navigate('/dashboards/profile/details');
-					}
+				if (userType === ProfileType.Organization) {
+					navigate('/dashboards/organization/settings');
+				}
+				if (userType === ProfileType.Member) {
+					navigate('/dashboards/profile/details');
+				}
 			} else if (type) {
 				if (type === ProfileType.Organization) {
 					setUserData({ type });
@@ -121,7 +121,10 @@ const App = () => {
 
 	useEffect(() => {
 		if (themeData && !contractData.thematics.length && !isFetchingThemes && !isLoadingThemes) {
-			const themes = (themeData as Array<any>)?.map((t, i) => ({ id: i, name: t }));
+			const themes = (themeData as Array<any>)?.map((t, i) => ({
+				id: i,
+				name: t,
+			}));
 			setContractData({ ...contractData, [DataTypes.Thematics]: themes });
 		}
 		if (
@@ -156,7 +159,6 @@ const App = () => {
 					justifyContent: 'center',
 					alignItems: 'center',
 					width: '100vw',
-					maxWidth: '100vw !important',
 					padding: '0px !important',
 					height: '100vh',
 					backgroundColor: '#111633',
@@ -190,14 +192,21 @@ const App = () => {
 		<ThemeProvider>
 			<LocalizationProvider dateAdapter={AdapterDateFns}>
 				<SnackbarProvider
-					maxSnack={3}
+					maxSnack={2}
 					anchorOrigin={{
-						vertical: 'top',
-						horizontal: 'left',
+						vertical: 'bottom',
+						horizontal: 'center',
 					}}
 				>
 					<AppContext.Provider
-						value={{ ...contractData, abi, contractAddress, currentUser: user, type, setType }}
+						value={{
+							...contractData,
+							abi,
+							contractAddress,
+							currentUser: user,
+							type,
+							setType,
+						}}
 					>
 						<CssBaseline />
 						{content}

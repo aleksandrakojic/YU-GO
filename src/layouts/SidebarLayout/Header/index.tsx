@@ -50,7 +50,7 @@ function Header() {
 		<HeaderWrapper display="flex" alignItems="center">
 			<Box display="flex" alignItems="center">
 				<Hidden lgUp>
-					<Logo /> <h1>Yu-Go DAO</h1>
+					<Logo />
 				</Hidden>
 			</Box>
 			<Box display="flex" alignItems="center">

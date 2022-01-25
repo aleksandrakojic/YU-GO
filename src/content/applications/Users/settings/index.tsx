@@ -26,7 +26,6 @@ function ManagementUserSettings() {
 		{ value: 'activity', label: 'Activity' },
 		{ value: 'edit_profile', label: 'Edit Profile' },
 		{ value: 'notifications', label: 'Notifications' },
-		{ value: 'security', label: 'Passwords/Security' },
 		{ value: 'token', label: 'YUGO Token' },
 	];
 
@@ -59,7 +58,6 @@ function ManagementUserSettings() {
 						{currentTab === 'activity' && <ActivityTab />}
 						{currentTab === 'edit_profile' && <EditProfileTab />}
 						{currentTab === 'notifications' && <NotificationsTab />}
-						{currentTab === 'security' && <SecurityTab />}
 						{currentTab === 'token' && <YugoTokenTab />}
 					</Grid>
 				</Grid>

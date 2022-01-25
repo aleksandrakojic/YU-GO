@@ -1,44 +1,55 @@
 import PageHeader from './PageHeader';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
-import { Grid, Container } from '@mui/material';
+import { Grid, Container, LinearProgress } from '@mui/material';
 import Footer from 'src/components/Footer';
 import React, { useContext, useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 
 import Members from './Members';
 import AddMemberModal from './AddMemberModal';
 import { AppContext } from 'src/contexts/AppContext';
-import { useWeb3ExecuteFunction, useMoralis } from 'react-moralis';
+import { useWeb3ExecuteFunction, useMoralis, useMoralisQuery } from 'react-moralis';
 import { IMemberStatus } from 'src/models';
 
 function OrganizationMembers() {
+	const { enqueueSnackbar } = useSnackbar();
 	const { Moralis, account } = useMoralis();
 	const { abi, contractAddress, currentUser } = useContext(AppContext);
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [newAddr, setNewAddr] = useState<any>(null);
 	const [allMembers, setAllMembers] = useState([]);
-	const [orgaParticipant, setOrgaParticipant] = useState<any[]>([]);
+
+	const {
+		data: participantsData,
+		error: participantsError,
+		isLoading: isLoadingParticipants,
+	} = useMoralisQuery('Participants', (query) => query.includeAll(), [], {
+		live: true,
+	});
+
+	const {
+		data: whitelistData,
+		error: whitelistError,
+		isLoading: isLoadingWhitelist,
+	} = useMoralisQuery('Organisations', (query) => query.includeAll(), [], {
+		live: true,
+	});
 
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
-	useEffect( () => {
-		getAllParticipants();
+	useEffect(() => {
 		getWhitelistedAddresses();
-		const subscribeFunc = async () => {
-			const query = new Moralis.Query('Organisations');
-			const subscription = await query.subscribe();
-			subscription?.on('update', (object) => {
-				setWhitelistedAddresses(object?.attributes?.whitelisted);
-			});
-			return subscription;
-		};
-		const subscription = subscribeFunc();
+	}, [whitelistData, participantsData]);
 
-		return () => {
-			subscription.then((r) => r?.unsubscribe());
-		};
-	}, []);
-
+	useEffect(() => {
+		if (!isLoadingParticipants && !isLoadingWhitelist) {
+			const err = participantsError || whitelistError;
+			if (err) {
+				enqueueSnackbar(err[0] ?? JSON.stringify(err), { variant: 'error' });
+			}
+		}
+	}, [participantsError, whitelistError]);
 
 	useEffect(() => {
 		if (!(isLoading && isFetching && error) && newAddr) {
@@ -52,7 +63,6 @@ function OrganizationMembers() {
 					const query = new Moralis.Query(Organisations);
 					query.equalTo('ethAddress', orgAddr.toLowerCase());
 					const res = await query.first();
-					console.log(memberAddr, orgAddr, res);
 					res?.addUnique('whitelisted', newAddr.toLowerCase());
 					res?.save();
 					setNewAddr(null);
@@ -60,48 +70,38 @@ function OrganizationMembers() {
 			};
 			queryFunc();
 		}
-	}, [data, isFetching, newAddr]);
+	}, [data, isFetching, isLoading, newAddr]);
 
 	const getWhitelistedAddresses = async () => {
-		const query = new Moralis.Query('Organisations');
-		const organization = await query.equalTo('ethAddress', account).first();
+		const organization = whitelistData.find((w) => {
+			return w.attributes.ethAddress === account;
+		});
+
 		setWhitelistedAddresses(organization?.attributes?.whitelisted);
 	};
 
 	const setWhitelistedAddresses = (whitelisted) => {
 		const whitelistedAddrs = whitelisted?.map((memberAddr) => {
-			const participant = orgaParticipant.find(e=>{
-				return e.ethAddress == memberAddr;
-			})
-			console.log(orgaParticipant, participant)
+			const participant = participantsData.find((e) => {
+				return e.attributes.ethAddress === memberAddr;
+			});
 			return {
 				id: Math.random().toString(36).substring(2, 7),
-				firstname: participant?.firstname,
-				lastname: participant?.lastname,
-				status: IMemberStatus.Pending,
-				email: participant?.email,
+				firstname: participant?.attributes?.firstname,
+				lastname: participant?.attributes?.lastname,
+				status: participant ? IMemberStatus.Registered : IMemberStatus.Pending,
+				email: participant?.attributes?.email,
 				ethAddress: memberAddr,
 				orgEthAddress: currentUser?.attributes?.ethAddress,
 				registrationDate: new Date(currentUser?.attributes?.updatedAt).getTime(),
-			}
+			};
 		});
 		if (whitelistedAddrs) {
 			setAllMembers(whitelistedAddrs);
 		}
 	};
 
-	const getAllParticipants = async () => {
-		const query = new Moralis.Query('Participants');
-		const participants = await query
-			.equalTo('organisation', currentUser?.attributes?.ethAddress)
-			.find();
-		console.log("getAllParticipants", participants);
-		setOrgaParticipant(participants);
-	};
-
 	const handleSubmit = (addr: string) => {
-		setIsModalOpen(false);
-		setNewAddr(addr);
 		const contractData: any = {
 			abi,
 			contractAddress,
@@ -111,10 +111,14 @@ function OrganizationMembers() {
 				_addrParticipant: addr,
 			},
 		};
-		fetch({ params: contractData });
+		fetch({
+			params: contractData,
+			onComplete: () => {
+				setIsModalOpen(false);
+			},
+		});
+		setNewAddr(addr);
 	};
-
-	console.log('add participant', data, isLoading, isFetching, error, newAddr, currentUser, account);
 
 	return (
 		<>
@@ -124,12 +128,18 @@ function OrganizationMembers() {
 			<Container maxWidth="lg">
 				<Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
 					<Grid item xs={12}>
+						{(isLoading || isFetching || isLoadingWhitelist) && <LinearProgress color="primary" />}
 						<Members members={allMembers} />
 					</Grid>
 				</Grid>
 			</Container>
 			<Footer />
-			<AddMemberModal isOpen={isModalOpen} onClose={toggleModalState} onSubmit={handleSubmit} />
+			<AddMemberModal
+				isOpen={isModalOpen}
+				onClose={toggleModalState}
+				onSubmit={handleSubmit}
+				isLoading={isLoading || isFetching}
+			/>
 		</>
 	);
 }

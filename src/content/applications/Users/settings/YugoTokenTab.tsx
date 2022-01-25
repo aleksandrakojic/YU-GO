@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BigNumber } from 'ethers';
 import {
 	Box,
 	Typography,
@@ -15,6 +16,7 @@ import {
 import { styled } from '@mui/material/styles';
 import contractManager from 'src/contracts/YugoManager.json';
 import { useChain, useMoralis, useWeb3ExecuteFunction, useWeb3Transfer } from 'react-moralis';
+import { useSnackbar } from 'notistack';
 
 const YugoToken = styled(Box)(
 	({ theme }) => `
@@ -59,12 +61,12 @@ const YugoToken = styled(Box)(
 );
 
 function YugoTokenTab() {
+	const { enqueueSnackbar } = useSnackbar();
 	const [hasYugo, setHasYugo] = useState(false);
 	const { Moralis } = useMoralis();
 	const { chain, account } = useChain();
 	const { networks, abi } = contractManager;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
-
 	const {
 		fetch: fetchBalance,
 		data: balanceData,
@@ -114,6 +116,8 @@ function YugoTokenTab() {
 		contractAddress: contractAddress,
 	});
 
+	const errorMessage = error || errorBalance || errorTransferYugo || errorLedger;
+
 	useEffect(() => {
 		if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
 			fetchBalance();
@@ -139,23 +143,17 @@ function YugoTokenTab() {
 		}
 	}, [transferYugoData, isLoadingTransferYugo]);
 
+	useEffect(() => {
+		if (errorMessage && Object.keys(errorMessage).length) {
+			enqueueSnackbar(JSON.stringify(errorMessage), { variant: 'error' });
+		}
+	}, [errorMessage]);
+
 	const handleBuyToken = () => {
 		fetch();
 	};
 
-	const handleRedeemToken = () => {
-		transferYugo();
-	};
-
-	const errorMessage = () => {
-		if (error) return JSON.stringify(error);
-		if (errorBalance) return JSON.stringify(errorBalance);
-		if (errorTransferYugo) return JSON.stringify(errorTransferYugo);
-		if (errorLedger) return JSON.stringify(errorLedger);
-		return null;
-	};
-
-	console.log('datas', balanceData, ledgerData, transferYugoData, data, hasYugo);
+	const handleRedeemToken = () => transferYugo();
 
 	const isLoading =
 		isFetching ||
@@ -220,13 +218,6 @@ function YugoTokenTab() {
 						</ListItem>
 					</List>
 				</Card>
-				{errorMessage() && (
-					<Card>
-						<List>
-							<ListItem sx={{ color: 'red' }}>{errorMessage()}</ListItem>
-						</List>
-					</Card>
-				)}
 			</Grid>
 		</Grid>
 	);

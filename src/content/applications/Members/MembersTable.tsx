@@ -191,7 +191,7 @@ const MembersTable: FC<MembersTableProps> = ({ members }) => {
 							<TableCell>First Name</TableCell>
 							<TableCell>Last Name</TableCell>
 							<TableCell>Email</TableCell>
-							<TableCell align="right">ETH Address</TableCell>
+							<TableCell>ETH Address</TableCell>
 							<TableCell align="right">Registration Date</TableCell>
 							<TableCell align="right">Status</TableCell>
 							<TableCell align="right">Action</TableCell>
@@ -236,24 +236,12 @@ const MembersTable: FC<MembersTableProps> = ({ members }) => {
 											</Typography>
 										</TableCell>
 										<TableCell>
-											<Typography
-												variant="body1"
-												fontWeight="bold"
-												color="text.primary"
-												gutterBottom
-												noWrap
-											>
+											<Typography variant="body1" color="text.primary" gutterBottom noWrap>
 												{member?.email}
 											</Typography>
 										</TableCell>
-										<TableCell align="right">
-											<Typography
-												variant="body1"
-												fontWeight="bold"
-												color="text.primary"
-												gutterBottom
-												noWrap
-											>
+										<TableCell>
+											<Typography variant="body1" color="text.primary" gutterBottom noWrap>
 												{member?.ethAddress}
 											</Typography>
 										</TableCell>

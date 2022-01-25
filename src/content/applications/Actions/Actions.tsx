@@ -86,11 +86,13 @@ function Actions({ currentUser, actions }: Props) {
 					</Tabs>
 				</Box>
 				<TabPanel value={value} index={0}>
+					{actions?.length === 0 && <h3>No Actions</h3>}
 					{actions?.map((c, i) => (
 						<ActionCard key={c.id} action={c} index={i} />
 					))}
 				</TabPanel>
 				<TabPanel value={value} index={1}>
+					{orgContests?.length === 0 && <h3>No Actions</h3>}
 					{orgContests?.map((c, i) => (
 						<ActionCard key={c.id} action={c} index={i} />
 					))}

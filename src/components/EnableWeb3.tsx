@@ -4,24 +4,29 @@ import React from 'react';
 import { useMoralis } from 'react-moralis';
 
 interface Props {
-  children: any;
+	children: any;
 }
 
 const EnableWeb3 = (props: Props) => {
-  const { enableWeb3, isWeb3Enabled, isWeb3EnableLoading, web3EnableError, web3 } = useMoralis();
+	const { enableWeb3, isWeb3Enabled, isWeb3EnableLoading, web3EnableError, web3 } = useMoralis();
 
-  if (isWeb3Enabled || web3) {
-    return props.children;
-  }
+	if (isWeb3Enabled || web3) {
+		return props.children;
+	}
 
-  return (
-    <Box sx={{ textAlign: 'center' }}>
-      {web3EnableError && <Paper elevation={5}>web3EnableError</Paper>}
-      <Button variant="outlined" onClick={() => enableWeb3()} disabled={isWeb3EnableLoading}>
-        Enable web3
-      </Button>
-    </Box>
-  );
+	return (
+		<Box sx={{ textAlign: 'center' }}>
+			{web3EnableError && <Paper elevation={5}>web3EnableError</Paper>}
+			<Button
+				color="primary"
+				variant="outlined"
+				onClick={() => enableWeb3()}
+				disabled={isWeb3EnableLoading}
+			>
+				Enable web3
+			</Button>
+		</Box>
+	);
 };
 
 export default EnableWeb3;

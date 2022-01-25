@@ -6,7 +6,7 @@ import Logo from 'src/components/LogoSign';
 import Hero from './Hero';
 
 const OverviewWrapper = styled(Box)(
-  () => `
+	() => `
     overflow: auto;
     flex: 1;
     overflow-x: hidden;
@@ -15,18 +15,18 @@ const OverviewWrapper = styled(Box)(
 );
 
 function Overview() {
-  return (
-    <OverviewWrapper>
-      <Container maxWidth="lg">
-        <Box display="flex" justifyContent="center" py={5} alignItems="center">
-          <Logo />
-        </Box>
-        <Card sx={{ p: 10, mb: 10, borderRadius: 12 }}>
-          <Hero />
-        </Card>
-      </Container>
-    </OverviewWrapper>
-  );
+	return (
+		<OverviewWrapper>
+			<Container maxWidth="lg">
+				<Box display="flex" justifyContent="center" py={5} alignItems="center">
+					<Logo />
+				</Box>
+				<Card sx={{ p: 10, mb: 10, borderRadius: 12 }}>
+					<Hero />
+				</Card>
+			</Container>
+		</OverviewWrapper>
+	);
 }
 
 export default Overview;
