@@ -27,7 +27,7 @@ contract GrantEscrow is Ownable {
     }
 
     modifier restrictedToContracts() {
-        require(msg.sender == address(yugodao) || msg.sender == address(verifSign) || msg.sender == address(this), 'Only YugoDao, VerifySignature or GrantEscrow (this) contract can call this function');
+        require(msg.sender == address(yugodao) || msg.sender == address(verifSign) || msg.sender == address(this), 'Only trusted YUGO contracts can call this function');
         _;
     }
 
@@ -72,14 +72,10 @@ contract GrantEscrow is Ownable {
         require(UnlockFunds[_contestCreator][msg.sender], "You cannot withdraw the grant at this time; agreement is not yet signed");
         require(Grants[_contestCreator] >= _requiredFunds, 'Not enough funds left in grant');
         UnlockFunds[_contestCreator][msg.sender] = false;
-        // require(!setStatus, 'wrong status set');
         uint256 newContestCreatorBalance = Grants[_contestCreator] - _requiredFunds;
         uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
         Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
-        // payable(msg.sender).transfer(Grants[msg.sender]);
-        // uint amountToTransfer = Grants[_contestCreator] - (Grants[_contestCreator] - _requiredFunds);
-        // payable(msg.sender).transfer(amountToTransfer);
         (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
         emit GrantWithdrawn(newActionCreatorBalance , msg.sender);

@@ -14,8 +14,9 @@ Take a look at [official documentation](https://docs.moralis.io/#user) for more 
 # Table of Content
 
 - [Quickstart](#-Quickstart)
-- [CONCEPT](#-Concept)
-- [ YG Token](#-yg-token)
+- [ConceptT](#-Concept)
+- [YG Token](#-yg-token)
+- [Testing](#-Testing)
 
 # Quickstart
 
@@ -71,6 +72,9 @@ npm run devchain
 npm run deploy
 ```
 
+# Links
+You can also test directly on Moralis:  https://4inwhly3zm24.usemoralis.com/  
+
 # Concept
 
 ![alt text](https://i.ibb.co/GCBR8jz/how-it-works.png)
@@ -86,3 +90,7 @@ Voting history is stored transparently on the blockchain. However, user and orga
 # YG Token
 
 Each organization buys a participation token from the platform. An annual subscription. At the end of the subscription, the token is burned. The token can only be manipulated by the Manager contract.
+
+# Testing
+To lunch the test, in a terminal execute `npm run devchain` from the root folder which will launch Ganache in determisitic mode to always get the same public and private keys.  
+In a second terminal, execute `truffle test --network develop` in the truffle folder.
