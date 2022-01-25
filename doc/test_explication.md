@@ -9,7 +9,8 @@ We are using:
 - truffle test as a test runner engine
 - [chai](https://www.npmjs.com/package/chai) for our TDD assertions
 
-We use the **`expect`** variant in our tests.
+To lunch the test, in a terminal execute `nom run devchain` which will launch Ganache in determisitic mode to always get the same public and private keys.
+In a second terminal, execute `truffle test --network develop`.
 
 ## Test Struture
 
@@ -23,26 +24,32 @@ We check the following for each key function of a smart-contract:
 - **successful cases**
 - **failure cases**
 
-## Test YugoDao
-Tests include:
-- check all the steps of a voting session
+## Test BDD FULL
+Tests the application's behavior from the end user's standpoint, such as:
 - registration of a Organisation
 - registration of a Particapant
 - creation of a contest
+- depositing funds in escrow
 - creation of actions for a contest
-- check the step for voting
-- various events emittion
-- check the vote tally
+- voting
+- Tallying
+_ Signature
+- withdrawing funds from escrow
+- all deadlines
+- events 
 
-## Test YugoManager
+## Test YugoManager functions
 Tests include:
 - setting up of Yugo and YuGoDao addresses in YugoManager
 - checking that Yugo was pre-minted to YugoManager right at deployment
 - the purchase of the Yugo token by the organisation
 - the deposit of ETH in YugoManager before Yugo token can be claimed
-- various events emittion
+- events
 
-## Test GrantEscrow
+## Test GrantEscrow functions
+Single check to test the modifier of the function depositGrant.
+
+## Test deleteActions function of YugoDao
 Tests include:
-- the deposit of grants in ETH
-- The withdrawal of funds by winning organisation
+- funcitonning of the require
+- event is emitted

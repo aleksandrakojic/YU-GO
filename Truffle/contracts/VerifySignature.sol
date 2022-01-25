@@ -14,6 +14,7 @@ contract VerifySignature  is Ownable {
     struct Confidential {
             string agreement;
             uint nonce;
+            bool usedNonce;
             bytes32 msgHash;
             bytes32 signature;
         }
@@ -27,6 +28,7 @@ contract VerifySignature  is Ownable {
     event SignerVerified(address caller, address signer, bool verified, bytes signature);
 
     mapping(address => mapping (address => Confidential)) private confidentials;
+    
     
     /**
     * @notice Set the address of teh YugoDao contract <br />
@@ -57,12 +59,13 @@ contract VerifySignature  is Ownable {
     function getMessageHash(
         address _to,
         uint _amount,
+        address _contractAddress,
         string memory _agreement,
         uint _nonce
     ) public returns (bytes32) {
         confidentials[msg.sender][_to].agreement = _agreement;
         confidentials[msg.sender][_to].nonce = _nonce;
-        bytes32 _msgHash = keccak256(abi.encodePacked(_to, _amount, _agreement, _nonce));
+        bytes32 _msgHash = keccak256(abi.encodePacked(_to, _amount, _contractAddress, _agreement, _nonce));
         confidentials[msg.sender][_to].msgHash = _msgHash;
         return _msgHash;
     }
@@ -95,11 +98,12 @@ contract VerifySignature  is Ownable {
     function verify(
         address _to,
         uint _amount,
+        address _contractAddress,
         string memory _agreement,
         uint _nonce,
         bytes memory signature
     ) external {
-        bytes32 messageHash = getMessageHash(_to, _amount, _agreement, _nonce);
+        bytes32 messageHash = getMessageHash(_to, _amount, _contractAddress, _agreement, _nonce);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
         bool verified;
         address _signer = recoverSigner(ethSignedMessageHash, signature);
@@ -107,13 +111,7 @@ contract VerifySignature  is Ownable {
             escrow.setWithdrawStatus(msg.sender, _to, true);
             verified = true;
         }
-        // address _from = msg.sender;
-        // escrow.setWithdrawStatus(_from, _to, true);
-        // if (escrow.canWithdraw(_from, _to) == true) {
-        //     return true;
-        // } else {
-        //     return false;
-        // }
+        require(verified, 'wrong signer');
         emit SignerVerified(msg.sender, _signer, verified, signature);
     }
 
