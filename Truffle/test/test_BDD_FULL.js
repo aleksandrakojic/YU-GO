@@ -99,7 +99,7 @@ contract("test_YugoDao", async function (accounts) {
    * @returns Promise
    */
   const mine = (timestamp) => {
-    console.log("mining new block");
+    console.log(":::mining new block..:::");
     return new Promise((resolve, reject) => {
       web3.currentProvider.send(
         {
@@ -622,6 +622,27 @@ contract("test_YugoDao", async function (accounts) {
             { from: organisations.orga3.members[0] }
           ),
           "Voting is closed"
+        );
+      });
+    });
+  });
+
+  describe("#getContestWinner", function () {
+    context("one winner", function () {
+      it("should return winner and funds", async function () {
+        let tx = await yugoDao.getContestWinner.call(contestCreator, {
+          from: admin,
+        });
+        console.log(tx[0] == actionCreator);
+        console.log(Number(tx[1]) == Number(action.funds));
+        console.log(Number(action.funds));
+        assert(
+          [tx[0], Number(tx[1])] == [actionCreator, Number(action.funds)],
+          "wrong winner"
+        );
+        assert(
+          [tx[0], Number(tx[1])] == [actionCreator, Number(action.funds)],
+          "wrong funds"
         );
       });
     });
