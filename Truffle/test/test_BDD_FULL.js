@@ -58,8 +58,8 @@ contract('test_YugoDao', async function (accounts) {
   //setup contest data on test execution
   (async function () {
     const _timestamp = await getBlockTimestamp();
-    const _applicationEndDate = _timestamp + 10; // 10 second
-    const _votingEndDate =  _timestamp + 20; // 20 seconds
+    const _applicationEndDate = _timestamp + 30; // 10 second
+    const _votingEndDate =  _timestamp + 40; // 20 seconds
     contest = {
       name: 'Education for all',
       themes: [0, 1],
@@ -100,7 +100,7 @@ contract('test_YugoDao', async function (accounts) {
    * @returns Promise
    */
   const mine = (timestamp) => {
-    console.log('mining new block')
+    console.log(':::mining new block..:::')
     return new Promise((resolve, reject) => {
       web3.currentProvider.send({
         jsonrpc: '2.0',
@@ -479,6 +479,20 @@ contract('test_YugoDao', async function (accounts) {
     });
   });
 
+  describe('#getContestWinner', function () {
+    context('one winner', function () {
+      it('should return winner and funds', async function () {
+        let tx = await yugoDao.getContestWinner.call(contestCreator, {from: admin})
+      console.log(tx[0] == actionCreator)
+      console.log(Number(tx[1]) == Number(action.funds))
+      console.log(Number(action.funds))
+        assert([tx[0], Number(tx[1])] == [actionCreator, Number(action.funds)], 'wrong winner');
+        assert([tx[0], Number(tx[1])] == [actionCreator, Number(action.funds)], 'wrong funds');
+      });
+    });
+  });
+  
+
   /**
    * The following tests the tallyVotes
    * It tests that :
@@ -600,7 +614,7 @@ contract('test_YugoDao', async function (accounts) {
    * the event GrantWithdrawn is emitted
    */
   describe('#withdrawGrant()', function () {
-    contest('caller is not teh winner', function () {
+    context('caller is not the winner', function () {
       it('should revert', async function () {
         await expectRevert(
           escrow.withdrawGrant(contestCreator, {from: accounts[3]}),

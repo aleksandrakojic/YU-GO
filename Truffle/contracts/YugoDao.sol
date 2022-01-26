@@ -267,6 +267,8 @@ contract YugoDao {
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
         // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
+        uint currentTime = block.timestamp;
+        require(currentTime < contests[_creatorOfContest].applicationEndDate, 'Voting has started. You cannot add a action');
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
