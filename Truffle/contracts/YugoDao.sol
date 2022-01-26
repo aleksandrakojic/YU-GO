@@ -266,7 +266,7 @@ contract YugoDao {
     * @param _requiredFunds Value of funds
     */
     function createAction(address _creatorOfContest, string memory _name, uint _requiredFunds) external {
-        // require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
+        require(yugo.balanceOf(msg.sender) > 0, "you need Yugo governance token to create an action");
         require(_creatorOfContest != msg.sender, 'Contest creator cannot propose actions');
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
@@ -338,12 +338,12 @@ contract YugoDao {
         contests[_creatorOfContest].actions[_actionCreator].voteNumber += 1;
         contests[_creatorOfContest].hasVoted[msg.sender] = true;
 
-        if(contests[_creatorOfContest].winningActionAddresses.length == 0){
+        if (contests[_creatorOfContest].winningActionAddresses.length == 0){
             contests[_creatorOfContest].winningActionAddresses.push(_actionCreator);
-        }else if(contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber < contests[_creatorOfContest].actions[_actionCreator].voteNumber){
+        } else if (contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber < contests[_creatorOfContest].actions[_actionCreator].voteNumber){
             delete contests[_creatorOfContest].winningActionAddresses;
             contests[_creatorOfContest].winningActionAddresses.push(_actionCreator);
-        }else if(contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber == contests[_creatorOfContest].actions[_actionCreator].voteNumber){
+        } else if (contests[_creatorOfContest].actions[contests[_creatorOfContest].winningActionAddresses[0]].voteNumber == contests[_creatorOfContest].actions[_actionCreator].voteNumber){
             contests[_creatorOfContest].winningActionAddresses.push(_actionCreator);
         }
         emit HasVotedForAction(_creatorOfContest, _actionCreator, msg.sender);
@@ -355,18 +355,14 @@ contract YugoDao {
     * @dev Emit VoteTallied event
     * @param _creatorOfContest Address of Contest creator 
     */
-    function tallyVotes(address _creatorOfContest) external view returns (address, string memory, uint, uint){
-        //NOTE Future will allow multiple winners
+    function tallyVotes(address _creatorOfContest) external view returns (address, address, string memory, uint, uint){
         uint currentTime = block.timestamp;
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
         address winner = contests[_creatorOfContest].winningActionAddresses[0];
-        // emit VoteTallied(
-        //     winner,
-        //     contests[_creatorOfContest].actions[winner].name, 
-        //     contests[_creatorOfContest].actions[winner].voteNumber, 
-        //     contests[_creatorOfContest].actions[winner].requiredFunds
-        //     );
-        return (winner,
+        
+        return (
+            _creatorOfContest,
+            winner,
             contests[_creatorOfContest].actions[winner].name,
             contests[_creatorOfContest].actions[winner].voteNumber, 
             contests[_creatorOfContest].actions[winner].requiredFunds
