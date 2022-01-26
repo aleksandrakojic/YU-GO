@@ -455,7 +455,7 @@ contract("test_YugoDao", async function (accounts) {
     context("Orga3 country is not eligible", function () {
       it("should revert", async function () {
         let orga3 = organisations.orga3;
-        await sleep(1000);
+        //await sleep(1000);
         await expectRevert(
           yugoDao.createAction(contestCreator, action.name, action.funds, {
             from: orga3.address,
@@ -513,6 +513,19 @@ contract("test_YugoDao", async function (accounts) {
             from: actionCreator,
           }),
           "You have already created an action"
+        );
+      });
+    });
+
+    context("application deadline is reached", function () {
+      it("should revert", async function () {
+        const futureTimestamp = contest.votingEndDate + 1;
+        mine(futureTimestamp);
+        await expectRevert(
+          yugoDao.createAction(contestCreator, action.name, action.funds, {
+            from: organisations.orga3.address,
+          }),
+          "Voting has started. You cannot add a action"
         );
       });
     });

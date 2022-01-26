@@ -91,7 +91,7 @@ export default function ActionCard({ action, index }: Props) {
 			params: {
 				_actionCreator: action?.attributes?.addrOrgaCreator,
 				_creatorOfContest: action?.attributes?.addrGrantOrga,
-				_participantOrga: membersOrgaAddr,
+				_orgaOfMember: membersOrgaAddr,
 			},
 		};
 		fetch({ params: votingData });
