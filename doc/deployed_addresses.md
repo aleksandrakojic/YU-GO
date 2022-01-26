@@ -7,9 +7,11 @@ This section contains the list of the deployed contract addresses on the Ethereu
 
 | Contract Name     | Address                                    |
 |---                |---                                         |
-| `Yugo`            | 0xd9234786DD7807d3456be76B7aF9989b851e3594 |
-| `YuGoDao`         | 0xE9e64b499D1948C5dEdcc6bed0B6441c81072aD9 |
-| `YugoManager`     | 0x1216a591FF7A6Cd1c36DfadAa771F7Bfd37659Be |
-| `YugoGovernor`    | 0x........................................ |
+| `Yugo`            | 0xa9aD69C381877361443C1a8300cAAaBCD9E5da84 |
+| `YuGoDao`         | 0xC6F57a87f5dC923c4525Cb39cec2e30EB0D3c204 |
+| `YugoManager`     | 0xC562339880B554B47835b4750459BABB70880D5D |
+| `VerifySignature` | 0x295ea3d8c02A06a627b5455c07f238A0787345dC |
+| `GrantEscrow`     | 0xA68DA0CAC82928C837785A6D86Dc5ab288255c84 |
+
 
 https://ropsten.etherscan.io/

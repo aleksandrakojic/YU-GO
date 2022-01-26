@@ -45,8 +45,6 @@ contract("test_YugoDao", async function (accounts) {
 
   let contestCreator = organisations.orga1.address;
   let actionCreator = organisations.orga2.address;
-  let actionCreatorBalanceBeforeClaim;
-  let actionCreatorBalanceAfterClaim;
   let yugoDao, yugo, manager, escrow, verifSign;
   let contest;
 
@@ -68,14 +66,14 @@ contract("test_YugoDao", async function (accounts) {
       countries: [0, 1],
       applicationEndDate: _applicationEndDate,
       votingEndDate: _votingEndDate,
-      funds: new BN(web3.utils.toWei("1")),
+      funds: new BN(web3.utils.toWei("0.000001")),
     };
   })();
 
   // setup action data
   let action = {
     name: "newAction",
-    funds: new BN(web3.utils.toWei("0.5")),
+    funds: new BN(web3.utils.toWei("0.000001")),
   };
 
   const agreement = () => {
@@ -142,12 +140,14 @@ contract("test_YugoDao", async function (accounts) {
   /**
    * The following function tests registerOrganisation().
    * It tests that:
+   * It reverts when wrong parameters are given
    * it emits the orgaRegistered event
    * it reverts if orga was already registered
    */
   describe("#registerOrganisation() with orga1", function () {
     context("with wrong parameters", async function () {
       it("no thematics, should revert ", async function () {
+        console.log(contest.applicationEndDate);
         let _orga1addr = organisations.orga1.address;
         let idCountry = 0;
         let idThematic = [];
@@ -308,23 +308,20 @@ contract("test_YugoDao", async function (accounts) {
   });
 
   /**
-   * The following tests the addContest
+   * The following tests the addContest function
    * It tests that :
-   * revert  voting session not over
+   * It reverts if an organisation did not purchase a Yugo token
+   * An organisation can nuy a token, which emits the Receive events
+   * The organisation can claim the token and emit the YugoTransfer event
    * should emit ContestCreated
+   * the amount deposited has been stored correctly
+   * * It reverts if the same organisation tries to create another contest at the same time
    */
   describe("#addContest()", function () {
     context("orga did not purchase a Yugo token", function () {
-      // it('yugo balance of orga1 should be 0', async function () {
-      //   let expectedOrga1YugoBal = new BN(0);
-      // check balance by calling Yugo directly
-      // let orga1YugoBal = await yugo.balanceOf(contestCreator, {from: contestCreator});
-      // expect(orga1YugoBal).to.be.bignumber.equal(expectedOrga1YugoBal);
-      // })
       it("should revert", async function () {
         await expectRevert(
           yugoDao.addContest(
-            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -339,10 +336,6 @@ contract("test_YugoDao", async function (accounts) {
     });
 
     context("orga1 buys token first, then creates contest", function () {
-      // it('check orga1 is registered', async function () {
-      //   let isRegistered = await yugoDao.organisationRegistrationStatus(contestCreator,{from: manager.address});
-      //   assert.equal(isRegistered, true, 'you need to be registered to purchase the token');
-      // })
       it("should emit Received events", async function () {
         let _value = web3.utils.toWei("0.1", "ether");
         let tx = await manager.sendTransaction({
@@ -365,7 +358,6 @@ contract("test_YugoDao", async function (accounts) {
       });
       it("should emit the ContestCreated event", async function () {
         let tx = await yugoDao.addContest(
-          // contest.nonce,
           contest.name,
           contest.themes,
           contest.countries,
@@ -374,10 +366,6 @@ contract("test_YugoDao", async function (accounts) {
           contest.funds,
           { from: contestCreator, value: contest.funds }
         );
-        // console.log('tx: ', tx);
-        // await expectEvent(tx, 'GrantDeposited', {
-        //   grant: contest.funds,
-        //   depositor: contestCreator});
         await expectEvent(tx, "ContestCreated", {
           addressOrga: contestCreator,
           name: contest.name,
@@ -388,8 +376,6 @@ contract("test_YugoDao", async function (accounts) {
         const deposit = await escrow.fundsInEscrow.call(contestCreator, {
           from: contestCreator,
         });
-        console.log("deposit :", Number(deposit));
-        console.log("contest.funds :", Number(contest.funds));
         assert(deposit == Number(contest.funds), "not deposited");
       });
     });
@@ -397,7 +383,6 @@ contract("test_YugoDao", async function (accounts) {
       it("should revert", async function () {
         await expectRevert(
           yugoDao.addContest(
-            // contest.nonce,
             contest.name,
             contest.themes,
             contest.countries,
@@ -415,7 +400,6 @@ contract("test_YugoDao", async function (accounts) {
     it("all events are emitted", async function () {
       let _ETH = web3.utils.toWei("0.1", "ether"); //ETH to buy Yugo
       const tokenAmount = web3.utils.toWei("1"); //amount of Yugo
-      // let expectedOrga1YugoBal = new BN(1);
       Object.entries(organisations)
         .slice(1)
         .forEach(async ([orga, data]) => {
@@ -445,16 +429,17 @@ contract("test_YugoDao", async function (accounts) {
             from: data.address,
           });
           expect(orgaYugoBal).to.be.bignumber.equal(tokenAmount);
-        }); //end loop
-    }); //end it
-  }); //end describe
+        });
+    });
+  });
 
   /**
    * The following tests the createAction
    * It tests that :
-   * revert if no eligible country
-   * should emit ActionCreated if good param
-   * revert if no already action created for contest
+   * revert if a contest creator tries to add its own action
+   * It reverts if the organisation is not eligible (country, themes)
+   * should emit ActionCreated if good parameters
+   * revert if the same organisation tries to create an action again
    */
   describe("#createAction()", function () {
     context("The Grant orga1 tries to create an action", function () {
@@ -471,8 +456,6 @@ contract("test_YugoDao", async function (accounts) {
       it("should revert", async function () {
         let orga3 = organisations.orga3;
         await sleep(1000);
-        // let orgaYugoBal = await yugo.balanceOf(orga3.address, {from: orga3.address});
-        // console.log('orgaYugoBal :', orgaYugoBal )
         await expectRevert(
           yugoDao.createAction(contestCreator, action.name, action.funds, {
             from: orga3.address,
@@ -493,7 +476,6 @@ contract("test_YugoDao", async function (accounts) {
       });
     });
 
-
     /*context("contest applicationEndDate passed", function () {
       it("currentTime >= applicationEndDate", async function () {
         const futureTimestamp = contest.applicationEndDate + 1;
@@ -506,7 +488,6 @@ contract("test_YugoDao", async function (accounts) {
         );
       });
     });*/
-    
 
     context("Orga2 has correct parameters", function () {
       it("should emit ActionCreated", async function () {
@@ -535,16 +516,16 @@ contract("test_YugoDao", async function (accounts) {
         );
       });
     });
-
-    
   });
 
   /**
    * The following tests the voteForAction
    * It tests that :
-   * revert  voter cant be actionCreator or contestCreator
+   * we have passed the applicationEndDate, otherwise we mine another block with a specific timestamp
+   * It reverts if the voter is the contest creator or the action creator
    * should emit HasVotedForAction
-   * revert cant vote multiple times
+   * It reverts since you can't vote multiple times
+   * It reverts because the deadline to vote has passed
    */
   describe("#voteForAction()", function () {
     context("Application has reached the deadline", function () {
@@ -636,8 +617,10 @@ contract("test_YugoDao", async function (accounts) {
   /**
    * The following tests the tallyVotes
    * It tests that :
+   * the votingEndDate is not reached
    * revert if voting session not over
-   * should emit VoteTallied if over
+   * the votingEndDate is not passed
+   * should emit VoteTallied event
    */
   describe("#tallyVotes()", function () {
     context("voting session not finished", function () {
@@ -678,81 +661,148 @@ contract("test_YugoDao", async function (accounts) {
           );
         }
       });
-      it("should return the VoteTallied event", async function () {
-        const hash = await yugoDao.tallyVotes(contestCreator, {
+      // it('should return the VoteTallied event', async function() {
+      it("should return the winner data", async function () {
+        // let tx = await yugoDao.tallyVotes(contestCreator, { from: contestCreator });
+        // await expectEvent(tx, 'VoteTallied', {
+        //   winner: actionCreator,
+        //   actionName: action.name,
+        //   nbVotes: new BN(1),
+        //   requiredFunds: action.funds
+        // });
+        // console.log('winner: ', tx.logs[0].args.winner);
+        // console.log('actionName: ', tx.logs[0].args.actionName);
+        // console.log('nbVotes: ', Number(tx.logs[0].args.nbVotes));
+        // console.log('requiredFunds: ', Number(tx.logs[0].args.requiredFunds));
+        let tx = await yugoDao.tallyVotes.call(contestCreator, {
           from: contestCreator,
         });
-        await expectEvent(hash, "VoteTallied", {
-          winner: actionCreator,
-          actionName: action.name,
-          nbVotes: new BN(1),
-          requiredFunds: action.funds,
-        });
-
-        console.log("winner: ", hash.logs[0].args.winner);
-        console.log("actionName: ", hash.logs[0].args.actionName);
-        console.log("nbVotes: ", Number(hash.logs[0].args.nbVotes));
-        console.log("requiredFunds: ", Number(hash.logs[0].args.requiredFunds));
+        assert(tx[0] == actionCreator, "wrond data");
       });
     });
   });
+
+  /**
+   * The following tests the getMessageHash function
+   * It tests that :
+   * it returns the correct hash
+   */
   describe("#getMessageHash()", function () {
-    context("contestCreator sends back the agreement + nonce", function () {
-      it("should return the right hash", async function () {
+    context(
+      "contestCreator sends back the agreement + contract address + nonce",
+      function () {
+        it("should return the right hash", async function () {
+          let _agreement = agreement();
+          let tx = await verifSign.getMessageHash.call(
+            actionCreator,
+            action.funds,
+            verifSign.address,
+            _agreement,
+            nonce,
+            { from: contestCreator }
+          );
+          let _hash = web3.utils.soliditySha3(
+            actionCreator,
+            action.funds,
+            verifSign.address,
+            _agreement,
+            nonce
+          );
+          assert(tx == _hash, "hash is incorrect");
+        });
+      }
+    );
+  });
+
+  /**
+   * The following tests the verify function
+   * It tests that :
+   * the event SignerVerified is emitted
+   * It reverts if msg.sender and signer are different
+   */
+  describe("#verify()", function () {
+    context("contestCreator IS the signer of the agreement", function () {
+      it("should emit the SignerVerified event", async function () {
+        //the private key of accounts[1] = orga1 = the contestCreator
+        const privateKey =
+          "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1";
         let _agreement = agreement();
         let hash = await verifSign.getMessageHash.call(
           actionCreator,
           action.funds,
+          verifSign.address,
           _agreement,
           nonce,
           { from: contestCreator }
         );
-        console.log("hash: ", hash);
-      });
-    });
-  });
-  //NOTE: recent changes in the verify function implies to change the test (in progress)
-  describe("#verify()", function () {
-    context("msg.sender is the signer of the agreement", function () {
-      it("should emit the SignerVerified event", async function () {
-        const privateKey =
-          "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1";
-        let _agreement = "test"; //agreement();
-        let hash = await verifSign.getMessageHash.call(
-          actionCreator,
-          action.funds,
-          _agreement,
-          nonce,
-          { from: contestCreator }
-        );
-        // const signature = await web3.eth.sign(hash, contestCreator)
-        // const sign = await web3.eth.accounts.sign(hash, privateKey);
-        // const signature = sign.signature;
-        const signature = await web3.eth.personal.sign(
-          hash,
-          contestCreator,
-          "password"
-        );
-        console.log("signature :", signature);
+        // sign
+        const sign = await web3.eth.accounts.sign(hash, privateKey);
+        const signature = sign.signature;
+        //verify
         let isVerified = await verifSign.verify(
           actionCreator,
           action.funds,
-          agreement,
+          verifSign.address,
+          _agreement,
           nonce,
           signature,
           { from: contestCreator }
         );
-        console.log("contestCreator :", contestCreator);
+
         await expectEvent(isVerified, "SignerVerified", {
           signer: contestCreator,
           verified: true,
           signature: signature,
         });
       });
+      it("should revert if msg.sender and signer are different", async function () {
+        //the private key of accounts[1] = orga1 = the contestCreator
+        const privateKey =
+          "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1";
+        let _agreement = agreement();
+        let hash = await verifSign.getMessageHash.call(
+          actionCreator,
+          action.funds,
+          verifSign.address,
+          _agreement,
+          nonce,
+          { from: contestCreator }
+        );
+        // sign
+        const sign = await web3.eth.accounts.sign(hash, privateKey);
+        const signature = sign.signature;
+        //verify
+        await expectRevert(
+          verifSign.verify(
+            actionCreator,
+            action.funds,
+            verifSign.address,
+            _agreement,
+            nonce,
+            signature,
+            { from: accounts[3] }
+          ),
+          "wrong signer"
+        );
+      });
     });
   });
 
+  /**
+   * The following tests the withdrawGrant function
+   * It tests that :
+   * It reverts if msg.sender and signer are different
+   * the event GrantWithdrawn is emitted
+   */
   describe("#withdrawGrant()", function () {
+    context("caller is not the winner", function () {
+      it("should revert", async function () {
+        await expectRevert(
+          escrow.withdrawGrant(contestCreator, { from: accounts[3] }),
+          "you cannot withdraw, seems like you did not win the contest"
+        );
+      });
+    });
     context("caller is authorised to withdraw", function () {
       it("should emit the GrantWithdrawn event", async function () {
         const wd = await escrow.withdrawGrant(contestCreator, {

@@ -329,15 +329,15 @@ contract YugoDao {
     * @dev Emit HasVotedForAction event
     * @param _creatorOfContest Address of Contest creator 
     * @param _actionCreator Address of Action creator
-    * @param _participantOrga Address of the participant's organisation
+    * @param _orgaOfMember Address of the participant's organisation
     */
-    function voteForAction(address _creatorOfContest, address _actionCreator, address _participantOrga) external {
+    function voteForAction(address _creatorOfContest, address _actionCreator, address _orgaOfMember) external {
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeToVote == true
         require(currentTime >= contests[_creatorOfContest].applicationEndDate, 'Voting has not started');
         require(currentTime < contests[_creatorOfContest].votingEndDate, 'Voting is closed');
         require(msg.sender != _creatorOfContest && msg.sender != _actionCreator, 'You can not vote for this action');
         require(!contests[_creatorOfContest].hasVoted[msg.sender], 'You have already voted');
-        require(yugo.balanceOf(_participantOrga) > 0, "you need Yugo governance token to create a contest");
+        require(yugo.balanceOf(_orgaOfMember) > 0, "you need Yugo governance token to create a contest");
         
         contests[_creatorOfContest].actions[_actionCreator].voteNumber += 1;
         contests[_creatorOfContest].hasVoted[msg.sender] = true;
@@ -359,17 +359,17 @@ contract YugoDao {
     * @dev Emit VoteTallied event
     * @param _creatorOfContest Address of Contest creator 
     */
-    function tallyVotes(address _creatorOfContest) external returns (address, string memory, uint, uint){
-        //NOTE needs more testing for multiple winners
-        uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeTotallyVotess == true
+    function tallyVotes(address _creatorOfContest) external view returns (address, string memory, uint, uint){
+        //NOTE Future will allow multiple winners
+        uint currentTime = block.timestamp;
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
         address winner = contests[_creatorOfContest].winningActionAddresses[0];
-        emit VoteTallied(
-            winner,
-            contests[_creatorOfContest].actions[winner].name, 
-            contests[_creatorOfContest].actions[winner].voteNumber, 
-            contests[_creatorOfContest].actions[winner].requiredFunds
-            );
+        // emit VoteTallied(
+        //     winner,
+        //     contests[_creatorOfContest].actions[winner].name, 
+        //     contests[_creatorOfContest].actions[winner].voteNumber, 
+        //     contests[_creatorOfContest].actions[winner].requiredFunds
+        //     );
         return (winner,
             contests[_creatorOfContest].actions[winner].name,
             contests[_creatorOfContest].actions[winner].voteNumber, 

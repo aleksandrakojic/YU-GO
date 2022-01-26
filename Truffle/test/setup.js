@@ -1,13 +1,16 @@
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 const { expect, assert } = require('chai');
-const { networkInterfaces } = require('os');
 const yugoDaoAbstraction = artifacts.require('YugoDao');
 const yugoAbstraction = artifacts.require('Yugo');
 const managerAbstraction = artifacts.require('YugoManager');
 const GrantEscrowAbstraction = artifacts.require('GrantEscrow');
 const VerifySignatureAbstraction = artifacts.require('VerifySignature');
 
+ /**
+ * The following setups the scene to test some of our functions
+ * in YugoManager and YugDao. It removes redundancy in test files.
+ */
 const setup = async function(accounts){
 
     const admin = accounts[0];
