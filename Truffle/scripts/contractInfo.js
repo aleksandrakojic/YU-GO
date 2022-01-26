@@ -14,3 +14,11 @@ fs.copyFile('build/contracts/Yugo.json', '../src/contracts/Yugo.json', (err) => 
   if (err) throw err;
   console.log("✅ Your contract's ABI was copied to the frontend");
 });
+fs.copyFile(
+	'build/contracts/VerifySignature.json',
+	'../src/contracts/VerifySignature.json',
+	(err) => {
+		if (err) throw err;
+		console.log("✅ Your contract's ABI was copied to the frontend");
+	}
+);

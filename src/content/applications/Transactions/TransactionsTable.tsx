@@ -24,7 +24,6 @@ import {
 } from '@mui/material';
 
 import Label from 'src/components/Label';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import BulkActions from './BulkActions';
 import { ITransaction, ITransactionStatus } from 'src/models';
@@ -32,6 +31,7 @@ import { ITransaction, ITransactionStatus } from 'src/models';
 interface TransactionTableProps {
 	className?: string;
 	transactions: any[];
+	onViewAgreement: (t: ITransaction) => void;
 }
 
 interface Filters {
@@ -79,7 +79,7 @@ const applyPagination = (
 	return transactions.slice(page * limit, page * limit + limit);
 };
 
-const TransactionsTable: FC<TransactionTableProps> = ({ transactions }) => {
+const TransactionsTable: FC<TransactionTableProps> = ({ transactions, onViewAgreement }) => {
 	const [selectedTransactions, setSelectedTransaction] = useState<string[]>([]);
 	const selectedBulkActions = selectedTransactions.length > 0;
 	const [page, setPage] = useState<number>(0);
@@ -134,14 +134,11 @@ const TransactionsTable: FC<TransactionTableProps> = ({ transactions }) => {
 		}
 	};
 
-	const handleSelectOneTransaction = (
-		event: ChangeEvent<HTMLInputElement>,
-		cryptoOrderId: string
-	): void => {
-		if (!selectedTransactions.includes(cryptoOrderId)) {
-			setSelectedTransaction((prevSelected) => [...prevSelected, cryptoOrderId]);
+	const handleSelectOneTransaction = (event: ChangeEvent<HTMLInputElement>, id: string): void => {
+		if (!selectedTransactions.includes(id)) {
+			setSelectedTransaction((prevSelected) => [...prevSelected, id]);
 		} else {
-			setSelectedTransaction((prevSelected) => prevSelected.filter((id) => id !== cryptoOrderId));
+			setSelectedTransaction((prevSelected) => prevSelected.filter((id) => id !== id));
 		}
 	};
 
@@ -215,15 +212,15 @@ const TransactionsTable: FC<TransactionTableProps> = ({ transactions }) => {
 					</TableHead>
 					<TableBody>
 						{paginatedTransactions.map((transaction) => {
-							const isSelected = selectedTransactions.includes(transaction.objectId);
+							const isSelected = selectedTransactions.includes(transaction.id);
 							return (
-								<TableRow hover key={transaction.objectId} selected={isSelected}>
+								<TableRow hover key={transaction.id} selected={isSelected}>
 									<TableCell padding="checkbox">
 										<Checkbox
 											color="primary"
 											checked={isSelected}
 											onChange={(event: ChangeEvent<HTMLInputElement>) =>
-												handleSelectOneTransaction(event, transaction.objectId)
+												handleSelectOneTransaction(event, transaction.id)
 											}
 											value={isSelected}
 										/>
@@ -291,6 +288,7 @@ const TransactionsTable: FC<TransactionTableProps> = ({ transactions }) => {
 									<TableCell align="right">
 										<Tooltip title="View Agreement" arrow>
 											<IconButton
+												onClick={() => onViewAgreement(transaction)}
 												sx={{
 													'&:hover': {
 														background: theme.colors.primary.lighter,

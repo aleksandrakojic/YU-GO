@@ -91,9 +91,11 @@ export interface ITransactionAttributes {
 	createdAt: Date;
 	status: string;
 	agreement: string;
+	nonce?: number;
+	signature?: string;
 }
 
 export interface ITransaction {
-	objectId: string;
+	id: string;
 	attributes: ITransactionAttributes;
 }
