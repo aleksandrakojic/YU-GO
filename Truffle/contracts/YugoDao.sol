@@ -271,6 +271,10 @@ contract YugoDao {
         require(contests[_creatorOfContest].isCreated, 'This organization does not have open contest');
         require(!contests[_creatorOfContest].actions[msg.sender].isCreated, 'You have already created an action');
         require(_requiredFunds <= contests[_creatorOfContest].fundsAvailable, 'Funds required are superior to funds available');
+        uint currentTime = block.timestamp;
+        require(currentTime < contests[_creatorOfContest].applicationEndDate, 'Voting has started. You cannot add a action');
+        
+        
         //Verify if action creator country is eligible to participate
         uint[] memory eligibleCountries = contests[_creatorOfContest].countryIDs;
         uint orgaCountry = organisation[msg.sender].country;
@@ -355,7 +359,7 @@ contract YugoDao {
     * @dev Emit VoteTallied event
     * @param _creatorOfContest Address of Contest creator 
     */
-    function tallyVotes(address _creatorOfContest) external {
+    function tallyVotes(address _creatorOfContest) external returns (address, string memory, uint, uint){
         //NOTE needs more testing for multiple winners
         uint currentTime = block.timestamp; //NOTE: test currentTime might change for check bool timeTotallyVotess == true
         require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
@@ -366,6 +370,11 @@ contract YugoDao {
             contests[_creatorOfContest].actions[winner].voteNumber, 
             contests[_creatorOfContest].actions[winner].requiredFunds
             );
+        return (winner,
+            contests[_creatorOfContest].actions[winner].name,
+            contests[_creatorOfContest].actions[winner].voteNumber, 
+            contests[_creatorOfContest].actions[winner].requiredFunds
+        );
     }
 
     /**
