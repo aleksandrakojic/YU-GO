@@ -78,7 +78,6 @@ contract GrantEscrow is Ownable {
         Grants[msg.sender] = newActionCreatorBalance;
         (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
-        yugodao.saveContestInHistory(_contestCreator);
         emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
     }
 
