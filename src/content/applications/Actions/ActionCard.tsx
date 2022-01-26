@@ -11,7 +11,7 @@ import CommentTwoToneIcon from '@mui/icons-material/CommentTwoTone';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Typography from '@mui/material/Typography';
 import ThumbUpAltTwoToneIcon from '@mui/icons-material/ThumbUpAltTwoTone';
-import { IAction, ProfileType } from 'src/models';
+import { ProfileType } from 'src/models';
 import { Button, Chip } from '@mui/material';
 import { useMoralis, useWeb3ExecuteFunction } from 'react-moralis';
 import { AppContext } from 'src/contexts/AppContext';

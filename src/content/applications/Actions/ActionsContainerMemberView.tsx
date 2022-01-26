@@ -42,7 +42,7 @@ function ActionsContainerMemberView() {
 			const eligibleContest = getEligibleFormattedContests(
 				contestData,
 				organization,
-				organization?.attibutes?.ethAddress
+				organization?.attributes?.ethAddress
 			);
 			setEligibleContests(eligibleContest);
 		}
@@ -80,6 +80,8 @@ function ActionsContainerMemberView() {
 			setOrganization(orga);
 		}
 	};
+
+	console.log('action data', actionsData, actions, contestData, eligibleContests, organization);
 
 	return (
 		<>
