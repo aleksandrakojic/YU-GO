@@ -4,6 +4,7 @@ import TransactionsTable from './TransactionsTable';
 import { subDays } from 'date-fns';
 import { useChain, useMoralis, useMoralisQuery, useWeb3ExecuteFunction } from 'react-moralis';
 import contractSignature from 'src/contracts/VerifySignature.json';
+import contractEscrow from 'src/contracts/GrantEscrow.json';
 import { useSnackbar } from 'notistack';
 import { ITransaction, ITransactionStatus } from 'src/models';
 import AgreementModal from './AgreementModal';
@@ -15,10 +16,12 @@ enum SignatureStatus {
 }
 
 function Transactions() {
+	const { enqueueSnackbar } = useSnackbar();
 	const { chain } = useChain();
 	const { networks, abi } = contractSignature;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
-	const { enqueueSnackbar } = useSnackbar();
+	const { abi: abiEscrow, networks: networksEscrow } = contractEscrow;
+	const contractEscrowAddress = networksEscrow[chain?.networkId ?? 5777].address;
 	const { Moralis, account, web3 } = useMoralis();
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,57 +97,26 @@ function Transactions() {
 
 	const signTransaction = () => {
 		console.log('sign transaction');
-		const nonce = Math.floor(Math.random() * 10000);
-		if(web3) {
+		const nonce = Math.floor(Math.random() * 10000).toString();
+		if (web3 && selectedTransaction) {
 			let _hash = web3?.utils.soliditySha3(
 				selectedTransaction?.attributes?.addrWinner,
 				selectedTransaction?.attributes?.requiredFunds,
 				contractAddress,
 				selectedTransaction?.attributes?.agreement,
-				selectedTransaction?.attributes?.nonce,
-				selectedTransaction?.attributes?.signature,
-			  );
-			  if(_hash) {
-				web3.eth.personal.sign(_hash, account, nonce)
+				nonce
+			);
+			console.log('HASH', _hash);
+			if (_hash && account && nonce) {
+				web3.eth.personal.sign(_hash, account, nonce).then((res) => {
+					console.log('signatrue response', res);
+					verifySignatureAndAuthFunds(res, nonce);
+				});
 			}
 		}
-		
-		const signatureData: any = {
-			abi,
-			contractAddress,
-			functionName: 'getMessageHash',
-			params: {
-				_to: selectedTransaction?.attributes?.addrWinner,
-				_amount: selectedTransaction?.attributes?.requiredFunds,
-				_contractAddress: contractAddress,
-				_agreement: selectedTransaction?.attributes?.agreement,
-				_nonce: nonce,
-			},
-		};
-		fetch({
-			params: signatureData,
-			onSuccess: (result) => {
-				console.log('RESULT', result);
-				const saveInDatabase = async () => {
-					const transQuery = new Moralis.Query('Transactions');
-					const query = await transQuery.equalTo('objectId', selectedTransaction?.id);
-					const queryResult = await query.first();
-					console.log('queryresult', queryResult);
-					if (queryResult) {
-						queryResult?.set('signature', result);
-						queryResult?.set('nonce', nonce);
-						queryResult?.set('status', 'signed');
-						queryResult.save();
-					}
-				};
-				saveInDatabase();
-				setIsModalOpen(false);
-				setSelectedTransaction(null);
-			},
-		});
 	};
 
-	const withdrawFunds = () => {
+	const verifySignatureAndAuthFunds = (hash, nonce) => {
 		console.log('withdrawFunds');
 		const verifySignatureData: any = {
 			abi,
@@ -155,20 +127,71 @@ function Transactions() {
 				_amount: selectedTransaction?.attributes?.requiredFunds,
 				_contractAddress: contractAddress,
 				_agreement: selectedTransaction?.attributes?.agreement,
-				_nonce: selectedTransaction?.attributes?.nonce,
-				signature: selectedTransaction?.attributes?.signature,
+				_nonce: nonce,
+				signature: hash,
 			},
 		};
 		fetch({
 			params: verifySignatureData,
 			onError: (error) => console.log('error: ', error),
 			onSuccess: (result) => {
-				console.log('RESULT Verify', result);
+				console.log('RES Verify', result);
+				if ((result as any)?.events?.SignerVerified?.returnValues[2]) {
+					const grantOrgaAddr = (result as any)?.events?.SignerVerified?.returnValues[0];
+					const saveInDatabase = async () => {
+						const transQuery = new Moralis.Query('Transactions');
+						const query = await transQuery.equalTo('objectId', selectedTransaction?.id);
+						const queryResult = await query.first();
+						console.log('queryresult', queryResult);
+						if (queryResult) {
+							queryResult?.set('addrGrantOrga', grantOrgaAddr);
+							queryResult?.set('signature', hash);
+							queryResult?.set('nonce', Number(nonce));
+							queryResult?.set('status', 'signed');
+							queryResult.save();
+						}
+					};
+					saveInDatabase();
+				}
+				setIsModalOpen(false);
+				setSelectedTransaction(null);
+			},
+		});
+	};
+
+	const withdrawFunds = () => {
+		// const escrowData = {
+		// 	abi: abiEscrow,
+		// 	contractAddress: contractEscrowAddress,
+		// 	functionName: 'canWithdraw',
+		// 	params: {
+		// 		_from: selectedTransaction?.attributes?.addrGrantOrga,
+		// 		_to: selectedTransaction?.attributes?.addrWinner,
+		// 	},
+		// };
+		// fetch({
+		// 	params: escrowData,
+		// 	onSuccess: (res) => console.log('res', res),
+		// 	onError: (err) => console.log('can not withdraw', err),
+		// });
+		const escrowData = {
+			abi: abiEscrow,
+			contractAddress: contractEscrowAddress,
+			functionName: 'withdrawGrant',
+			params: {
+				_contestCreator: selectedTransaction?.attributes?.addrGrantOrga,
+			},
+		};
+		fetch({
+			params: escrowData,
+			onError: (e) => console.log('err', e),
+			onSuccess: (res) => {
+				console.log('SUCCESS WITHDRAW', res);
 				const saveInDatabase = async () => {
 					const transQuery = new Moralis.Query('Transactions');
 					const query = await transQuery.equalTo('objectId', selectedTransaction?.id);
 					const queryResult = await query.first();
-					console.log('queryresult', queryResult);
+					console.log('withdrawFunds', queryResult);
 					if (queryResult) {
 						queryResult?.set('status', 'transfered');
 						queryResult.save();
@@ -179,7 +202,6 @@ function Transactions() {
 				setSelectedTransaction(null);
 			},
 		});
-		
 	};
 
 	const handleAgreementSubmit = () => {
@@ -191,7 +213,6 @@ function Transactions() {
 				withdrawFunds();
 			}
 		}
-		console.log('signed');
 	};
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
