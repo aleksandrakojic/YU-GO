@@ -75,3 +75,27 @@ export interface IAction {
 	createdAt: Date;
 	imageUrl?: string;
 }
+
+export enum ITransactionStatus {
+	Pending = 'pending',
+	Signed = 'signed',
+	Transfered = 'transfered',
+}
+
+export interface ITransactionAttributes {
+	addrGrantOrga: string;
+	actionName: string;
+	votes: number;
+	requiredFunds: number;
+	addrWinner: string;
+	createdAt: Date;
+	status: string;
+	agreement: string;
+	nonce?: number;
+	signature?: string;
+}
+
+export interface ITransaction {
+	id: string;
+	attributes: ITransactionAttributes;
+}

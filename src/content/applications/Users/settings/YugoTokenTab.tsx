@@ -1,25 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { BigNumber } from 'ethers';
+import React, { useEffect, useState } from "react";
+
 import {
-	Box,
-	Typography,
-	Card,
-	Grid,
-	ListItem,
-	List,
-	ListItemText,
-	Button,
-	ListItemAvatar,
-	CircularProgress,
-	Chip,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import contractManager from 'src/contracts/YugoManager.json';
-import { useChain, useMoralis, useWeb3ExecuteFunction, useWeb3Transfer } from 'react-moralis';
-import { useSnackbar } from 'notistack';
+  Box,
+  Typography,
+  Card,
+  Grid,
+  ListItem,
+  List,
+  ListItemText,
+  Button,
+  ListItemAvatar,
+  CircularProgress,
+  Chip,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import contractManager from "src/contracts/YugoManager.json";
+import {
+  useChain,
+  useMoralis,
+  useWeb3ExecuteFunction,
+  useWeb3Transfer,
+} from "react-moralis";
+import { useSnackbar } from "notistack";
 
 const YugoToken = styled(Box)(
-	({ theme }) => `
+  ({ theme }) => `
     width: ${theme.spacing(10)};
     height: ${theme.spacing(10)};
 		display: flex;
@@ -61,166 +66,180 @@ const YugoToken = styled(Box)(
 );
 
 function YugoTokenTab() {
-	const { enqueueSnackbar } = useSnackbar();
-	const [hasYugo, setHasYugo] = useState(false);
-	const { Moralis } = useMoralis();
-	const { chain, account } = useChain();
-	const { networks, abi } = contractManager;
-	const contractAddress = networks[chain?.networkId ?? 5777].address;
-	const {
-		fetch: fetchBalance,
-		data: balanceData,
-		isFetching: isFetchingBalance,
-		isLoading: isLoadingBalance,
-		error: errorBalance,
-	} = useWeb3ExecuteFunction({
-		abi,
-		contractAddress,
-		functionName: 'yugoBalanceOf',
-		params: {
-			account,
-		},
-	});
+  const { enqueueSnackbar } = useSnackbar();
+  const [hasYugo, setHasYugo] = useState(false);
+  const { Moralis } = useMoralis();
+  const { chain, account } = useChain();
+  const { networks, abi } = contractManager;
+  const contractAddress = networks[chain?.networkId ?? 5777].address;
+  const {
+    fetch: fetchBalance,
+    data: balanceData,
+    isFetching: isFetchingBalance,
+    isLoading: isLoadingBalance,
+    error: errorBalance,
+  } = useWeb3ExecuteFunction({
+    abi,
+    contractAddress,
+    functionName: "yugoBalanceOf",
+    params: {
+      account,
+    },
+  });
 
-	const {
-		fetch: fetchLedgerState,
-		data: ledgerData,
-		isFetching: isFetchingLedger,
-		isLoading: isLoadingLedger,
-		error: errorLedger,
-	} = useWeb3ExecuteFunction({
-		abi,
-		contractAddress,
-		functionName: 'hasEthDeposit',
-		params: {
-			_account: account,
-		},
-	});
+  const {
+    fetch: fetchLedgerState,
+    data: ledgerData,
+    isFetching: isFetchingLedger,
+    isLoading: isLoadingLedger,
+    error: errorLedger,
+  } = useWeb3ExecuteFunction({
+    abi,
+    contractAddress,
+    functionName: "hasEthDeposit",
+    params: {
+      _account: account,
+    },
+  });
 
-	const {
-		fetch: transferYugo,
-		data: transferYugoData,
-		isFetching: isTransferingYugo,
-		isLoading: isLoadingTransferYugo,
-		error: errorTransferYugo,
-	} = useWeb3ExecuteFunction({
-		abi,
-		contractAddress,
-		functionName: 'transferYugo',
-	});
+  const {
+    fetch: transferYugo,
+    data: transferYugoData,
+    isFetching: isTransferingYugo,
+    isLoading: isLoadingTransferYugo,
+    error: errorTransferYugo,
+  } = useWeb3ExecuteFunction({
+    abi,
+    contractAddress,
+    functionName: "transferYugo",
+  });
 
-	const { fetch, error, isFetching, data } = useWeb3Transfer({
-		amount: Moralis.Units.ETH(0.1),
-		type: 'native',
-		receiver: contractAddress,
-		contractAddress: contractAddress,
-	});
+  const { fetch, error, isFetching, data } = useWeb3Transfer({
+    amount: Moralis.Units.ETH(0.1),
+    type: "native",
+    receiver: contractAddress,
+    contractAddress: contractAddress,
+  });
 
-	const errorMessage = error || errorBalance || errorTransferYugo || errorLedger;
+  const errorMessage =
+    error || errorBalance || errorTransferYugo || errorLedger;
 
-	useEffect(() => {
-		if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
-			fetchBalance();
-		}
-	}, []);
+  useEffect(() => {
+    if (!(balanceData && isFetchingBalance && isLoadingBalance)) {
+      fetchBalance();
+    }
+  }, []);
 
-	useEffect(() => {
-		if (data) {
-			fetchBalance();
-			fetchLedgerState();
-		}
-	}, [data]);
+  useEffect(() => {
+    if (data) {
+      fetchBalance();
+      fetchLedgerState();
+    }
+  }, [data]);
 
-	useEffect(() => {
-		if (balanceData === '0' && !isLoadingBalance && !ledgerData) {
-			fetchLedgerState();
-		}
-	}, [balanceData, isLoadingBalance]);
+  useEffect(() => {
+    if (balanceData === "0" && !isLoadingBalance && !ledgerData) {
+      fetchLedgerState();
+    }
+  }, [balanceData, isLoadingBalance]);
 
-	useEffect(() => {
-		if ((transferYugoData as any)?.events?.YugoTransfer && !isLoadingTransferYugo && !hasYugo) {
-			setHasYugo(true);
-		}
-	}, [transferYugoData, isLoadingTransferYugo]);
+  useEffect(() => {
+    if (
+      (transferYugoData as any)?.events?.YugoTransfer &&
+      !isLoadingTransferYugo &&
+      !hasYugo
+    ) {
+      setHasYugo(true);
+    }
+  }, [transferYugoData, isLoadingTransferYugo]);
 
-	useEffect(() => {
-		if (errorMessage && Object.keys(errorMessage).length) {
-			enqueueSnackbar(JSON.stringify(errorMessage), { variant: 'error' });
-		}
-	}, [errorMessage]);
+  useEffect(() => {
+    if (errorMessage && Object.keys(errorMessage).length) {
+      enqueueSnackbar(JSON.stringify(errorMessage), { variant: "error" });
+    }
+  }, [errorMessage]);
 
-	const handleBuyToken = () => {
-		fetch();
-	};
+  const handleBuyToken = () => {
+    fetch();
+  };
 
-	const handleRedeemToken = () => transferYugo();
+  const handleRedeemToken = () => transferYugo();
 
-	const isLoading =
-		isFetching ||
-		isFetchingBalance ||
-		isLoadingBalance ||
-		isFetchingLedger ||
-		isLoadingLedger ||
-		isTransferingYugo ||
-		isLoadingTransferYugo;
+  const isLoading =
+    isFetching ||
+    isFetchingBalance ||
+    isLoadingBalance ||
+    isFetchingLedger ||
+    isLoadingLedger ||
+    isTransferingYugo ||
+    isLoadingTransferYugo;
 
-	return (
-		<Grid container spacing={3}>
-			<Grid item xs={12}>
-				<Box pb={2}>
-					<Typography variant="h3">Yugo Token Balance</Typography>
-					<Typography variant="subtitle2">
-						Manage your access on platform with Yugo token
-					</Typography>
-				</Box>
-				<Card>
-					<List>
-						<ListItem sx={{ p: 3 }}>
-							<ListItemAvatar sx={{ pr: 2 }}>
-								<YugoToken>YUGO</YugoToken>
-							</ListItemAvatar>
-							<ListItemText
-								primaryTypographyProps={{ variant: 'h5', gutterBottom: true }}
-								secondaryTypographyProps={{
-									variant: 'subtitle2',
-									lineHeight: 1,
-								}}
-								primary="Yugo Token"
-								secondary={
-									balanceData !== '0' || hasYugo
-										? 'You have full access on the platform'
-										: 'Get Yugo token to be able to create your community, contests and actions'
-								}
-							/>
-							{isLoading && <CircularProgress />}
-							{!isLoading && balanceData === '0' && !ledgerData && (
-								<Button color="info" size="large" variant="contained" onClick={handleBuyToken}>
-									Buy
-								</Button>
-							)}
-							{!isLoading && balanceData === '0' && ledgerData && !hasYugo && (
-								<Button
-									color="warning"
-									size="large"
-									variant="contained"
-									onClick={handleRedeemToken}
-								>
-									Redeem
-								</Button>
-							)}
-							{!isLoading && (balanceData !== '0' || hasYugo) && (
-								<Chip
-									label="1 YUGO"
-									color="primary"
-									sx={{ color: 'black', fontWeight: 'bold', borderRadius: '3px' }}
-								/>
-							)}
-						</ListItem>
-					</List>
-				</Card>
-			</Grid>
-		</Grid>
-	);
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Box pb={2}>
+          <Typography variant="h3">Yugo Token Balance</Typography>
+          <Typography variant="subtitle2">
+            Manage your access on platform with Yugo token
+          </Typography>
+        </Box>
+        <Card>
+          <List>
+            <ListItem sx={{ p: 3 }}>
+              <ListItemAvatar sx={{ pr: 2 }}>
+                <YugoToken>YUGO</YugoToken>
+              </ListItemAvatar>
+              <ListItemText
+                primaryTypographyProps={{ variant: "h5", gutterBottom: true }}
+                secondaryTypographyProps={{
+                  variant: "subtitle2",
+                  lineHeight: 1,
+                }}
+                primary="Yugo Token"
+                secondary={
+                  balanceData !== "0" || hasYugo
+                    ? "You have full access on the platform"
+                    : "Get Yugo token to be able to create your community, contests and actions"
+                }
+              />
+              {isLoading && <CircularProgress />}
+              {!isLoading && balanceData === "0" && !ledgerData && (
+                <Button
+                  color="info"
+                  size="large"
+                  variant="contained"
+                  onClick={handleBuyToken}
+                >
+                  Buy
+                </Button>
+              )}
+              {!isLoading && balanceData === "0" && ledgerData && !hasYugo && (
+                <Button
+                  color="warning"
+                  size="large"
+                  variant="contained"
+                  onClick={handleRedeemToken}
+                >
+                  Redeem
+                </Button>
+              )}
+              {!isLoading && (balanceData !== "0" || hasYugo) && (
+                <Chip
+                  label="1 YUGO"
+                  color="primary"
+                  sx={{
+                    color: "black",
+                    fontWeight: "bold",
+                    borderRadius: "3px",
+                  }}
+                />
+              )}
+            </ListItem>
+          </List>
+        </Card>
+      </Grid>
+    </Grid>
+  );
 }
 
 export default YugoTokenTab;

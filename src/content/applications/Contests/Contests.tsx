@@ -15,7 +15,6 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
 	const { children, value, index, ...other } = props;
-
 	return (
 		<div
 			role="tabpanel"
@@ -27,6 +26,7 @@ function TabPanel(props: TabPanelProps) {
 			{value === index && (
 				<Box sx={{ p: 3 }}>
 					<Typography sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+						
 						{children}
 					</Typography>
 				</Box>
@@ -68,6 +68,7 @@ function Contests({ account, contests }: Props) {
 					</Tabs>
 				</Box>
 				<TabPanel value={value} index={0}>
+					{contests?.length === 0 && <h3>No Contests</h3>}
 					{contests?.map((c, i) => (
 						<ContestCard
 							index={i}
@@ -78,6 +79,7 @@ function Contests({ account, contests }: Props) {
 					))}
 				</TabPanel>
 				<TabPanel value={value} index={1}>
+					{orgContests?.length === 0 && <h3>No Contests</h3>}
 					{orgContests?.map((c, i) => (
 						<ContestCard key={c.id} contest={c} isCreator={true} index={i} />
 					))}

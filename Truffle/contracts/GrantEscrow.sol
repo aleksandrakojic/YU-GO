@@ -76,8 +76,9 @@ contract GrantEscrow is Ownable {
         uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
         Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
-        (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
-        require(success, "Transfer failed.");
+        // (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
+        // require(success, "Transfer failed.");
+        payable(msg.sender).transfer(Grants[msg.sender]);
         emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
     }
 

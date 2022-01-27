@@ -62,8 +62,8 @@ module.exports = {
       networkCheckTimeout: 10000000,
       provider: () =>
         new HDWalletProvider(
-          `${process.env.MNEMONIC}`,
-          `https://speedy-nodes-nyc.moralis.io/2e6b0b3e58520cacbb947f20/eth/ropsten`,
+          `intact bacon stamp convince piano wise seminar enough doctor crash solve arrest`,
+          `https://ropsten.infura.io/v3/36fdf6942a41473792a0a2034bed0fe7`,
           1
         ),
       // provider: () => new HDWalletProvider(`${process.env.MNEMONIC}`, `https://ropsten.infura.io/v3/${process.env.INFURA_ID}`, 1),
@@ -80,7 +80,6 @@ module.exports = {
     // production: true    // Treats this network as if it was a public net. (default: false)
     // }
   },
-  plugins: ["solidity-coverage"],
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
