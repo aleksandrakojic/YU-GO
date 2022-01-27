@@ -29,7 +29,8 @@ function LandingPage() {
 	const { thematics, countries, abi, contractAddress, setType, type } = useContext(AppContext);
 	const [newOrganistation, setNewOrganisation] = useState<any>(null);
 	const [newParticipant, setNewParticipant] = useState<any>(null);
-	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const { data, isFetching, fetch, error } = useWeb3ExecuteFunction();
 
 	useEffect(() => {
 		if (data && newOrganistation) {
@@ -39,9 +40,11 @@ function LandingPage() {
 				const orga = new Organisation();
 
 				orga.save({ ...newOrganistation, ethAddress: d?.from }).then(
-					(res) => {
-						authenticate();
+					async (res) => {
+						await authenticate();
+						setIsLoading(false);
 						setType(ProfileType.Organization);
+						
 					},
 					(error) => {
 						console.error('error saving orga', error);
@@ -57,9 +60,11 @@ function LandingPage() {
 			const Participant = Moralis.Object.extend('Participants');
 			const participant = new Participant();
 			participant.save({ ...newParticipant, ethAddress: account }).then(
-				(res) => {
-					authenticate();
+				async (res) => {
+					await authenticate();
+					setIsLoading(false);
 					setType(ProfileType.Member);
+					
 				},
 				(error) => {
 					console.error('error saving member', error);
@@ -94,6 +99,7 @@ function LandingPage() {
 		};
 		fetch({ params: contractData });
 		setNewParticipant(member);
+		setIsLoading(true);
 	};
 
 	const handleSubmitOrganization = (organization) => {
@@ -109,10 +115,12 @@ function LandingPage() {
 
 		fetch({ params: contractData });
 		setNewOrganisation(organization);
+		setIsLoading(true);
 	};
 
 	const renderForm = () => {
-		if (signup === SignupType.Organization) {
+		
+		if (signup === SignupType.Organization && !isLoading) {
 			return (
 				<OrganizationSignup
 					thematics={thematics}
@@ -121,10 +129,10 @@ function LandingPage() {
 				/>
 			);
 		}
-		if (signup === SignupType.Member) {
+		if (signup === SignupType.Member && !isLoading) {
 			return <MemberSignup onSubmitMember={handleSubmitMember} />;
 		}
-		if (signup === SignupType.None) {
+		if (signup === SignupType.None && !isLoading) {
 			return (
 				<Stack
 					sx={{
