@@ -122,6 +122,7 @@ function Transactions() {
 			abi,
 			contractAddress,
 			functionName: 'verify',
+			msgSender: account?.toLowerCase(),
 			params: {
 				_to: selectedTransaction?.attributes?.addrWinner,
 				_amount: selectedTransaction?.attributes?.requiredFunds,
@@ -216,7 +217,7 @@ function Transactions() {
 	};
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
-	console.log('trans', transactionsData, transactions, transactionsError, data, contractAddress);
+	console.log('trans', transactionsData, transactions, transactionsError, data, account);
 
 	return (
 		<Card>

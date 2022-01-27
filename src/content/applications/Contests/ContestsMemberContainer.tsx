@@ -33,7 +33,11 @@ function ContestsMemberContainer() {
 
 	useEffect(() => {
 		if (contestData && organization) {
-			const eligibleContest = getEligibleFormattedContests(contestData, organization, account);
+			const eligibleContest = getEligibleFormattedContests(
+				contestData,
+				organization,
+				organization?.attributes?.ethAddress
+			);
 			setContests(eligibleContest);
 		}
 	}, [contestData, organization]);
