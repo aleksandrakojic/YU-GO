@@ -19,7 +19,7 @@ function Transactions() {
 	const { networks, abi } = contractSignature;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
 	const { enqueueSnackbar } = useSnackbar();
-	const { Moralis, account } = useMoralis();
+	const { Moralis, account, web3 } = useMoralis();
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [transactions, setTransactions] = useState<any[]>([]);
@@ -95,7 +95,20 @@ function Transactions() {
 	const signTransaction = () => {
 		console.log('sign transaction');
 		const nonce = Math.floor(Math.random() * 10000);
-
+		if(web3) {
+			let _hash = web3?.utils.soliditySha3(
+				selectedTransaction?.attributes?.addrWinner,
+				selectedTransaction?.attributes?.requiredFunds,
+				contractAddress,
+				selectedTransaction?.attributes?.agreement,
+				selectedTransaction?.attributes?.nonce,
+				selectedTransaction?.attributes?.signature,
+			  );
+			  if(_hash) {
+				web3.eth.personal.sign(_hash, account, nonce)
+			}
+		}
+		
 		const signatureData: any = {
 			abi,
 			contractAddress,
@@ -133,7 +146,6 @@ function Transactions() {
 
 	const withdrawFunds = () => {
 		console.log('withdrawFunds');
-
 		const verifySignatureData: any = {
 			abi,
 			contractAddress,
@@ -149,6 +161,7 @@ function Transactions() {
 		};
 		fetch({
 			params: verifySignatureData,
+			onError: (error) => console.log('error: ', error),
 			onSuccess: (result) => {
 				console.log('RESULT Verify', result);
 				const saveInDatabase = async () => {
@@ -166,6 +179,7 @@ function Transactions() {
 				setSelectedTransaction(null);
 			},
 		});
+		
 	};
 
 	const handleAgreementSubmit = () => {

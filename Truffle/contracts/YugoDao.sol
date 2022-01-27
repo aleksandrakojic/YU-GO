@@ -360,9 +360,9 @@ contract YugoDao {
     * @dev Emit VoteTallied event
     * @param _creatorOfContest Address of Contest creator 
     */
-    function tallyVotes(address _creatorOfContest) external view returns (address, address, string memory, uint, uint){
-        uint currentTime = block.timestamp;
-        require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
+    function tallyVotes(address _creatorOfContest) external view returns (address, address, string memory, uint, uint, uint){
+        uint currentTime = block.timestamp + 3600;
+        // require(currentTime > contests[_creatorOfContest].votingEndDate, "Voting has not finished yet");
         address winner = contests[_creatorOfContest].winningActionAddresses[0];
         
         return (
@@ -370,7 +370,8 @@ contract YugoDao {
             winner,
             contests[_creatorOfContest].actions[winner].name,
             contests[_creatorOfContest].actions[winner].voteNumber, 
-            contests[_creatorOfContest].actions[winner].requiredFunds
+            contests[_creatorOfContest].actions[winner].requiredFunds,
+            currentTime
         );
     }
 
