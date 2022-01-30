@@ -22,7 +22,9 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 const HDWalletProvider = require("@truffle/hdwallet-provider");
+// const HDWalletProvider = require('truffle-hdwallet-provider');
 require("dotenv").config();
+
 
 module.exports = {
   /**
@@ -42,6 +44,19 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
+    avalanche_fuji: {
+      provider: () =>
+        new HDWalletProvider(
+          `cactus stairs force dust brown hour raise scorpion execute kangaroo fly pledge neither fruit answer fee forget coast planet close people nut clump shift`,
+          // `https://speedy-nodes-nyc.moralis.io/9c659b66feaf0c0d52d504e0/avalanche/testnet`
+          `wss://speedy-nodes-nyc.moralis.io/9c659b66feaf0c0d52d504e0/avalanche/testnet/ws`
+          // `https://pinc0xztf3n2.usemoralis.com:2053/server`
+        ),
+
+      network_id: 43113,
+      skipDryRun: true,
+    },
+
     develop: {
       host: "127.0.0.1", // Localhost (default: none)
       port: 7545, // Standard Ethereum port (default: none)

@@ -3,6 +3,7 @@ pragma solidity 0.8.11;
 
 import "./interfaces/IYugo.sol";
 import "./interfaces/IGrantEscrow.sol";
+import "hardhat/console.sol";
 
 /**  
 * @title Smart Contract for the DAO
@@ -174,6 +175,7 @@ contract YugoDao {
     * 
     */
     function registerOrganisation(uint[] memory thematicIds, uint countryId) external {
+        console.log('In YugoDao.sol, orga = ', msg.sender);
         require(!organisation[msg.sender].isRegistered, 'Organisation already registered');
         require(thematicIds.length > 0 && countryId >= 0, 'You must provide thematics and country');
         organisation[msg.sender].ethAddress = msg.sender;

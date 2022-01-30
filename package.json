@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.2.5",
     "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "latest",
+    "@nomiclabs/hardhat-ethers": "^2.0.4",
     "@openzeppelin/contracts": "^4.4.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",

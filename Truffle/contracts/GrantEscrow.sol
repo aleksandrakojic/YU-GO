@@ -4,6 +4,7 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IYugoDao.sol";
 import "./interfaces/IVerifySignature.sol";
+import "hardhat/console.sol";
 
 /**
 * @notice This smart contracthandles the ETH deposited in escrow when a contest is created.
@@ -67,6 +68,7 @@ contract GrantEscrow is Ownable {
     * be run multiple times in parallel. A second call would not pass the require.  
     */
     function withdrawGrant(address _contestCreator) external {
+        console.log('In GrantEscrow.sol, msg.sender = ', msg.sender);
         (address _winner, uint _requiredFunds ) = yugodao.getContestWinner(_contestCreator);
         require(msg.sender == _winner, "you cannot withdraw, seems like you did not win the contest");
         require(UnlockFunds[_contestCreator][msg.sender], "You cannot withdraw the grant at this time; agreement is not yet signed");
@@ -76,9 +78,9 @@ contract GrantEscrow is Ownable {
         uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
         Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
-        // (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
-        // require(success, "Transfer failed.");
-        payable(msg.sender).transfer(Grants[msg.sender]);
+        (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
+        require(success, "Transfer failed.");
+        // payable(msg.sender).transfer(Grants[msg.sender]);
         emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
     }
 

@@ -5,7 +5,7 @@ const run = async () => {
   console.log("📄 Deploying and updating contracts...");
   try {
     spawn(
-      "cd Truffle && truffle migrate --reset --compile-all --network develop && node scripts/contractInfo.js",
+      "cd Truffle && truffle migrate --reset --compile-all --network avalanche_fuji && node scripts/contractInfo.js",
       {
         shell: true,
         stdio: "inherit",
