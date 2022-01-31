@@ -17,7 +17,7 @@ contract GrantEscrow is Ownable {
 
     event AddressesSet(address yugodao, address verifySign);
     event GrantDeposited(uint grant, address depositor);
-    event GrantWithdrawn(uint amountWithdrawn, address recipient);
+    event GrantWithdrawn(uint amountWithdrawn, address recipient, uint balanceBefore, uint balanceAfter);
 
     mapping(address => uint) public Grants;
     mapping (address =>  mapping (address => bool)) public UnlockFunds;
@@ -78,10 +78,12 @@ contract GrantEscrow is Ownable {
         uint newActionCreatorBalance = Grants[_contestCreator] - newContestCreatorBalance;
         Grants[_contestCreator] = newContestCreatorBalance;
         Grants[msg.sender] = newActionCreatorBalance;
+        uint actionCreatorBalanceBefore = msg.sender.balance;
         (bool success, ) = msg.sender.call{value: Grants[msg.sender]}("");
         require(success, "Transfer failed.");
+        uint actionCreatorBalanceAfter = msg.sender.balance;
         // payable(msg.sender).transfer(Grants[msg.sender]);
-        emit GrantWithdrawn(newActionCreatorBalance , msg.sender);
+        emit GrantWithdrawn(newActionCreatorBalance , msg.sender, actionCreatorBalanceBefore,actionCreatorBalanceAfter );
     }
 
         /**

@@ -266,7 +266,7 @@ const TransactionsTable: FC<TransactionTableProps> = ({ transactions, onViewAgre
 											gutterBottom
 											noWrap
 										>
-											{transaction?.attributes?.requiredFunds} ETH
+											{transaction?.attributes?.requiredFunds} Wei
 										</Typography>
 									</TableCell>
 									<TableCell align="right">

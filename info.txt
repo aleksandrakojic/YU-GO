@@ -1,0 +1,11 @@
+Ganache server devchain
+./frpc -c frpc.ini
+
+deploy:
+moralis-admin-cli deploy
+
+avalanchego@v1.7.0-fuji:
+$GOPATH/pkg/mod/github.com/ava-labs/avalanchego@v1.7.0-fuji
+
+avash@v1.7.0
+$GOPATH/pkg/mod/github.com/ava-labs/avash@v1.7.0

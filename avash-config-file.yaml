@@ -1,0 +1,6 @@
+avalancheLocation: $GOPATH/pkg/mod/github.com/ava-labs/avalanchego@v1.7.0-fuji
+datadir: $GOPATH/pkg/mod/github.com/ava-labs/avash/stash
+log:
+  terminal: info
+  logfile: info
+  dir: $GOPATH/pkg/mod/github.com/ava-labs/avash/stash/logs`
