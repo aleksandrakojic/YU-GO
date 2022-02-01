@@ -1,8 +1,18 @@
+Moralis avalanche 
+user: alexandra.kojic@gmail.com
+pass: HdTbG64uHKV6bU
+
 Ganache server devchain
 ./frpc -c frpc.ini
 
-deploy:
-moralis-admin-cli deploy
+Deploy React app:
+-from root:
+$ yarn build
+$ cd build
+-deploy:
+$ moralis-admin-cli deploy
+YxZIjL5QVGLWVvy
+9OPvEyoK5lRQVSo
 
 avalanchego@v1.7.0-fuji:
 $GOPATH/pkg/mod/github.com/ava-labs/avalanchego@v1.7.0-fuji

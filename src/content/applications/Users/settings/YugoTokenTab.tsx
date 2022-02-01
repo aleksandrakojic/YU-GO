@@ -71,7 +71,8 @@ function YugoTokenTab() {
   const { Moralis } = useMoralis();
   const { chain, account } = useChain();
   const { networks, abi } = contractManager;
-  const contractAddress = networks[chain?.networkId ?? 5777].address;
+  // const contractAddress = networks[chain?.networkId ?? 43113].address;
+  const contractAddress = networks[43113].address;
   const {
     fetch: fetchBalance,
     data: balanceData,

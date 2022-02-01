@@ -49,12 +49,15 @@ module.exports = {
         new HDWalletProvider(
           `cactus stairs force dust brown hour raise scorpion execute kangaroo fly pledge neither fruit answer fee forget coast planet close people nut clump shift`,
           // `https://speedy-nodes-nyc.moralis.io/9c659b66feaf0c0d52d504e0/avalanche/testnet`
-          `wss://speedy-nodes-nyc.moralis.io/9c659b66feaf0c0d52d504e0/avalanche/testnet/ws`
+          // `wss://speedy-nodes-nyc.moralis.io/9c659b66feaf0c0d52d504e0/avalanche/testnet/ws`
           // `https://pinc0xztf3n2.usemoralis.com:2053/server`
+          `https://api.avax-test.network/ext/bc/C/rpc`
         ),
 
-      network_id: 43113,
-      skipDryRun: true,
+      network_id: '*',
+      // skipDryRun: true,
+      timeoutBlocks: 200,
+      confirmations: 5
     },
 
     develop: {

@@ -38,13 +38,14 @@ const App = () => {
 	const { chainId, chain, account } = useChain();
 	const { networks, abi } = contractInfo;
 	// const contractAddress = networks[3].address; //1337
-	const [contractAddress, setContractAddress] = useState(networks[5777].address);
+	const [contractAddress, setContractAddress] = useState(networks[43113].address);
 	const [contractData, setContractData] = useState<IContractData>({
 		thematics: [],
 		countries: [],
 	});
 	const [type, setType] = useState(ProfileType.None);
 	const prevAccount = usePrevious(account);
+	console.log('chain:', chain, 'chainId :', chainId, 'networks :', networks)
 
 	const {
 		fetch: fetchThemes,
@@ -76,9 +77,9 @@ const App = () => {
 			onError: (e) => console.info('enableweb3 error', e),
 			onComplete: () => console.info('complete web3'),
 		});
-		if (chain && chainId) {
-			setContractAddress(networks[chain?.networkId]?.address);
-		}
+		// if (chain && chainId) {
+		// 	setContractAddress(networks[chain?.networkId]?.address);
+		// }
 	}, []);
 
 	useEffect(() => {
@@ -111,13 +112,13 @@ const App = () => {
 		}
 	}, [account]);
 
-	useEffect(() => {
-		if (chain && chainId) {
-			setContractAddress(networks[chain?.networkId]?.address);
-		} else {
-			setContractAddress(networks[5777]?.address);
-		}
-	}, [chain, chainId]);
+	// useEffect(() => {
+	// 	if (chain && chainId) {
+	// 		setContractAddress(networks[chain?.networkId]?.address);
+	// 	} else {
+	// 		setContractAddress(networks[43113]?.address);
+	// 	}
+	// }, [chain, chainId]);
 
 	useEffect(() => {
 		if (themeData && !contractData.thematics.length && !isFetchingThemes && !isLoadingThemes) {
