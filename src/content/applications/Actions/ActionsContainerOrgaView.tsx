@@ -116,7 +116,7 @@ function ActionsContainerOrgaView() {
 			params: {
 				_name: action.name,
 				_creatorOfContest: action.addrGrantOrga,
-				_requiredFunds: action.requiredFunds,
+				_requiredFunds: Moralis.Units.ETH(action.requiredFunds),
 			},
 		};
 		fetch({ params: contractData });
