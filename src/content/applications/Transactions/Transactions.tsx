@@ -17,12 +17,12 @@ enum SignatureStatus {
 
 function Transactions() {
 	const { enqueueSnackbar } = useSnackbar();
-	const { chain } = useChain();
+	const { chain, account: chainAccount } = useChain();
 	const { networks, abi } = contractSignature;
 	const contractAddress = networks[chain?.networkId ?? 5777].address;
 	const { abi: abiEscrow, networks: networksEscrow } = contractEscrow;
 	const contractEscrowAddress = networksEscrow[chain?.networkId ?? 5777].address;
-	const { Moralis, account, web3 } = useMoralis();
+	const { Moralis, account, web3, user } = useMoralis();
 	const { data, isLoading, isFetching, fetch, error } = useWeb3ExecuteFunction();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [transactions, setTransactions] = useState<any[]>([]);
@@ -217,7 +217,16 @@ function Transactions() {
 	};
 	const toggleModalState = () => setIsModalOpen(!isModalOpen);
 
-	console.log('trans', transactionsData, transactions, transactionsError, data, account);
+	console.log(
+		'trans',
+		transactionsData,
+		transactions,
+		transactionsError,
+		data,
+		account,
+		chainAccount,
+		user?.attributes?.ethAddress
+	);
 
 	return (
 		<Card>

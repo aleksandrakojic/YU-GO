@@ -27,6 +27,7 @@ import Label from 'src/components/Label';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import BulkActions from './BulkActions';
 import { ITransaction, ITransactionStatus } from 'src/models';
+import { useMoralis } from 'react-moralis';
 
 interface TransactionTableProps {
 	className?: string;
@@ -80,6 +81,7 @@ const applyPagination = (
 };
 
 const TransactionsTable: FC<TransactionTableProps> = ({ transactions, onViewAgreement }) => {
+	const { Moralis } = useMoralis();
 	const [selectedTransactions, setSelectedTransaction] = useState<string[]>([]);
 	const selectedBulkActions = selectedTransactions.length > 0;
 	const [page, setPage] = useState<number>(0);
@@ -266,7 +268,7 @@ const TransactionsTable: FC<TransactionTableProps> = ({ transactions, onViewAgre
 											gutterBottom
 											noWrap
 										>
-											{transaction?.attributes?.requiredFunds} ETH
+											{transaction?.attributes?.requiredFunds} WEI
 										</Typography>
 									</TableCell>
 									<TableCell align="right">
